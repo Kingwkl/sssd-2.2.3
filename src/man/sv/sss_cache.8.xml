@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<reference>
+<title>SSSD manualsidor</title>
+<refentry>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/upstream.xml" />
+
+    <refmeta>
+        <refentrytitle>sss_cache</refentrytitle>
+        <manvolnum>8</manvolnum>
+    </refmeta>
+
+    <refnamediv id='name'>
+        <refname>sss_cache</refname>
+        <refpurpose>utför cacherensning</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv id='synopsis'>
+        <cmdsynopsis>
+<command>sss_cache</command> <arg choice='opt'>
+<replaceable>flaggor</replaceable> </arg></cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1 id='description'>
+        <title>BESKRIVNING</title>
+        <para>
+            <command>sss_cache</command> invalidrtst poster i SSSD-cachen.  Invaliderade
+poster måste hämtas om från servern så fort den tillhörande SSSD-bakänden är
+ansluten.  Flaggor som invaliderar ett enstaka objekt tar bara ett ensamt
+argument.
+        </para>
+    </refsect1>
+
+    <refsect1 id='options'>
+        <title>FLAGGOR</title>
+        <variablelist remap='IP'>
+            <varlistentry>
+                <term>
+                    <option>-E</option>,<option>--everything</option>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera alla cachade poster.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-u</option>,<option>--user</option>
+<replaceable>inloggning</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera en viss användare.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-U</option>,<option>--users</option>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera alla användarposter.  Detta alternativ åsidosätter invalidering
+av en viss användare om det också angavs.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-g</option>,<option>--group</option>
+<replaceable>grupp</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera en viss grupp.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-G</option>,<option>--groups</option>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera alla grupposter.  Detta alternativ åsidosätter invalidering av en
+viss grupp om det också angavs.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-n</option>,<option>--netgroup</option>
+<replaceable>nätgrupp</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera en viss nätgrupp.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-N</option>,<option>--netgroups</option>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera alla nätgruppsposter.  Detta alternativ åsidosätter invalidering
+av en viss nätgrupp om det också angavs.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-s</option>,<option>--service</option>
+<replaceable>tjänst</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera en viss tjänst.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-S</option>,<option>--services</option>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera alla tjänsteposter.  Detta alternativ åsidosätter invalidering av
+en viss tjänst om det också angavs.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry condition="with_autofs">
+                <term>
+                    <option>-a</option>,<option>--autofs-map</option>
+<replaceable>autofs-översättning</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera specifika autofs-översättningar.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry condition="with_autofs">
+                <term>
+                    <option>-A</option>,<option>--autofs-maps</option>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera alla autofs-översättningar.  Detta alternativ åsidosätter
+invalidering av en viss översättning om det också angavs.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry condition="with_ssh">
+                <term>
+                    <option>-h</option>,<option>--ssh-host</option>
+<replaceable>värdnamn</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera publika SSH-nycklar för en viss värd.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry condition="with_ssh">
+                <term>
+                    <option>-H</option>,<option>--ssh-hosts</option>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera publika SSH-nycklar för alla värdar.  Detta alternativ
+åsidosätter invalidering av SSH-nycklar för en viss värd om det också
+angavs.
+                    </para>
+                </listitem>
+            </varlistentry>
+           <varlistentry condition="with_sudo">
+                <term>
+                    <option>-r</option>,<option>--sudo-rule</option>
+<replaceable>regel</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera en viss sudo-regel.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry condition="with_sudo">
+                <term>
+                    <option>-R</option>,<option>--sudo-rules</option>
+                </term>
+                <listitem>
+                    <para>
+                        Invalidera alla cachade sudo-regler.  Detta alternativ åsidosätter
+invalidering av en viss sudo-regel om det också angavs.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-d</option>,<option>--domain</option>
+<replaceable>domän</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Begränsa invalideringsprocessen till endast en viss domän.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/param_help.xml" />
+        </variablelist>
+    </refsect1>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/seealso.xml" />
+
+</refentry>
+</reference>

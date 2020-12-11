@@ -1,0 +1,127 @@
+'\" t
+.\"     Title: sss_seed
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: SSSD-Handbuchseiten
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_SEED" "8" "12/09/2020" "SSSD" "SSSD-Handbuchseiten"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_seed \- füllt den SSSD\-Zwischenspeicher mit einem Benutzer
+.SH "SYNOPSIS"
+.HP \w'\fBsss_seed\fR\ 'u
+\fBsss_seed\fR [\fIOptionen\fR] \-D\ \fIDOMAIN\fR \-n\ \fIBENUTZER\fR
+.SH "BESCHREIBUNG"
+.PP
+\fBsss_seed\fR
+füllt den SSSD\-Zwischenspeicher mit einem Benutzereintrag und einem temporären Passwort\&. Falls bereits ein Benutzereintrag im SSSD\-Zwischenspeicher vorhanden ist, wird der Eintrag mit dem temporären Passwort aktualisiert\&.
+.PP
+.SH "OPTIONEN"
+.PP
+\fB\-D\fR,\fB\-\-domain\fR \fIDOMAIN\fR
+.RS 4
+stellt den Namen der Doamin bereit, in der der Benutzer Mitglied ist\&. Die Domain wird auch zur Abfrage von Benutzerinformationen verwendet\&. Sie muss in der \(Fcsssd\&.conf\(Fo konfiguriert sein\&. Die Option
+\fIDOMAIN\fR
+muss bereitgestellt werden\&. Von der Domain geholte Informationen setzen das, was in den Optionen bereitgestellt wurde, außer Kraft\&.
+.RE
+.PP
+\fB\-n\fR,\fB\-\-username\fR \fIBENUTZER\fR
+.RS 4
+der Benutzername des Eintrags, der im Zwischenspeicher erstellt oder verändert werden soll\&. Die Option
+\fIBENUTZER\fR
+muss bereitgestellt werden\&.
+.RE
+.PP
+\fB\-u\fR,\fB\-\-uid\fR \fIUID\fR
+.RS 4
+setzt die UID des Benutzers auf
+\fIUID\fR\&.
+.RE
+.PP
+\fB\-g\fR,\fB\-\-gid\fR \fIGID\fR
+.RS 4
+setzt die GID des Benutzers auf
+\fIGID\fR\&.
+.RE
+.PP
+\fB\-c\fR,\fB\-\-gecos\fR \fIKOMMENTAR\fR
+.RS 4
+irgendeine Zeichenkette, die den Benutzer beschreibt\&. Dieses Feld wird oft für den vollständigen Namen des Benutzers verwendet\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-home\fR \fIHOME_VERZ\fR
+.RS 4
+setzt das Home\-Verzeichnis des Benutzers auf
+\fIHOME_VERZ\fR\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-shell\fR \fISHELL\fR
+.RS 4
+setzt die Anmelde\-Shell des Benutzers auf
+\fISHELL\fR\&.
+.RE
+.PP
+\fB\-i\fR,\fB\-\-interactive\fR
+.RS 4
+interaktiver Modus zur Eingabe von Benutzerinformationen\&. Diese Option wird nur nach Informationen fragen, die nicht von den Optionen bereitgestellt oder in der Domain geholt werden\&.
+.RE
+.PP
+\fB\-p\fR,\fB\-\-password\-file\fR \fIPASSWORTDATEI\fR
+.RS 4
+gibt die Datei an, aus der das Passwort des Benutzers gelesen wird (ist es nicht angegeben, wird nach dem Passwort gefragt)\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+zeigt den Hilfetext und beendet sich\&.
+.RE
+.SH "ANMERKUNGEN"
+.PP
+Die Länge des Passworts (oder die Größe der mit der Option \-p oder \-\-password\-file angegebenen Datei) muss kleiner oder gleich PASS_MAX Byte sein (64 Byte auf Systemen ohne global definiertem Wert für PASS_MAX)\&.
+.PP
+.SH "SIEHE AUCH"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

@@ -1,0 +1,689 @@
+'\" t
+.\"     Title: sssd-ldap-attributes
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Formatos de archivo y convenciones
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-LDAP\-ATTRIBUT" "5" "12/09/2020" "SSSD" "Formatos de archivo y convenci"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-ldap-attributes \- SSSD LDAP Provider: Mapping Attributes
+.SH "DESCRIPCION"
+.PP
+This manual page describes the mapping attributes of SSSD LDAP provider
+\fBsssd-ldap\fR(5)\&. Refer to the
+\fBsssd-ldap\fR(5)
+manual page for full details about SSSD LDAP provider configuration options\&.
+.SH "USER ATTRIBUTES"
+.PP
+.PP
+ldap_user_object_class (cadena)
+.RS 4
+La clase de objeto de una entrada de usuario en LDAP\&.
+.sp
+Predeterminado: posixAccount
+.RE
+.PP
+ldap_user_name (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre de inicio de sesión del usuario\&.
+.sp
+Predeterminado: uid (rfc2307, rfc2307bis e IPA), sAMAccountName (AD)
+.RE
+.PP
+ldap_user_uid_number (cadena)
+.RS 4
+El atributo LDAP que corresponde al id de usuario\&.
+.sp
+Predeterminado: uidNumber
+.RE
+.PP
+ldap_user_gid_number (cadena)
+.RS 4
+El atributo LDAP que corresponde al id del grupo primario del usuario\&.
+.sp
+Predeterminado: gidNumber
+.RE
+.PP
+ldap_user_primary_group (cadena)
+.RS 4
+Atributo de grupo primario Active Directory para el mapeo de ID\&. Advierta que este atributo debería solo ser establecido manualmente si usted está ejecutando el proveedor
+\(lqldap\(rq
+con mapeo ID\&.
+.sp
+Predeterminado: no establecido (LDAP), primaryGroupID (AD)
+.RE
+.PP
+ldap_user_gecos (cadena)
+.RS 4
+El atributo LDAP que corresponde al campo de gecos del usuario\&.
+.sp
+Predeterminado: gecos
+.RE
+.PP
+ldap_user_home_directory (cadena)
+.RS 4
+El atributo LDAP que contiene el nombre del directorio principal del usuario\&.
+.sp
+Default: homeDirectory (LDAP and IPA), unixHomeDirectory (AD)
+.RE
+.PP
+ldap_user_shell (cadena)
+.RS 4
+El atributo LDAP que contiene la ruta de acceso a la shell predeterminada del usuario\&.
+.sp
+Predeterminado: loginShell
+.RE
+.PP
+ldap_user_uuid (cadena)
+.RS 4
+El atributo LDAP que contiene el UUID/GUID de un objeto de usuario LDAP\&.
+.sp
+Predeterminado: no establecido en caso general, objectGUID para AD e ipaUniqueID para IPA
+.RE
+.PP
+ldap_user_objectsid (cadena)
+.RS 4
+El atributo LDAP que contiene el objectSID de un objeto usuario LDAP\&. Esto es normalmente sólo necesario para servidores ActiveDirectory\&.
+.sp
+Predeterminado: objectSid para ActiveDirectory, no establecido para otros servidores\&.
+.RE
+.PP
+ldap_user_modify_timestamp (cadena)
+.RS 4
+El atributo LDAP que contiene la fecha y hora de la última modificación del objeto primario\&.
+.sp
+Predeterminado: modifyTimestamp
+.RE
+.PP
+ldap_user_shadow_last_change (cadena)
+.RS 4
+Cuando se utiliza ldap_pwd_policy=shadow, este parámetro contiene el nombre de un atributo LDAP correspondiente a su
+\fBshadow\fR(5)
+homologo (fecha del último cambio de password)\&.
+.sp
+Predeterminado: shadowLastChange
+.RE
+.PP
+ldap_user_shadow_min (cadena)
+.RS 4
+Cuando se utiliza ldap_pwd_policy=shadow, este parámetro contiene el nombre de un atributo LDAP correspondiente a su
+\fBshadow\fR(5)
+homologo (edad mínima del password)\&.
+.sp
+Predeterminado: shadowMin
+.RE
+.PP
+ldap_user_shadow_max (cadena)
+.RS 4
+Cuando se utiliza ldap_pwd_policy=shadow, este parámetro contiene el nombre de un atributo LDAP correspondiente a su
+\fBshadow\fR(5)
+homologo (edad máxima del password)\&.
+.sp
+Predeterminado: shadowMax
+.RE
+.PP
+ldap_user_shadow_warning (cadena)
+.RS 4
+Cuando se utiliza ldap_pwd_policy=shadow, este parámetro contiene el nombre de un atributo LDAP correspondiente a su
+\fBshadow\fR(5)
+homologo (período de aviso de password)\&.
+.sp
+Predeterminado: shadowWarning
+.RE
+.PP
+ldap_user_shadow_inactive (cadena)
+.RS 4
+Cuando se utiliza ldap_pwd_policy=shadow, este parámetro contiene el nombre de un atributo LDAP correspondiente a su
+\fBshadow\fR(5)
+homologo (período de inactividad de password)\&.
+.sp
+Predeterminado: shadowInactive
+.RE
+.PP
+ldap_user_shadow_expire (cadena)
+.RS 4
+Cuando se utiliza ldap_pwd_policy=shadow o ldap_account_expire_policy=shadow, este parámetro contiene el nombre de un atributo correspondiente con su
+\fBshadow\fR(5)
+homólogo (fecha de expiración de la cuenta)\&.
+.sp
+Predeterminado: shadowExpire
+.RE
+.PP
+ldap_user_krb_last_pwd_change (cadena)
+.RS 4
+Cuando se utiliza ldap_pwd_policy=mit_kerberos, este parámetro contiene el nombre de un atributo LDAP que almacena la fecha y la hora del último cambio de password en kerberos\&.
+.sp
+Predeterminado: krbLastPwdChange
+.RE
+.PP
+ldap_user_krb_password_expiration (cadena)
+.RS 4
+Cuando se utiliza ldap_pwd_policy=mit_kerberos, este parámetro contiene el nombre de un atributo LDAP que almacena la fecha y la hora en la que expira el password actual\&.
+.sp
+Predeterminado: krbPasswordExpiration
+.RE
+.PP
+ldap_user_ad_account_expires (cadena)
+.RS 4
+Cuando se utiliza ldap_account_expire_policy=ad, este parámetro contiene el nombre de un atributo LDAP que almacena el tiempo de expiración de la cuenta\&.
+.sp
+Predeterminado: accountExpires
+.RE
+.PP
+ldap_user_ad_user_account_control (cadena)
+.RS 4
+Cuando se usa ldap_account_expire_policy=ad, este parámetro contiene el nombre de un atributo LDAP que almacena el campo bit de control de la cuenta de usuario\&.
+.sp
+Predeterminado: userAccountControl
+.RE
+.PP
+ldap_ns_account_lock (cadena)
+.RS 4
+Cuando se usa ldap_account_expire_policy=rhds o esquivalente, este parámetro determina si el acceso está permitido o no\&.
+.sp
+Predeterminado: nsAccountLock
+.RE
+.PP
+ldap_user_nds_login_disabled (cadena)
+.RS 4
+Cuando se usa ldap_account_expire_policy=nds, este atributo determina si el acceso está permitido o no\&.
+.sp
+Predeterminado: loginDisabled
+.RE
+.PP
+ldap_user_nds_login_expiration_time (cadena)
+.RS 4
+Cuando se usa ldap_account_expire_policy=nds, este atributo determina hasta que fecha se concede el acceso\&.
+.sp
+Predeterminado: loginDisabled
+.RE
+.PP
+ldap_user_nds_login_allowed_time_map (cadena)
+.RS 4
+Cuando se utiliza ldap_account_expire_policy=nds, este atributo determina la hora de un día en la semana cuando se concede el acceso\&.
+.sp
+Predeterminado: loginAllowedTimeMap
+.RE
+.PP
+ldap_user_principal (cadena)
+.RS 4
+El atributo LDAP que contiene le Nombre Principal de Usuario Kerberos (UPN) del usuario\&.
+.sp
+Predeterminado: krbPrincipalName
+.RE
+.PP
+ldap_user_extra_attrs (cadena)
+.RS 4
+Lista separada por comas de atributos LDAP que SSSD debería ir a buscar con el conjunto usual de atributos de usuario\&.
+.sp
+La lista puede contener bien nombres de atributo LDAP solamente o tuplas separadas por comas de de nombre de atributo SSSD en caché y nombre de atributo LDAP\&. En el caso de que solo sed especifique el nombre de atributo LDAP, el atributo se salva al caché literal\&. El uso de un nombre de atributo SSSD personal puede ser requerido por entornos que configuran varios dominios SSSD con diferentes esquemas LDAP\&.
+.sp
+Por favor advierta que varios nombres de atributos están reservados por SSSD, notablemente el atributo
+\(lqname\(rq\&. SSSD informaría de un error si cualquiera de los nombres de atributo reservados es usado como un nombre de atributo extra\&.
+.sp
+Ejemplos:
+.sp
+ldap_user_extra_attrs = telephoneNumber
+.sp
+Guarda el atributo
+\(lqtelephoneNumber\(rq
+desde LDAP como
+\(lqtelephoneNumber\(rq
+al caché\&.
+.sp
+ldap_user_extra_attrs = phone:telephoneNumber
+.sp
+Guarda el atributo
+\(lqtelephoneNumber\(rq
+desde LDAP como
+\(lqphone\(rq
+al caché\&.
+.sp
+Predeterminado: no definido
+.RE
+.PP
+ldap_user_ssh_public_key (cadena)
+.RS 4
+El atributo LDAP que contiene las claves públicas SSH del usuario\&.
+.sp
+Predeterminado: sshPublicKey
+.RE
+.PP
+ldap_user_fullname (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre completo del usuario\&.
+.sp
+Predeterminado: cn
+.RE
+.PP
+ldap_user_member_of (cadena)
+.RS 4
+El atributo LDAP que lista los afiliación a grupo de usario\&.
+.sp
+Predeterminado: memberOf
+.RE
+.PP
+ldap_user_authorized_service (cadena)
+.RS 4
+Si access_provider=ldap y ldap_access_order=authorized_service, SSSD utilizará la presencia del atributo authorizedService en la entrada LDAP del usuario para determinar el privilegio de acceso\&.
+.sp
+Una denegación explícita (\(r!svc) se resuelve primero\&. Segundo, SSSD busca permiso explícito (svc) y finalmente permitir todo (*)\&.
+.sp
+Por favor advierta que la opcion de configuración ldap_access_order
+\fIdebe\fR
+incluir
+\(lqauthorized_service\(rq
+con el objetivo de que la opción ldap_user_authorized_service trabaje\&.
+.sp
+Some distributions (such as Fedora\-29+ or RHEL\-8) always include the
+\(lqsystemd\-user\(rq
+PAM service as part of the login process\&. Therefore when using service\-based access control, the
+\(lqsystemd\-user\(rq
+service might need to be added to the list of allowed services\&.
+.sp
+Predeterminado: iluminada
+.RE
+.PP
+ldap_user_authorized_host (cadena)
+.RS 4
+Si access_provider=ldap y ldap_access_order=host, SSSD utilizará la presencia del atributo host en la entrada LDAP del usuario para determinar el privilegio de acceso\&.
+.sp
+Una denegación explícita (\(r!host) se resuelve primero\&. Segundo, la búsqueda SSSD para permiso explícito (host) y finalmente permitir todo (*)\&.
+.sp
+Por favor advierta que la opción de configuración ldap_access_order
+\fIdebe\fR
+incluir
+\(lqhost\(rq
+con el objetivo de que la opción ldap_user_authorized_host\&.
+.sp
+Default: host
+.RE
+.PP
+ldap_user_authorized_rhost (cadena)
+.RS 4
+Si access_provider=ldap y ldap_access_order=rhost, SSSD usará la presencia del atributo rhost en la entrada LDAP de usuario para determinar el privilegio de acceso\&. Similarmente al proceso de verificación de host\&.
+.sp
+Una denegación explícita (!rhost) se resuelve primero\&. Segundo, SSSD busca permisos explícitos (rhost) y finalmente allow_all (*)\&.
+.sp
+Por favor advierta que la opción de configuración ldap_access_order
+\fIdebe\fR
+incluir
+\(lqrhost\(rq
+con el objetivo de que la opción ldap_user_authorized_rhost trabaje\&.
+.sp
+Predeterminado: rhost
+.RE
+.PP
+ldap_user_certificate (cadena)
+.RS 4
+Nombre del atributo LDAP que contiene el certificado X509 del usuario\&.
+.sp
+Predeterminado: userCertificate;binary
+.RE
+.PP
+ldap_user_email (cadena)
+.RS 4
+Nombre del atributo LDAP que contiene el correo electrónico del usuario\&.
+.sp
+Aviso: Si una dirección de correo electrónico de un usuario entra en conflicto con una dirección de correo electrónico o el nombre totalmente cualificado de otro usuario, SSSD no será capaz de servir adecuadamente a esos usuarios\&. Si por alguna de varias razones los usuarios necesitan compartir la misma dirección de correo electrónico establezca esta opción a un nombre de atributo no existente con elobjetivo de deshabilitar la búsqueda/acceso por correo electrónico\&.
+.sp
+Predeterminado: mail
+.RE
+.SH "GROUP ATTRIBUTES"
+.PP
+.PP
+ldap_group_object_class (cadena)
+.RS 4
+La clase de objeto de una entrada de grupo LDAP\&.
+.sp
+Por defecto: posixGroup
+.RE
+.PP
+ldap_group_name (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre de grupo\&.
+.sp
+Predeterminado: cn (rfc2307, rfc2307bis and IPA), sAMAccountName (AD)
+.RE
+.PP
+ldap_group_gid_number (cadena)
+.RS 4
+El atributo LDAP que corresponde al id del grupo\&.
+.sp
+Predeterminado: gidNumber
+.RE
+.PP
+ldap_group_member (cadena)
+.RS 4
+El atributo LDAP que contiene los nombres de los miembros del grupo\&.
+.sp
+Valor predeterminado: memberuid (rfc2307) / member (rfc2307bis)
+.RE
+.PP
+ldap_group_uuid (cadena)
+.RS 4
+El atributo LDAP que contiene el UUID/GUID de un objeto grupo LDAP\&.
+.sp
+Predeterminado: no establecido en caso general, objectGUID para AD e ipaUniqueID para IPA
+.RE
+.PP
+ldap_group_objectsid (cadena)
+.RS 4
+El atributo LDAP que contiene el objectSID de un objeto grupo LDAP\&. Esto es normalmente sólo necesario para servidores ActiveDirectory\&.
+.sp
+Predeterminado: objectSid para ActiveDirectory, no establecido para otros servidores\&.
+.RE
+.PP
+ldap_group_modify_timestamp (cadena)
+.RS 4
+El atributo LDAP que contiene la fecha y hora de la última modificación del objeto primario\&.
+.sp
+Predeterminado: modifyTimestamp
+.RE
+.PP
+ldap_group_type (string)
+.RS 4
+El atributo LDAP que contiene un valor entero indicando el tipo del grupo y puede ser otras banderas\&.
+.sp
+Este atributo es actualmente usado por el proveedor AD para determinar si un grupo está en grupos de dominio local y ha de ser sacado de los dominios de confianza\&.
+.sp
+Predeterminado: groupType en el proveedor AD, de otro modo no establecido
+.RE
+.PP
+ldap_group_external_member (cadena)
+.RS 4
+El atributo LDAP que referencia a los miembros de grupo que están definidos en un dominio externo\&. En este momento, solo se soportan los miembros externos de IPA\&.
+.sp
+Predeterminado: ipaExternalMember en el proveedor IPA, de otro modo no estabecido\&.
+.RE
+.SH "NETGROUP ATTRIBUTES"
+.PP
+.PP
+ldap_netgroup_object_class (cadena)
+.RS 4
+La clase de objeto de una entrada netgroup en LDAP\&.
+.sp
+En proveedor IPA, ipa_netgroup_object_class, se usaría en su lugar\&.
+.sp
+Predeterminado: nisNetgroup
+.RE
+.PP
+ldap_netgroup_name (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre del netgroup\&.
+.sp
+Un proveedor IPA, ipa_netgroup_name sería usado en su lugar\&.
+.sp
+Predeterminado: cn
+.RE
+.PP
+ldap_netgroup_member (cadena)
+.RS 4
+El atributo LDAP que contiene los nombres de los miembros de grupo de red\&.
+.sp
+Un proveedor IPA, ipa_netgroup_member sería usado en su lugar\&.
+.sp
+Predeterminado: memberNisNetgroup
+.RE
+.PP
+ldap_netgroup_triple (cadena)
+.RS 4
+El atributo LDAP que contiene los (host, usuario, dominio) triples de grupo de red\&.
+.sp
+Esta opción no está disponible en el proveedor IPA\&.
+.sp
+Predeterminado: nisNetgroupTriple
+.RE
+.PP
+ldap_netgroup_modify_timestamp (cadena)
+.RS 4
+El atributo LDAP que contiene la fecha y hora de la última modificación del objeto primario\&.
+.sp
+Esta opción no está disponible en el proveedor IPA\&.
+.sp
+Predeterminado: modifyTimestamp
+.RE
+.SH "HOST ATTRIBUTES"
+.PP
+.PP
+ldap_host_object_class (cadena)
+.RS 4
+El objeto clase de una entrada host en LDAP\&.
+.sp
+Por defecto: ipService
+.RE
+.PP
+ldap_host_name (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre de host\&.
+.sp
+Predeterminado: cn
+.RE
+.PP
+ldap_host_fqdn (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre de dominio totalmente cualificado del host\&.
+.sp
+Predeterminado: fqdn
+.RE
+.PP
+ldap_host_serverhostname (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre de host\&.
+.sp
+Predeterminado: serverHostname
+.RE
+.PP
+ldap_host_member_of (cadena)
+.RS 4
+Atributo LDAP que lista los miembros del grupo del host\&.
+.sp
+Predeterminado: memberOf
+.RE
+.PP
+ldap_host_ssh_public_key (cadena)
+.RS 4
+Atributo LDAP que contiene las claves públicas SSH del host\&.
+.sp
+Predeterminado: sshPublicKey
+.RE
+.PP
+ldap_host_uuid (cadena)
+.RS 4
+Atributo LDAP que contiene las UUID/GUID de un objeto host LDAP\&.
+.sp
+Predeterminado: no definido
+.RE
+.SH "SERVICE ATTRIBUTES"
+.PP
+.PP
+ldap_service_object_class (cadena)
+.RS 4
+La clase objeto de una entrada de servicio en LDAP\&.
+.sp
+Por defecto: ipService
+.RE
+.PP
+ldap_service_name (cadena)
+.RS 4
+El atributo LDAP que contiene el nombre de servicio de atributos y sus alias\&.
+.sp
+Predeterminado: cn
+.RE
+.PP
+ldap_service_port (cadena)
+.RS 4
+El atributo LDAP que contiene el puerto manejado por este servicio\&.
+.sp
+Por defecto: ipServicePort
+.RE
+.PP
+ldap_service_proto (cadena)
+.RS 4
+El atributo LDAP que contiene los protocolos entendidos por este servicio\&.
+.sp
+Por defecto: ipServiceProtocol
+.RE
+.SH "SUDO ATTRIBUTES"
+.PP
+.PP
+ldap_sudorule_object_class (cadena)
+.RS 4
+El objeto clase de una regla de entrada sudo en LDAP\&.
+.sp
+Por defecto: sudoRole
+.RE
+.PP
+ldap_sudorule_name (cadena)
+.RS 4
+El atributo LDAP que corresponde a la regla nombre de sudo\&.
+.sp
+Predeterminado: cn
+.RE
+.PP
+ldap_sudorule_command (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre de comando\&.
+.sp
+Por defecto: sudoCommand
+.RE
+.PP
+ldap_sudorule_host (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre de host (o dirección IP del host, red IP del host o grupo de red del host)
+.sp
+Por defecto: sudoHost
+.RE
+.PP
+ldap_sudorule_user (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre de usuario (o UID\&. nombre de grupo o grupo de red del usuario)
+.sp
+Por defecto: sudoUser
+.RE
+.PP
+ldap_sudorule_option (cadena)
+.RS 4
+El atributo LDAP que corresponde a las opciones sudo\&.
+.sp
+Por defecto: sudoOption
+.RE
+.PP
+ldap_sudorule_runasuser (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre de usuario que los comandos pueden ejecutar como\&.
+.sp
+Por defectot: sudoRunAsUser
+.RE
+.PP
+ldap_sudorule_runasgroup (cadena)
+.RS 4
+El atributo LDAP que corresponde al nombre de grupo o GID de grupo que puede ejecutar comandos como\&.
+.sp
+Por defecto: sudoRunAsGroup
+.RE
+.PP
+ldap_sudorule_notbefore (cadena)
+.RS 4
+El atributo LDAP que corresponde al inicio de fecha/hora para cuando la regla sudo es válida\&.
+.sp
+Por defecto: sudoNotBefore
+.RE
+.PP
+ldap_sudorule_notafter (cadena)
+.RS 4
+El atributo LDAP que corresponde a la fecha/hora final, después de la cual la regla sudo dejará de ser válida\&.
+.sp
+Por defecto: sudoNotAfter
+.RE
+.PP
+ldap_sudorule_order (cadena)
+.RS 4
+El atributo LDAP que corresponde al índice de ordenación de la regla\&.
+.sp
+Por defecto: sudoOrder
+.RE
+.SH "AUTOFS ATTRIBUTES"
+.PP
+.PP
+ldap_autofs_map_object_class (cadena)
+.RS 4
+El objeto clase de una entrada de mapa de automontaje en LDAP\&.
+.sp
+Predeterminado: nisMap (rfc2307, autofs_provider=ad), de otra manera automountMap
+.RE
+.PP
+ldap_autofs_map_name (cadena)
+.RS 4
+El nombre de una entrada de mapa de automontaje en LDAP\&.
+.sp
+Predeterminado: nisMapName (rfc2307, autofs_provider=ad), de otra manera automountMapName
+.RE
+.PP
+ldap_autofs_entry_object_class (cadena)
+.RS 4
+El objeto clase de una entrada de montaje automático en LDAP\&. La entrada normalmente corresponde a un punto de montaje\&.
+.sp
+Predeterminado: nisObject (rfc2307, autofs_provider=ad), de otra manera automount
+.RE
+.PP
+ldap_autofs_entry_key (cadena)
+.RS 4
+La clave de una entrada de automontaje en LDAP\&. La entrada corresponde normalmente a un punto de montaje\&.
+.sp
+Predeterminado: cn (rfc2307, autofs_provider=ad), de otra manera automountKey
+.RE
+.PP
+ldap_autofs_entry_value (cadena)
+.RS 4
+La clave de una entrada de automontaje en LDAP\&. La entrada corresponde normalmente a un punto de montaje\&.
+.sp
+Predeterminado: nisMapEntry (rfc2307, autofs_provider=ad), de otra manera automountInformation
+.RE
+.SH "VEA TAMBIEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

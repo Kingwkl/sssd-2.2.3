@@ -1,0 +1,183 @@
+'\" t
+.\"     Title: pam_sss
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Páginas de manual de SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "PAM_SSS" "8" "12/09/2020" "SSSD" "Páginas de manual de SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+pam_sss \- Módulo PAM para SSSD
+.SH "SYNOPSIS"
+.HP \w'\fBpam_sss\&.so\fR\ 'u
+\fBpam_sss\&.so\fR [\fIquiet\fR] [\fIforward_pass\fR] [\fIuse_first_pass\fR] [\fIuse_authtok\fR] [\fIretry=N\fR] [\fIignore_unknown_user\fR] [\fIignore_authinfo_unavail\fR] [\fIdomains=X\fR] [\fIallow_missing_name\fR] [\fIprompt_always\fR] [\fItry_cert_auth\fR] [\fIrequire_cert_auth\fR]
+.SH "DESCRIPCION"
+.PP
+\fBpam_sss\&.so\fR
+es la interfaz PAM para el demonio Servicios de Seguridad de Sistema (SSSD)\&. Los errores y resultados son registrados a través de
+\fBsyslog(3)\fR
+con la facilidad LOG_AUTHPRIV\&.
+.SH "OPCIONES"
+.PP
+\fBquiet\fR
+.RS 4
+Suprime el registro de mensajes de usuarios desconocidos\&.
+.RE
+.PP
+\fBforward_pass\fR
+.RS 4
+Si
+\fBforward_pass\fR
+está fijada el password introducido se pone en la pila para que lo usen otros módulos PAM\&.
+.RE
+.PP
+\fBuse_first_pass\fR
+.RS 4
+El argumento use_first_pass fuerza al módulo a usar un módulo de password apilado previamente y nunca preguntará al usuario \- si no hay password disponible o el password no es apropiado, se denegará el acceso al usuario\&.
+.RE
+.PP
+\fBuse_authtok\fR
+.RS 4
+Cuando cambia el password fuerza al módulo a fijar el nuevo password a uno suministrado por un módulo de password previamente apilado\&.
+.RE
+.PP
+\fBretry=N\fR
+.RS 4
+Si el usuario especificado es preguntado N veces por un password si la autenticación falla\&. Por defecto es 0\&.
+.sp
+Por favor advierta que esta opción puede no trabajar como se espera llamando PAM a manejar el diálogo de usuario por el mismo\&. Un ejecplo típico es
+\fBsshd\fR
+con
+\fBPasswordAuthentication\fR\&.
+.RE
+.PP
+\fBignore_unknown_user\fR
+.RS 4
+Si se especifica esta opción y el usuario no existe, el módulo PAM devolverá PAM_IGNORE\&. Esto origina que el marco de referencia PAM ignore este módulo\&.
+.RE
+.PP
+\fBignore_authinfo_unavail\fR
+.RS 4
+Especifica que el módulo PAM debería devolver PAM_IGNORE si no puede contactar con el demonio SSSD\&. Esto causa que el marco de referencia PAM ignore este módulo\&.
+.RE
+.PP
+\fBdomains\fR
+.RS 4
+Permite al administrador restringir los dominios contra los que un servicio PAM particular puede autenticarse\&. El formato es una lista separada por comas de nombres de dominio SSSD, como se especifica en el fichero sssd\&.conf\&.
+.sp
+AVISO: Se debe usar junto con las opciones
+\(lqpam_trusted_users\(rq
+y
+\(lqpam_public_domains\(rq\&. Por favor vea la página de manual
+\fBsssd.conf\fR(5)
+para mas información sobre estas dos opciones del respondedor PAM\&.
+.RE
+.PP
+\fBallow_missing_name\fR
+.RS 4
+El propósito principal de esta opción es dejar que SSSD determine el nombre de usuario en base a información adicional, e\&.g\&. el certificado de una Smartcard\&.
+.sp
+El caso de uso actual son los administradores de inicio de sesión que pueden monitorear un lector de tarjetas inteligentes para eventos de tarjetas\&. En el caso de que una Smartcard se inserte el administrador de inicio de sesión llamara a la pila PAM que incluye una línea como
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+auth sufficient pam_sss\&.so allow_missing_name
+                        
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+En este caso SSSD intentará determinar el nobre de usuairo en base al contenido de la tarjeta inteligente, se lo devolverá a pam_sss quien finalmente lo pondrá en la pila PAM\&.
+.RE
+.PP
+\fBprompt_always\fR
+.RS 4
+Solicita siempre al usuario las credenciales\&. Con esta opción las credenciales pedidas por otros módulos PAM, normalmente una contraseña, serán ignoradas y pam_sss solicitará las credenciales otra vez\&. En base a la respuesta pre autorización de SSSD pam_sss debe solicitar una contraseña, un Smartcard PIN u otras credenciales\&.
+.RE
+.PP
+\fBtry_cert_auth\fR
+.RS 4
+Intenta usar autenticación basada en certificado, i\&.e\&. autenticación con una tarjeta inteligente o dispositivos similares\&. Si hay disponible una Smartcard y el servicio tiene permitido la autenticación Smartcard se le pedirá al usuario un PIN y continuará la autenticación basada en certificado
+.sp
+Si no hay Smartcard disponible o la autenticación basada en certificado no está permitida para el servicio actual se devuelve PAM_AUTHINFO_UNAVAIL\&.
+.RE
+.PP
+\fBrequire_cert_auth\fR
+.RS 4
+Hace la autenticación en base a certificado, i\&.e\&. autenticación con Smartcard o dispositivos similares\&. Si no hay una Smartcard disponible se pedirá al usuario que inserte una\&. SSSD esperará una Smartcard hasta el tiempo límite definido por p11_wait_for_card_timeout passed, más detalles en
+\fBsssd.conf\fR(5)\&.
+.sp
+Si no hay Smartcard disponible después del tiempo límite o no está pemitida la autenticación basada en certificado para el servicio actual se devolverá PAM_AUTHINFO_UNAVAIL\&.
+.RE
+.SH "TIPOS DE MÓDULOS SUMINISTRADOS"
+.PP
+Todos los tipos de módulos (\fBaccount\fR,
+\fBauth\fR,
+\fBpassword\fR
+y
+\fBsession\fR) son suministrados\&.
+.PP
+Si el respondedor PAM de SSSD no está corriendo, e\&.g\&. si el socket respondedor PAM no esta disponible, pam_sss devolverá PAM_USER_UNKNOWN cuando se llame como módulo
+\fBaccount\fR
+para evitar problemas con usuarios de otras fuentes durante el control de acceso\&.
+.SH "ARCHIVOS"
+.PP
+Si un password se resetea por un fallo de root, como el correspondiente proveedor SSSD no soporta el reseteo de password, se puede mostrar un mensaje individual\&. Este mensaje puede, por ejemplo, contener instrucciones sobre como resetear un password\&.
+.PP
+El mensaje se lee desde el fichero
+pam_sss_pw_reset_message\&.LOC
+donde LOC destaca una cadena de lugar devuelta por
+\fBsetlocale\fR(3)\&. Si no hay fichero coincidente se muestra el contenido de
+pam_sss_pw_reset_message\&.txt\&. Root debe ser el propietario de los ficheros y sólo root puede tener permisos de lectura y escritura mientras que todos los demás usuarios sólo tienen permisos de lectura\&.
+.PP
+Estos ficheros son buscados en el directorio
+/etc/sssd/customize/DOMAIN_NAME/\&. Si no hay archivos coincidentes se muestra un mensaje genérico\&.
+.SH "VEA TAMBIEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

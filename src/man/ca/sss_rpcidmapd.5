@@ -1,0 +1,110 @@
+'\" t
+.\"     Title: sss_rpcidmapd
+.\"    Author: Noam Meltzer
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Formats i convencions dels fitxers
+.\"    Source: sss rpc.idmapd plugin
+.\"  Language: English
+.\"
+.TH "SSS_RPCIDMAPD" "5" "12/09/2020" "sss rpc.idmapd plugin" "Formats i convencions dels fit"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_rpcidmapd \- les directrius de configuració del complement sss per al rpc\&.idmapd
+.SH "FITXER DE CONFIGURACIÓ"
+.PP
+El fitxer de configuració rpc\&.idmapd normalment es troba a
+\fI/etc/idmapd\&.conf\fR\&. Vegeu
+\fBidmapd.conf\fR(5)
+per més informació\&.
+.SH "AMPLIACIÓ DE LA CONFIGURACIÓ DE L\*(AQSSS"
+.SS "Habilita el complement SSS"
+.PP
+En la secció
+\(lq[Translation]\(rq, modifiqueu o establiu l\*(Aqatribut
+\(lqMethod\(rq
+per abastar
+\fIsss\fR\&.
+.SS "Secció de configuració [sss]"
+.PP
+Per canviar el valor per defecte d\*(Aqun dels atributs de configuració del connector de l\*(Aq\fIsss\fR
+que es llisten a continuació, necessitareu crear\-li una secció de configuració, anomenada
+\(lq[sss]\(rq\&.
+.PP
+\fBAtributs de configuració\fR
+.PP
+memcache (booleà)
+.RS 4
+Indica si s\*(Aqutilitza o no la tècnica d\*(Aqoptimització de la memòria cau\&.
+.sp
+Per defecte: True
+.RE
+.SH "INTEGRACIÓ DE L\*(AQSSSD"
+.PP
+El connector sss requereix que s\*(Aqhabiliti el
+\fIcontestador del NSS\fR
+al sssd\&.
+.PP
+L\*(Aqatribut
+\(lquse_fully_qualified_names\(rq
+ha d\*(Aqestar habilitat en tots els dominis (els clients de NFSv4 esperen un FQN per a ser enviats al cable)\&.
+.SH "EXEMPLE"
+.PP
+En el següent exemple es mostra un idmapd\&.conf mínim que fa ús del connector sss\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[General]
+Verbosity = 2
+# el domini ha de sincronitzar\-se entre el servidor i els clients del NFSv4
+# Solaris/Illumos/AIX utilitzen "localdomain" com a predeterminat!
+Domain = default
+
+[Mapping]
+Nobody\-User = nfsnobody
+Nobody\-Group = nfsnobody
+
+[Translation]
+Method = sss
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "VEGEU TAMBÉ"
+.PP
+\fBsssd\fR(8),
+\fBidmapd.conf\fR(5)
+.SH "AUTHORS"
+.PP
+\fBNoam Meltzer\fR
+.br
+Primary Data Inc\&.
+.RS 4
+Desenvolupador (2013\-2014)
+.RE
+.PP
+\fBNoam Meltzer\fR <\&tsnoam@gmail\&.com\&>
+.RS 4
+Desenvolupador (2014\-)
+.RE

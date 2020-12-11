@@ -1,0 +1,1476 @@
+'\" t
+.\"     Title: sssd-ad
+.\"    Author: Основна гілка розробки SSSD \(em https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Формати файлів та правила
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-AD" "5" "12/09/2020" "SSSD" "Формати файлів та правила"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-ad \- Модуль надання даних Active Directory SSSD
+.SH "ОПИС"
+.PP
+На цій сторінці довідника описано налаштування засобу керування доступом AD для
+\fBsssd\fR(8)\&. Щоб дізнатися більше про синтаксис налаштування, зверніться до розділу \(FoФОРМАТ ФАЙЛІВ\(Fc сторінки довідника
+\fBsssd.conf\fR(5)\&.
+.PP
+Засіб надання даних AD є модулем, який використовується для встановлення з\*(Aqєднання із сервером Active Directory\&. Для роботи цього засобу надання даних потрібно, щоб комп\*(Aqютер було долучено до домену AD і щоб було доступним сховище ключів\&. Обмін даними із модулем відбувається за допомогою каналу із шифруванням GSSAPI\&. Із засобом надання даних AD не слід використовувати параметри SSL/TLS, оскільки їх перекриває використання Kerberos\&.
+.PP
+У засобі надання даних AD передбачено підтримку встановлення з\(cqєднання з Active Directory 2008 R2 або пізнішою версією\&. Робота з попередніми версіями можлива, але не підтримується\&.
+.PP
+Засобом надання даних AD можна скористатися для отримання даних щодо користувачів і розпізнавання користувачів за допомогою довірених доменів\&. У поточній версії передбачено підтримку використання лише довірених доменів з того самого лісу\&. Крім того автоматично визначаються сервери із довірених доменів\&.
+.PP
+Засіб надання даних AD уможливлює для SSSD використання засобу надання даних профілів
+\fBsssd-ldap\fR(5)
+та засобу надання даних розпізнавання
+\fBsssd-krb5\fR(5)
+з оптимізацією для середовищ Active Directory\&. Засіб надання даних AD приймає ті самі параметри, які використовуються засобами надання даних sssd\-ldap та sssd\-krb5, із деякими виключеннями\&. Втім, встановлювати ці параметри не обов\*(Aqязково і не рекомендовано\&.
+.PP
+Засіб надання даних AD в основному копіює типові параметри традиційних засобів надання даних ldap і krb5 із деякими виключенням\&. Відмінності наведено у розділі
+\(lqЗМІНЕНІ ТИПОВІ ПАРАМЕТРИ\(rq\&.
+.PP
+Інструментом надання даних AD також можна скористатися для доступу, зміни паролів запуску від імені користувача (sudo) та використання autofs\&. У налаштовуванні керування доступом на боці клієнта немає потреби\&.
+.PP
+Якщо у sssdconf вказано
+\(lqauth_provider=ad\(rq
+або
+\(lqaccess_provider=ad\(rq, для id_provider також має бути вказано
+\(lqad\(rq\&.
+.PP
+Типово, модуль надання даних AD виконуватиме прив\(cqязку до значень UID та GID з параметра objectSID у Active Directory\&. Докладніший опис наведено у розділі \(FoВСТАНОВЛЕННЯ ВІДПОВІДНОСТІ ІДЕНТИФІКАТОРІВ\(Fc\&. Якщо вам потрібно вимкнути встановлення відповідності ідентифікаторів і покладатися на атрибути POSIX, визначені у Active Directory, вам слід встановити
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ldap_id_mapping = False
+            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Якщо має бути використано атрибути POSIX, рекомендуємо з міркувань швидкодії виконувати також реплікацію атрибутів до загального каталогу\&. Якщо виконується реплікація атрибутів POSIX, SSSD намагатиметься знайти домен числового ідентифікатора із запиту за допомогою загального каталогу і шукатиме лише цей домен\&. І навпаки, якщо реплікація атрибутів POSIX до загального каталогу не відбувається, SSSD доводиться шукати на усіх доменах у лісі послідовно\&. Будь ласка, зауважте, що для пришвидшення пошуку без доменів також може бути корисним використання параметра
+\(lqcache_first\(rq\&. Зауважте, що якщо у загальному каталозі є лише підмножина атрибутів POSIX, у поточній версії невідтворювані атрибути з порту LDAP не читатимуться\&.
+.PP
+Дані щодо користувачів, груп та інших записів, які обслуговуються SSSD, у модулі надання даних AD завжди обробляються із врахуванням регістру символів для забезпечення сумісності з реалізацією Active Directory у LDAP\&.
+.SH "ПАРАМЕТРИ НАЛАШТУВАННЯ"
+.PP
+Зверніться до розділу \(FoРОЗДІЛИ ДОМЕНІВ\(Fc сторінки довідника (man)
+\fBsssd.conf\fR(5), щоб дізнатися більше про налаштування домену SSSD\&.
+.PP
+ad_domain (рядок)
+.RS 4
+Визначає назву домену Active Directory\&. Є необов\(cqязковим\&. Якщо не вказано, буде використано назву домену з налаштувань\&.
+.sp
+Для забезпечення належної роботи цей параметр слід вказати у форматі запису малими літерами повної версії назви домену Active Directory\&.
+.sp
+Скорочена назва домену (також відома як назва NetBIOS або проста назва) автоматично визначається засобами SSSD\&.
+.RE
+.PP
+ad_enabled_domains (рядок)
+.RS 4
+Список дозволених доменів Active Directory, відокремлених комами\&. Якщо вказано, SSSD ігноруватиме будь\-які домени, яких немає у списку цього параметра\&. Якщо значення параметра не встановлено, доступними будуть усі домени з лісу AD\&.
+.sp
+Для належного функціонування значення цього параметра має бути вказано малими літерами у форматі повної назви домену Active Directory\&. Приклад:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_enabled_domains = sales\&.example\&.com, eng\&.example\&.com
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Скорочена назва домену (також відома як назва NetBIOS або проста назва) автоматично визначається засобами SSSD\&.
+.sp
+Типове значення: не встановлено
+.RE
+.PP
+ad_server, ad_backup_server (рядок)
+.RS 4
+Список назв тих вузлів серверів AD, відокремлених комами, з якими SSSD має встановлювати з\*(Aqєднання у порядку пріоритетності\&. Щоб дізнатися більше про резервне використання серверів, ознайомтеся із розділом
+\(lqРЕЗЕРВ\(rq\&.
+.sp
+Цей список є необов\(cqязковим, якщо увімкнено автоматичне виявлення служб\&. Докладніші відомості щодо автоматичного виявлення служб наведено у розділі \(FoПОШУК СЛУЖБ\(Fc\&.
+.sp
+Зауваження: довірені домени завжди автоматично визначають сервери, навіть якщо основний сервер явним чином визначено у параметрі ad_server\&.
+.RE
+.PP
+ad_hostname (рядок)
+.RS 4
+Необов\(cqязковий\&. Може бути встановлено на комп\(cqютерах, де hostname(5) не відповідає повній назві, що використовується доменом Active Directory для розпізнавання цього вузла\&.
+.sp
+Це поле використовується для визначення основної назви вузла, яка використовуватиметься у таблиці ключів\&. Ця назва має відповідати назві вузла, для якого випущено таблицю ключів\&.
+.RE
+.PP
+ad_enable_dns_sites (булеве значення)
+.RS 4
+Вмикає сайти DNS \(em визначення служб на основі адрес\&.
+.sp
+Якщо вказано значення true і увімкнено визначення служб (див\&. розділ щодо пошуку служб у нижній частині сторінки підручника (man)), SSSD спочатку спробує визначити сервер Active Directory для встановлення з\(cqєднання на основі використання визначення сайтів Active Directory і повертається до визначення за записами SRV DNS, якщо сайт AD не буде знайдено\&. Налаштування SRV DNS, зокрема домен пошуку, використовуються також під час визначення сайтів\&.
+.sp
+Типове значення: true
+.RE
+.PP
+ad_access_filter (рядок)
+.RS 4
+Цей параметр визначає фільтр керування доступом LDAP, якому має відповідати запис користувача для того, щоб йому було надано доступ\&. Будь ласка, зауважте, що слід явним чином встановити для параметра \(Foaccess_provider\(Fc значення \(Foad\(Fc, щоб цей параметр почав діяти\&.
+.sp
+У параметрі також передбачено підтримку визначення різних фільтрів для окремих доменів або дерев\&. Цей розширений фільтр повинен мати такий формат: \(FoКЛЮЧОВЕ СЛОВО:НАЗВА:ФІЛЬТР\(Fc\&. Набір підтримуваних ключових слів: \(FoDOM\(Fc, \(FoFOREST\(Fc або ключове слово слід пропустити\&.
+.sp
+Якщо вказано ключове слово \(FoDOM\(Fc або ключового слова не вказано, \(FoНАЗВА\(Fc визначає домен або піддомен, до якого застосовується фільтрування\&. Якщо ключовим словом є \(FoFOREST\(Fc, фільтр застосовується до усіх доменів з лісу, вказаного значенням \(FoНАЗВА\(Fc\&.
+.sp
+Декілька фільтрів можна відокремити символом \(Fo?\(Fc, подібно до способу визначення фільтрів у базах для пошуку\&.
+.sp
+Визначення участі у вкладених групах має відбуватися із використанням спеціалізованого OID
+\(lq:1\&.2\&.840\&.113556\&.1\&.4\&.1941:\(rq, окрім повних синтаксичних конструкцій DOM:domain\&.example\&.org:, щоб засіб обробки не намагався інтерпретувати символи двокрапки, пов\*(Aqязані з OID\&. Якщо ви не використовуєте цей OID, вкладена участь у групах не визначатиметься\&. Ознайомтеся із прикладом використання, який наведено нижче, і цим посиланням, щоб дізнатися більше про OID:
+\m[blue]\fB[MS\-ADTS] Правила встановлення відповідності у LDAP\fR\m[]\&\s-2\u[1]\d\s+2
+.sp
+Завжди використовується відповідник з найвищим рівнем відповідності\&. Наприклад, якщо визначено фільтрування для домену, учасником якого є користувач, і загальне фільтрування, буде використано фільтрування для окремого домену\&. Якщо буде виявлено декілька відповідників з однаковою специфікацією, використовуватиметься лише перший з них\&.
+.sp
+Приклади:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+# застосувати фільтрування лише для домену з назвою dom1:
+dom1:(memberOf=cn=admins,ou=groups,dc=dom1,dc=com)
+
+# застосувати фільтрування лише для домену з назвою dom2:
+DOM:dom2:(memberOf=cn=admins,ou=groups,dc=dom2,dc=com)
+
+# застосувати фільтрування лише для лісу з назвою EXAMPLE\&.COM:
+FOREST:EXAMPLE\&.COM:(memberOf=cn=admins,ou=groups,dc=example,dc=com)
+
+# застосувати фільтрування до учасника вкладеної групи у dom1:
+DOM:dom1:(memberOf:1\&.2\&.840\&.113556\&.1\&.4\&.1941:=cn=nestedgroup,ou=groups,dc=example,dc=com)
+                        
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Типове значення: не встановлено
+.RE
+.PP
+ad_site (рядок)
+.RS 4
+Визначає сайт AD, з яким має встановлювати з\(cqєднання клієнт\&. Якщо не буде вказано, виконуватиметься спроба автоматичного визначення сайта AD\&.
+.sp
+Типове значення: не встановлено
+.RE
+.PP
+ad_enable_gc (булеве значення)
+.RS 4
+Типово, SSSD для отримання даних користувачів з надійних (довірених) доменів спочатку встановлює з\(cqєднання із загальним каталогом (Global Catalog)\&. Якщо ж отримати дані не вдасться, система використовує порт LDAP для отримання даних щодо участі у групах\&. Вимикання цього параметра призведе до того, що SSSD встановлюватиме зв\(cqязок лише з портом LDAP поточного сервера AD\&.
+.sp
+Будь ласка, зауважте, що вимикання підтримки загального каталогу (Global Catalog) не призведе до вимикання спроб отримати дані користувачів з надійних (довірених) доменів\&. Просто SSSD намагатиметься отримати ці ж дані за допомогою порту LDAP надійних доменів\&. Втім, загальним каталогом (Global Catalog) доведеться скористатися для визначення зв\(cqязків даних щодо участі у групах для різних доменів\&.
+.sp
+Типове значення: true
+.RE
+.PP
+ad_gpo_access_control (рядок)
+.RS 4
+Цей параметр визначає режим роботи для функціональних можливостей керування доступом на основі GPO: працюватиме система у вимкненому режимі, режимі примушення чи дозвільному режимі\&. Будь ласка, зауважте, що для того, щоб цей параметр запрацював, слід явним чином встановити для параметра \(Foaccess_provider\(Fc значення \(Foad\(Fc\&.
+.sp
+GPO\-based access control functionality uses GPO policy settings to determine whether or not a particular user is allowed to logon to the host\&. For more information on the supported policy settings please refer to the
+\(lqad_gpo_map\(rq
+options\&.
+.sp
+Please note that current version of SSSD does not support Active Directory\*(Aqs built\-in groups\&. Built\-in groups (such as Administrators with SID S\-1\-5\-32\-544) in GPO access control rules will be ignored by SSSD\&. See upstream issue tracker https://pagure\&.io/SSSD/sssd/issue/4099 \&.
+.sp
+Before performing access control SSSD applies group policy security filtering on the GPOs\&. For every single user login, the applicability of the GPOs that are linked to the host is checked\&. In order for a GPO to apply to a user, the user or at least one of the groups to which it belongs must have following permissions on the GPO:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Read: The user or one of its groups must have read access to the properties of the GPO (RIGHT_DS_READ_PROPERTY)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Apply Group Policy: The user or at least one of its groups must be allowed to apply the GPO (RIGHT_DS_CONTROL_ACCESS)\&.
+.RE
+.sp
+By default, the Authenticated Users group is present on a GPO and this group has both Read and Apply Group Policy access rights\&. Since authentication of a user must have been completed successfully before GPO security filtering and access control are started, the Authenticated Users group permissions on the GPO always apply also to the user\&.
+.sp
+Зауваження: у поточній версії SSSD не передбачено підтримки записів вузлів (комп\*(Aqютерів) до списку \(FoФільтрування захисту\(Fc (\(FoSecurity Filtering\(Fc) GPO\&. Передбачено підтримку лише записів користувачів і груп\&. Записи вузлів у списку ні на що не впливатимуть\&.
+.sp
+NOTE: If the operation mode is set to enforcing, it is possible that users that were previously allowed logon access will now be denied logon access (as dictated by the GPO policy settings)\&. In order to facilitate a smooth transition for administrators, a permissive mode is available that will not enforce the access control rules, but will evaluate them and will output a syslog message if access would have been denied\&. By examining the logs, administrators can then make the necessary changes before setting the mode to enforcing\&. For logging GPO\-based access control debug level \*(Aqtrace functions\*(Aq is required (see
+\fBsssctl\fR(8)
+manual page)\&.
+.sp
+У цього параметра є три підтримуваних значення:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+disabled: правила керування доступом, засновані на GPO, не обробляються і не використовуються примусово\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+enforcing: правила керування доступом, засновані на GPO, обробляються і використовуються примусово\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+permissive: виконати перевірку відповідності правилам керування доступом на основі GPO, але не наполягати на їхньому виконанні\&. Якщо правила не виконуються, вивести до системного журналу повідомлення про те, що користувачеві було б заборонено доступ, якби використовувався режим enforcing\&.
+.RE
+.sp
+Типове значення: enforcing
+.RE
+.PP
+ad_gpo_implicit_deny (булеве значення)
+.RS 4
+Зазвичай, якщо не буде знайдено відповідних GPO, користувачам буде надано доступ\&. Якщо для цього параметра встановлено значення True, доступ користувачам надаватиметься, лише якщо його явним чином дозволено правилом GPO\&. Якщо ж такого дозвільного правила не буде виявлено, доступ буде заборонено\&. Цим можна скористатися для підвищення рівня захисту, але слід бути обережним із використанням цього параметра, оскільки за його допомогою можна заборонити доступ навіть користувачам у вбудованій групі Administrators, якщо немає правил GPO, якими надається такий доступ\&.
+.sp
+Типове значення: False
+.RE
+.PP
+ad_gpo_ignore_unreadable (булеве значення)
+.RS 4
+Зазвичай, якщо певні контейнери правил групи (об\*(Aqєкта AD) відповідних об\*(Aqєктів правил груп є непридатним до читання з SSSD, доступ користувачам буде заборонено\&. За допомогою цього параметра можна проігнорувати контейнери правил груп та пов\*(Aqязані із ними правила, якщо їхні атрибути у контейнерах правил груп є непридатним до читання з SSSD\&.
+.sp
+Типове значення: False
+.RE
+.PP
+ad_gpo_cache_timeout (ціле число)
+.RS 4
+Проміжок часу між послідовними пошуками файлів правил GPO щодо сервера AD\&. Зміна може зменшити час затримки та навантаження на сервер AD, якщо протягом короткого періоду часу надходить багато запитів щодо керування доступом\&.
+.sp
+Типове значення: 5 (секунд)
+.RE
+.PP
+ad_gpo_map_interactive (рядок)
+.RS 4
+A comma\-separated list of PAM service names for which GPO\-based access control is evaluated based on the InteractiveLogonRight and DenyInteractiveLogonRight policy settings\&. Only those GPOs are evaluated for which the user has Read and Apply Group Policy permission (see option
+\(lqad_gpo_access_control\(rq)\&. If an evaluated GPO contains the deny interactive logon setting for the user or one of its groups, the user is denied local access\&. If none of the evaluated GPOs has an interactive logon right defined, the user is granted local access\&. If at least one evaluated GPO contains interactive logon right settings, the user is granted local access only, if it or at least one of its groups is part of the policy settings\&.
+.sp
+Зауваження: у редакторі керування правилами для груп це значення має назву \(FoДозволити локальний вхід\(Fc (\(FoAllow log on locally\(Fc) та \(FoЗаборонити локальний вхід\(Fc (\(FoDeny log on locally\(Fc)\&.
+.sp
+Можна додати іншу назву служби PAM до типового набору за допомогою конструкції \(Fo+назва_служби\(Fc або явним чином вилучити назву служби PAM з типового набору за допомогою конструкції \(Fo\-назва_служби\(Fc\&. Наприклад, щоб замінити типову назву служби PAM для цього входу (наприклад, \(Fologin\(Fc) з нетиповою назвою служби pam (наприклад, \(Fomy_pam_service\(Fc), вам слід скористатися такими налаштуваннями:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_interactive = +my_pam_service, \-login
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Типове значення: типовий набір назв служб PAM складається з таких значень:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+login
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+su
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+su\-l
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+gdm\-fingerprint
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+gdm\-password
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+gdm\-smartcard
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+kdm
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+lightdm
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+lxdm
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sddm
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+unity
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+xdm
+.RE
+.sp
+.RE
+.PP
+ad_gpo_map_remote_interactive (рядок)
+.RS 4
+A comma\-separated list of PAM service names for which GPO\-based access control is evaluated based on the RemoteInteractiveLogonRight and DenyRemoteInteractiveLogonRight policy settings\&. Only those GPOs are evaluated for which the user has Read and Apply Group Policy permission (see option
+\(lqad_gpo_access_control\(rq)\&. If an evaluated GPO contains the deny remote logon setting for the user or one of its groups, the user is denied remote interactive access\&. If none of the evaluated GPOs has a remote interactive logon right defined, the user is granted remote access\&. If at least one evaluated GPO contains remote interactive logon right settings, the user is granted remote access only, if it or at least one of its groups is part of the policy settings\&.
+.sp
+Зауваження: у редакторі керування правилами щодо груп це значення називається \(FoДозволити вхід за допомогою служб віддаленої стільниці\(Fc (\(FoAllow log on through Remote Desktop Services\(Fc) та \(FoЗаборонити вхід за допомогою служб віддаленої стільниці\(Fc (\(FoDeny log on through Remote Desktop Services\(Fc)\&.
+.sp
+Можна додати іншу назву служби PAM до типового набору за допомогою конструкції \(Fo+назва_служби\(Fc або явним чином вилучити назву служби PAM з типового набору за допомогою конструкції \(Fo\-назва_служби\(Fc\&. Наприклад, щоб замінити типову назву служби PAM для цього входу (наприклад, \(Fosshd\(Fc) з нетиповою назвою служби pam (наприклад, \(Fomy_pam_service\(Fc), вам слід скористатися такими налаштуваннями:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_remote_interactive = +my_pam_service, \-sshd
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Типове значення: типовий набір назв служб PAM складається з таких значень:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sshd
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+cockpit
+.RE
+.sp
+.RE
+.PP
+ad_gpo_map_network (рядок)
+.RS 4
+A comma\-separated list of PAM service names for which GPO\-based access control is evaluated based on the NetworkLogonRight and DenyNetworkLogonRight policy settings\&. Only those GPOs are evaluated for which the user has Read and Apply Group Policy permission (see option
+\(lqad_gpo_access_control\(rq)\&. If an evaluated GPO contains the deny network logon setting for the user or one of its groups, the user is denied network logon access\&. If none of the evaluated GPOs has a network logon right defined, the user is granted logon access\&. If at least one evaluated GPO contains network logon right settings, the user is granted logon access only, if it or at least one of its groups is part of the policy settings\&.
+.sp
+Зауваження: у редакторі керування правилами щодо груп це значення називається \(FoВідкрити доступ до цього комп\(cqютера із мережі\(Fc (\(FoAccess this computer from the network\(Fc) і \(FoЗаборонити доступ до цього комп\(cqютера із мережі\(Fc (Deny access to this computer from the network\(Fc)\&.
+.sp
+Можна додати іншу назву служби PAM до типового набору за допомогою конструкції \(Fo+назва_служби\(Fc або явним чином вилучити назву служби PAM з типового набору за допомогою конструкції \(Fo\-назва_служби\(Fc\&. Наприклад, щоб замінити типову назву служби PAM для цього входу (наприклад, \(Foftp\(Fc) з нетиповою назвою служби pam (наприклад, \(Fomy_pam_service\(Fc), вам слід скористатися такими налаштуваннями:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_network = +my_pam_service, \-ftp
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Типове значення: типовий набір назв служб PAM складається з таких значень:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ftp
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+samba
+.RE
+.sp
+.RE
+.PP
+ad_gpo_map_batch (рядок)
+.RS 4
+A comma\-separated list of PAM service names for which GPO\-based access control is evaluated based on the BatchLogonRight and DenyBatchLogonRight policy settings\&. Only those GPOs are evaluated for which the user has Read and Apply Group Policy permission (see option
+\(lqad_gpo_access_control\(rq)\&. If an evaluated GPO contains the deny batch logon setting for the user or one of its groups, the user is denied batch logon access\&. If none of the evaluated GPOs has a batch logon right defined, the user is granted logon access\&. If at least one evaluated GPO contains batch logon right settings, the user is granted logon access only, if it or at least one of its groups is part of the policy settings\&.
+.sp
+Зауваження: у редакторі керування правилами щодо груп це значення називається \(FoДозволити вхід як пакетне завдання\(Fc (\(FoAllow log on as a batch job\(Fc) і \(FoЗаборонити вхід як пакетне завдання\(Fc (\(FoDeny log on as a batch job\(Fc)\&.
+.sp
+Можна додати іншу назву служби PAM до типового набору за допомогою конструкції \(Fo+назва_служби\(Fc або явним чином вилучити назву служби PAM з типового набору за допомогою конструкції \(Fo\-назва_служби\(Fc\&. Наприклад, щоб замінити типову назву служби PAM для цього входу (наприклад, \(Focrond\(Fc) з нетиповою назвою служби pam (наприклад, \(Fomy_pam_service\(Fc), вам слід скористатися такими налаштуваннями:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_batch = +my_pam_service, \-crond
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Зауваження: назва служби cron у різних дистрибутивах Linux може бути різною\&.
+.sp
+Типове значення: типовий набір назв служб PAM складається з таких значень:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+crond
+.RE
+.sp
+.RE
+.PP
+ad_gpo_map_service (рядок)
+.RS 4
+A comma\-separated list of PAM service names for which GPO\-based access control is evaluated based on the ServiceLogonRight and DenyServiceLogonRight policy settings\&. Only those GPOs are evaluated for which the user has Read and Apply Group Policy permission (see option
+\(lqad_gpo_access_control\(rq)\&. If an evaluated GPO contains the deny service logon setting for the user or one of its groups, the user is denied service logon access\&. If none of the evaluated GPOs has a service logon right defined, the user is granted logon access\&. If at least one evaluated GPO contains service logon right settings, the user is granted logon access only, if it or at least one of its groups is part of the policy settings\&.
+.sp
+Зауваження: у редакторі керування правилами щодо груп це значення називається \(FoДозволити вхід як службу\(Fc (\(FoAllow log on as a service\(Fc) і \(FoЗаборонити вхід як службу\(Fc (\(FoDeny log on as a service\(Fc)\&.
+.sp
+Можна додати іншу назву служби PAM до типового набору за допомогою конструкції \(Fo+назва_служби\(Fc\&. Оскільки типовий набір є порожнім, назви служби з типового набору назв служб PAM вилучити неможливо\&. Наприклад, щоб додати нетипову назву служби PAM (наприклад, \(Fomy_pam_service\(Fc), вам слід скористатися такими налаштуваннями:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_service = +my_pam_service
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Типове значення: not set
+.RE
+.PP
+ad_gpo_map_permit (рядок)
+.RS 4
+Список назв служб PAM, відокремлених комами, яким завжди надається доступ на основі GPO, незалежно від будь\-яких прав входу GPO\&.
+.sp
+Можна додати іншу назву служби PAM до типового набору за допомогою конструкції \(Fo+назва_служби\(Fc або явним чином вилучити назву служби PAM з типового набору за допомогою конструкції \(Fo\-назва_служби\(Fc\&. Наприклад, щоб замінити типову назву служби PAM для безумовного дозволеного доступу (наприклад, \(Fosudo\(Fc) з нетиповою назвою служби pam (наприклад, \(Fomy_pam_service\(Fc), вам слід скористатися такими налаштуваннями:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_permit = +my_pam_service, \-sudo
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Типове значення: типовий набір назв служб PAM складається з таких значень:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+polkit\-1
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sudo
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sudo\-i
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+systemd\-user
+.RE
+.sp
+.RE
+.PP
+ad_gpo_map_deny (рядок)
+.RS 4
+Список назв служб PAM, відокремлених комами, яким завжди заборонено доступ на основі GPO, незалежно від будь\-яких прав входу GPO\&.
+.sp
+Можна додати іншу назву служби PAM до типового набору за допомогою конструкції \(Fo+назва_служби\(Fc\&. Оскільки типовий набір є порожнім, назви служби з типового набору назв служб PAM вилучити неможливо\&. Наприклад, щоб додати нетипову назву служби PAM (наприклад, \(Fomy_pam_service\(Fc), вам слід скористатися такими налаштуваннями:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_deny = +my_pam_service
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Типове значення: not set
+.RE
+.PP
+ad_gpo_default_right (рядок)
+.RS 4
+За допомогою цього параметра визначається спосіб керування доступом для назв служб PAM, які не вказано явним чином у одному з параметрів ad_gpo_map_*\&. Цей параметр може бути встановлено у два різних способи\&. По\-перше, цей параметр можна встановити так, що використовуватиметься типовий вхід\&. Наприклад, якщо для цього параметра встановлено значення \(Fointeractive\(Fc, непов\(cqязані назви служб PAM оброблятимуться на основі параметрів правил InteractiveLogonRight і DenyInteractiveLogonRight\&. Крім того, для цього параметра можна встановити таке значення, щоб система завжди дозволяла або забороняла доступ для непов\(cqязаних назв служб PAM\&.
+.sp
+Передбачені значення для цього параметра:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+interactive
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+remote_interactive
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+network
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+batch
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+service
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+permit
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+deny
+.RE
+.sp
+Типове значення: deny
+.RE
+.PP
+ad_maximum_machine_account_password_age (ціле число)
+.RS 4
+SSSD перевірятиме раз на день, чи має пароль до облікового запису комп\*(Aqютера вік, який перевищує заданий вік у днях, і намагатиметься оновити його\&. Значення 0 вимкне спроби оновлення\&.
+.sp
+Типове значення: 30 днів
+.RE
+.PP
+ad_machine_account_password_renewal_opts (рядок)
+.RS 4
+Цей параметр має використовуватися лише для перевірки завдання із оновлення облікових записів комп\*(Aqютерів\&. Параметру слід передати цілих числа, відокремлених двокрапкою (\(Fo:\(Fc)\&. Перше ціле число визначає інтервал у секундах між послідовними повторними виконаннями завдання з оновлення\&. Друге \(em визначає початковий час очікування на перший запуск завдання\&.
+.sp
+Типове значення: 86400:750 (24 годин і 15 хвилин)
+.RE
+.PP
+dyndns_update (булеве значення)
+.RS 4
+Необов\(cqязковий\&. За допомогою цього параметра можна наказати SSSD автоматично оновити IP\-адресу цього клієнта на сервері DNS Active Directory\&. Захист оновлення буде забезпечено за допомогою GSS\-TSIG\&. Як наслідок, адміністраторові Active Directory достатньо буде дозволити оновлення безпеки для зони DNS\&. Для оновлення буде використано IP\-адресу з\(cqєднання LDAP AD, якщо цю адресу не було змінено за допомогою параметра \(Fodyndns_iface\(Fc\&.
+.sp
+ЗАУВАЖЕННЯ: на застарілих системах (зокрема RHEL 5) для надійної роботи у цьому режимі типову область дії Kerberos має бути належним чином визначено у /etc/krb5\&.conf
+.sp
+Типове значення: true
+.RE
+.PP
+dyndns_ttl (ціле число)
+.RS 4
+TTL, до якого буде застосовано клієнтський запис DNS під час його оновлення\&. Якщо dyndns_update має значення false, цей параметр буде проігноровано\&. Перевизначає TTL на боці сервера, якщо встановлено адміністратором\&.
+.sp
+Типове значення: 3600 (секунд)
+.RE
+.PP
+dyndns_iface (рядок)
+.RS 4
+Необов\*(Aqязковий\&. Застосовний, лише якщо dyndns_update має значення true\&. Виберіть інтерфейс або список інтерфейсів, чиї IP\-адреси має бути використано для динамічних оновлень DNS\&. Спеціальне значення
+\(lq*\(rq
+означає, що слід використовувати IP\-адреси з усіх інтерфейсів\&.
+.sp
+Типове значення: використовувати IP\-адреси інтерфейсу, який використовується для з\(cqєднання LDAP AD
+.sp
+Приклад: dyndns_iface = em1, vnet1, vnet2
+.RE
+.PP
+dyndns_refresh_interval (ціле число)
+.RS 4
+Визначає, наскільки часто серверний модуль має виконувати періодичні оновлення DNS на додачу до автоматичного оновлення, яке виконується під час кожного встановлення з\(cqєднання серверного модуля з мережею\&. Цей параметр не є обов\(cqязкоми, його застосовують, лише якщо dyndns_update має значення true\&. Зауважте, що найменшим можливим значенням є 60 секунд\&. Якщо буде вказано значення, яке є меншим за 60, використовуватиметься найменше можливе значення\&.
+.sp
+Типове значення: 86400 (24 години)
+.RE
+.PP
+dyndns_update_ptr (булеве значення)
+.RS 4
+Визначає, чи слід явним чином оновлювати запис PTR під час оновлення записів DNS клієнта\&. Застосовується, лише якщо значенням dyndns_update буде true\&.
+.sp
+Типове значення: True
+.RE
+.PP
+dyndns_force_tcp (булеве значення)
+.RS 4
+Визначає, чи слід у програмі nsupdate типово використовувати TCP для обміну даними з сервером DNS\&.
+.sp
+Типове значення: False (надати змогу nsupdate вибирати протокол)
+.RE
+.PP
+dyndns_auth (рядок)
+.RS 4
+Визначає, чи має використовувати допоміжний засіб nsupdate розпізнавання GSS\-TSIG для безпечних оновлень за допомогою сервера DNS, незахищені оновлення можна надсилати встановленням для цього параметра значення \(Fonone\(Fc\&.
+.sp
+Типове значення: GSS\-TSIG
+.RE
+.PP
+dyndns_server (рядок)
+.RS 4
+Сервер DNS, який слід використовувати для виконання оновлення DNS\&. У більшості конфігурацій рекомендуємо не встановлювати значення для цього параметра\&.
+.sp
+Встановлення значення для цього параметра потрібне для середовищ, де сервер DNS відрізняється від сервера профілів\&.
+.sp
+Будь ласка, зауважте, що цей параметр буде використано лише для резервних спроб, якщо попередні спроби із використанням автовиявлення завершаться невдало\&.
+.sp
+Типове значення: немає (надати nsupdate змогу вибирати сервер)
+.RE
+.PP
+dyndns_update_per_family (булеве значення)
+.RS 4
+Оновлення DNS, типово, виконується у два кроки \(em оновлення IPv4, а потім оновлення IPv6\&. Іноді бажаним є виконання оновлення IPv4 і IPv6 за один крок\&.
+.sp
+Типове значення: true
+.RE
+.PP
+override_homedir (рядок)
+.RS 4
+Перевизначити домашній каталог користувача\&. Ви можете вказати абсолютне значення або шаблон\&. У шаблоні можна використовувати такі замінники:
+.PP
+%u
+.RS 4
+ім\*(Aqя користувача
+.RE
+.PP
+%U
+.RS 4
+номер UID
+.RE
+.PP
+%d
+.RS 4
+назва домену
+.RE
+.PP
+%f
+.RS 4
+ім\(cqя користувача повністю (користувач@домен)
+.RE
+.PP
+%l
+.RS 4
+Перша літера назви облікового запису\&.
+.RE
+.PP
+%P
+.RS 4
+UPN \- User Principal Name (ім\(cqя@ОБЛАСТЬ)
+.RE
+.PP
+%o
+.RS 4
+Початкова домашня тека, отримана від служби профілів\&.
+.RE
+.PP
+%H
+.RS 4
+Значення параметра налаштовування
+\fIhomedir_substring\fR\&.
+.RE
+.PP
+%%
+.RS 4
+символ відсотків (\(Fo%\(Fc)
+.RE
+.sp
+Значення цього параметра можна встановлювати для кожного з доменів окремо\&.
+.sp
+приклад:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+override_homedir = /home/%u
+        
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Типове значення: не встановлено (SSSD використовуватиме значення, отримане від LDAP)
+.RE
+.PP
+homedir_substring (рядок)
+.RS 4
+Значення цього параметра буде використано під час розгортання параметра
+\fIoverride_homedir\fR, якщо у шаблоні міститься рядок форматування
+\fI%H\fR\&. Запис каталогу LDAP може безпосередньо містити цей шаблон для розгортання шляху до домашнього каталогу на кожному з клієнтських комп\(cqютерів (або у кожній з операційних систем)\&. Значення параметра можна вказати окремо для кожного з доменів або на загальному рівні у розділі [nss]\&. Значення, вказане у розділі домену, має вищий пріоритет за значення, встановлене за допомогою розділу [nss]\&.
+.sp
+Типове значення: /home
+.RE
+.PP
+krb5_confd_path (рядок)
+.RS 4
+Абсолютний шлях до каталогу, у якому SSSD має зберігати фрагменти налаштувань Kerberos\&.
+.sp
+Щоб вимкнути створення фрагментів налаштувань, встановіть для параметра значення \(Fonone\(Fc\&.
+.sp
+Типове значення: не встановлено (підкаталог krb5\&.include\&.d каталогу pubconf SSSD)
+.RE
+.SH "ЗМІНЕНІ ТИПОВІ ПАРАМЕТРИ"
+.PP
+Деякі типові значення параметрів не збігаються із типовими значеннями параметрів засобу надання даних\&. Із назвами відповідних параметрів та специфічні для засобу надання даних AD значення цих параметрів можна ознайомитися за допомогою наведеного нижче списку:
+.SS "Модуль надання даних KRB5"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+krb5_validate = true
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+krb5_use_enterprise_principal = true
+.RE
+.SS "Модуль надання даних LDAP"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_schema = ad
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_force_upper_case_realm = true
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_id_mapping = true
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_sasl_mech = gssapi
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_referrals = false
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_account_expire_policy = ad
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_use_tokengroups = true
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_sasl_authid = sAMAccountName@ОБЛАСТЬ (типово SHORTNAME$@ОБЛАСТЬ)
+.sp
+Засіб надання даних AD типово шукає інші реєстраційні записи, ніж засіб надання даних LDAP, оскільки у середовищі Active Directory реєстраційні записи поділено на дві групи \(em реєстраційні записи користувачів і реєстраційні записи служб\&. Для отримання TGT типово може бути використано лише реєстраційний запис користувача, реєстраційні записи об\*(Aqєктів комп\*(Aqютерів будуються на основі sAMAccountName та області AD\&. Широко відомий реєстраційний запис host/hostname@REALM є реєстраційним записом служби, отже не може бути використаний для отримання TGT\&.
+.RE
+.SS "Налаштування NSS"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+fallback_homedir = /home/%d/%u
+.sp
+Засіб надання даних AD автоматично встановлює \(Fofallback_homedir = /home/%d/%u\(Fc для надання особистих домашніх каталогів для записів користувачів без атрибута homeDirectory\&. Якщо ваш домен AD належним чином заповнено щодо атрибутів Posix і ви хочете уникнути такої резервної поведінки, ви можете явним чином вказати \(Fofallback_homedir = %o\(Fc\&.
+.RE
+.SH "РЕЗЕРВ"
+.PP
+Можливість резервування надає змогу модулям обробки автоматично перемикатися на інші сервери, якщо спроба встановлення з\(cqєднання з поточним сервером зазнає невдачі\&.
+.SS "Синтаксичні конструкції визначення резервного сервера"
+.PP
+Список записів серверів, відокремлених комами\&. Між комами можна використовувати довільну кількість пробілів\&. Порядок у списку визначає пріоритет\&. У списку може бути будь\-яка кількість записів серверів\&.
+.PP
+Для кожного з параметрів налаштування з увімкненим резервним отриманням існує два варіанти:
+\fIосновний\fR
+і
+\fIрезервний\fR\&. Ідея полягає у тому, що сервери з основного списку мають вищий пріоритет за резервні сервери, пошук же на резервних серверах виконується, лише якщо не вдасться з\(cqєднатися з жодним з основних серверів\&. Якщо буде вибрано резервний сервер, встановлюється час очікування у 31 секунду\&. Після завершення часу очікування SSSD періодично намагатиметься повторно встановити з\(cqєднання з основними серверами\&. Якщо спроба буде успішною, поточний активний резервний сервер буде замінено на основний\&.
+.SS "Механізм визначення резервного сервера"
+.PP
+Механізмом резервного використання розрізняються окремі комп\(cqютери і служби\&. Спочатку модуль намагається визначити назву вузла вказаного комп\(cqютера\&. Якщо спроби визначення зазнають невдачі, комп\(cqютер вважатиметься від\(cqєднаним від мережі\&. Подальших спроб встановити з\(cqєднання з цим комп\(cqютером для всіх інших служб не виконуватиметься\&. Якщо вдасться виконати визначення, модуль зробити спробу встановити з\(cqєднання зі службою на визначеному комп\(cqютері\&. Якщо спроба з\(cqєднання зі службою не призведе до успіху, непрацездатною вважатиметься лише служба, модуль автоматично перемкнеться на наступну службу\&. Комп\(cqютер служби вважатиметься з\(cqєднаним з мережею, можливі подальші спроби використання інших служб\&.
+.PP
+Подальші спроби встановлення з\(cqєднання з комп\(cqютерами або службами, позначеними як такі, що перебувають поза мережею, буде виконано за певний проміжок часу\&. У поточній версії цей проміжок є незмінним і дорівнює 30 секундам\&.
+.PP
+Якщо список комп\(cqютерів буде вичерпано, основний модуль перейде у режим автономної роботи і повторюватиме спроби з\(cqєднання кожні 30 секунд\&.
+.SS "Час очікування на перемикання на резервний ресурс та точне налаштовування"
+.PP
+Для визначення сервера для з\*(Aqєднання достатньо одного запиту DNS або декількох кроків, зокрема визначення відповідного сайта або спроба використати декілька назв вузлів у випадку, якщо якісь із налаштованих серверів недоступні\&. Складніші сценарії можуть потребувати додаткового часу, а SSSD треба збалансувати надання достатнього часу для завершення процесу визначення і використання притомного часу на виконання цього запиту перед переходом до автономного режиму\&. Якщо діагностичний журнал SSSD показує, що під час визначення сервера перевищено час очікування на з\*(Aqєднання із працездатним сервером, варто змінити значення параметрів часу очікування\&.
+.PP
+У цьому розділі наведено списки доступних для коригування параметрів\&. Будь ласка, ознайомтеся із їхніми описами за допомогою сторінки підручника
+\fBsssd.conf\fR(5)\&.
+.PP
+dns_resolver_server_timeout
+.RS 4
+Time in milliseconds that sets how long would SSSD talk to a single DNS server before trying next one\&.
+.sp
+Типове значення: 1000
+.RE
+.PP
+dns_resolver_op_timeout
+.RS 4
+Time in seconds to tell how long would SSSD try to resolve single DNS query (e\&.g\&. resolution of a hostname or an SRV record) before trying the next hostname or discovery domain\&.
+.sp
+Типове значення: 2
+.RE
+.PP
+dns_resolver_timeout
+.RS 4
+Наскільки довго має чекати SSSD на визначення резервної служби надання даних\&. На внутрішньому рівні визначення такої служби може включати декілька кроків, зокрема визначення адрес запитів DNS SRV або пошук розташування сайта\&.
+.sp
+Типове значення: 4
+.RE
+.PP
+For LDAP\-based providers, the resolve operation is performed as part of an LDAP connection operation\&. Therefore, also the
+\(lqldap_opt_timeout>\(rq
+timeout should be set to a larger value than
+\(lqdns_resolver_timeout\(rq
+which in turn should be set to a larger value than
+\(lqdns_resolver_op_timeout\(rq
+which should be larger than
+\(lqdns_resolver_server_timeout\(rq\&.
+.SH "ПОШУК СЛУЖБ"
+.PP
+За допомогою можливості виявлення служб основні модулі мають змогу автоматично визначати відповідні сервери для встановлення з\(cqєднання на основі даних, отриманих у відповідь на спеціальний запит до DNS\&. Підтримки цієї можливості для резервних серверів не передбачено\&.
+.SS "Налаштування"
+.PP
+Якщо серверів не буде вказано, модуль автоматично використає визначення служб для пошуку сервера\&. Крім того, користувач може використовувати і фіксовані адреси серверів і виявлення служб\&. Для цього слід вставити особливе ключове слово, \(Fo_srv_\(Fc, до списку серверів\&. Пріоритет визначається за вказаним порядком\&. Ця можливість є корисною, якщо, наприклад, користувач надає перевагу використанню виявлення служб, якщо це можливо, з поверненням до використання певного сервера, якщо за допомогою DNS не вдасться виявити жодного сервера\&.
+.SS "Назва домену"
+.PP
+З докладнішими відомостями щодо параметра \(Fodns_discovery_domain\(Fc можна ознайомитися на сторінці підручника (man)
+\fBsssd.conf\fR(5)\&.
+.SS "Протокол"
+.PP
+Запитами зазвичай визначається протокол _tcp\&. Виключення документовано у описі відповідного параметра\&.
+.SS "Також прочитайте"
+.PP
+Докладніші відомості щодо механізмів визначення служб можна знайти у RFC 2782\&.
+.SH "ВСТАНОВЛЕННЯ ВІДПОВІДНОСТІ ІДЕНТИФІКАТОРІВ"
+.PP
+Можливість встановлення відповідності ідентифікаторів надає SSSD змогу працювати у режимі клієнта Active Directory без потреби для адміністраторів розширювати атрибути користувача з метою підтримки атрибутів POSIX для ідентифікаторів користувачів та груп\&.
+.PP
+Зауваження: якщо увімкнено встановлення відповідності ідентифікаторів, атрибути uidNumber та gidNumber буде проігноровано\&. Так зроблено з метою уникання конфліктів між автоматично визначеними та визначеними вручну значеннями\&. Якщо вам потрібно призначити певні значення вручну, вручну доведеться призначати ВСІ значення\&.
+.PP
+Будь ласка, зауважте, що зміна параметрів налаштувань, пов\(cqязаних із встановленням відповідності ідентифікаторів, призведе до зміни ідентифікаторів користувачів і груп\&. У поточній версії SSSD зміни ідентифікаторів не передбачено, отже, вам доведеться вилучити базу даних SSSD\&. Оскільки кешовані паролі також зберігаються у базі даних, вилучення бази даних слід виконувати, лише якщо сервери розпізнавання є доступними, інакше користувачі не зможуть отримати потрібного їм доступу\&. З метою кешування паролів слід виконати сеанс розпізнавання\&. Для вилучення бази даних недостатньо використання команди
+\fBsss_cache\fR(8), процедура має складатися з декількох кроків:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Переконуємося, що віддалені сервери є доступними\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Зупиняємо роботу служби SSSD
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Вилучаємо базу даних
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Запускаємо службу SSSD
+.RE
+.sp
+Крім того, оскільки зміна ідентифікаторів може потребувати коригування інших властивостей системи, зокрема прав власності на файли і каталоги, варто спланувати усе наперед і ретельно перевірити налаштування встановлення відповідності ідентифікаторів\&.
+.SS "Алгоритм встановлення відповідності"
+.PP
+Active Directory надає значення objectSID для всіх об\(cqєктів користувачів і груп у каталозі\&. Таке значення objectSID можна розбити на компоненти, які відповідають профілю домену Active Directory та відносному ідентифікатору (RID) об\(cqєкта користувача або групи\&.
+.PP
+Алгоритмом встановлення відповідності ідентифікаторів SSSD передбачено поділ діапазону доступних UID на розділи однакових розмірів, які називаються \(Foзрізами\(Fc\&. Кожен зріз відповідає простору, доступному певному домену Active Directory\&.
+.PP
+Коли SSSD вперше зустрічає запис користувача або групи певного домену, SSSD віддає один з доступних зрізів під цей домен\&. З метою уможливлення відтворення такого призначення зрізів на різних клієнтських системах, зріз вибирається за таким алгоритмом:
+.PP
+Рядок SID передається алгоритмові murmurhash3 з метою перетворення його на хешоване 32\-бітове значення\&. Для вибору зрізу використовується ціла частина від ділення цього значення на загальну кількість доступних зрізів\&.
+.PP
+Зауваження: за такого алгоритму можливі збіги за хешем та відповідною цілою частиною від ділення\&. У разі виявлення таких збігів буде вибрано наступний доступних зріз, але це може призвести до неможливості відтворити точно такий самий набір зрізів на інших комп\(cqютерах (оскільки в такому разі на вибір зрізів може вплинути порядок, у якому виконується обробка даних)\&. Якщо ви зіткнулися з подібною ситуацією, рекомендуємо вам або перейти на використання явних атрибутів POSIX у Active Directory (вимкнути встановлення відповідності ідентифікаторів) або налаштувати типовий домен з метою гарантування того, що принаймні цей домен матиме еталонні дані\&. Докладніше про це у розділі \(FoНалаштування\(Fc\&.
+.SS "Налаштування"
+.PP
+Мінімальне налаштовування (у розділі
+\(lq[domain/НАЗВА_ДОМЕНУ]\(rq):
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+ldap_id_mapping = True
+ldap_schema = ad
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+За типових налаштувань буде створено 10000 зрізів, кожен з яких може містити до 200000 ідентифікаторів, починаючи з 2000000 і аж до 2000200000\&. Цього має вистачити для більшості розгорнутих середовищ\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBДодаткові налаштування\fR
+.RS 4
+.PP
+ldap_idmap_range_min (ціле число)
+.RS 4
+Визначає нижню межу діапазону ідентифікаторів POSIX, які слід використовувати для встановлення відповідності SID користувачів і груп Active Directory\&.
+.sp
+Зауваження: цей параметр відрізняється від
+\(lqmin_id\(rq
+тим, що
+\(lqmin_id\(rq
+працює як фільтр відповідей на запити щодо цього домену, а цей параметр керує діапазоном призначення ідентифікаторів\&. Ця відмінність є мінімальною, але загалом варто визначати
+\(lqmin_id\(rq
+меншим або рівним
+\(lqldap_idmap_range_min\(rq
+.sp
+Типове значення: 200000
+.RE
+.PP
+ldap_idmap_range_max (ціле число)
+.RS 4
+Визначає верхню межу діапазону ідентифікаторів POSIX, які слід використовувати для встановлення відповідності SID користувачів і груп Active Directory\&.
+.sp
+Зауваження: цей параметр відрізняється від
+\(lqmax_id\(rq
+тим, що
+\(lqmax_id\(rq
+працює як фільтр відповідей на запити щодо цього домену, а цей параметр керує діапазоном призначення ідентифікаторів\&. Ця відмінність є мінімальною, але загалом варто визначати
+\(lqmax_id\(rq
+більшим або рівним
+\(lqldap_idmap_range_max\(rq
+.sp
+Типове значення: 2000200000
+.RE
+.PP
+ldap_idmap_range_size (ціле число)
+.RS 4
+Визначає кількість ідентифікаторів доступних на кожному зі зрізів\&. Якщо розмір діапазону не ділиться націло на мінімальне і максимальне значення, буде створено якомога більше повних зрізів\&.
+.sp
+ЗАУВАЖЕННЯ: значення цього параметра має бути не меншим за значення максимального запланованого до використання RID на сервері Active Directory\&. Пошук даних та вхід для будь\-яких користувачів з RID, що перевищує це значення, буде неможливим\&.
+.sp
+Приклад: якщо найсвіжішим доданим користувачем Active Directory є користувач з objectSid=S\-1\-5\-21\-2153326666\-2176343378\-3404031434\-1107, \(Foldap_idmap_range_size\(Fc повинне мати значення, яке є не меншим за 1108, оскільки розмір діапазону дорівнює максимальному SID мінус мінімальний SID плюс 1\&. (Наприклад, 1108 = 1107 \- 0 + 1)\&.
+.sp
+Для майбутнього можливого розширення важливо все спланувати наперед, оскільки зміна цього значення призведе до зміни усіх прив\(cqязок ідентифікаторів у системі, отже зміни попередніх локальних ідентифікаторів користувачів\&.
+.sp
+Типове значення: 200000
+.RE
+.PP
+ldap_idmap_default_domain_sid (рядок)
+.RS 4
+Визначає SID типового домену\&. За допомогою цього параметра можна гарантувати те, що цей домен буде завжди призначено до нульового зрізу у карті ідентифікаторів без використання алгоритму murmurhash описаного вище\&.
+.sp
+Типове значення: not set
+.RE
+.PP
+ldap_idmap_default_domain (рядок)
+.RS 4
+Вказати назву типового домену\&.
+.sp
+Типове значення: not set
+.RE
+.PP
+ldap_idmap_autorid_compat (булеве значення)
+.RS 4
+Змінює поведінку алгоритму встановлення відповідності ідентифікаторів так, щоб обчислення відбувалися за алгоритмом подібним до алгоритму
+\(lqidmap_autorid\(rq
+winbind\&.
+.sp
+Якщо встановлено цей параметр, домени призначатимуться, починаючи з нульового зрізу з поступовим зростанням номерів на кожен додатковий домен\&.
+.sp
+Зауваження: цей алгоритм є недетерміністичним (залежить від порядку записів користувачів та груп)\&. Якщо з метою сумісності з системою, у якій запущено winbind, буде використано цей алгоритм, варто також скористатися параметром
+\(lqldap_idmap_default_domain_sid\(rq
+з метою гарантування послідовного призначення принаймні одного домену до нульового зрізу\&.
+.sp
+Типове значення: False
+.RE
+.PP
+ldap_idmap_helper_table_size (ціле число)
+.RS 4
+Максимальна кількість вторинних зрізів, яку можна використовувати під час виконання прив\*(Aqязки ідентифікатора UNIX до SID\&.
+.sp
+Зауваження: під час прив\*(Aqязування SID до ідентифікатора UNIX може бути створено додаткові вторинні зрізи, якщо частини RID SID перебувають поза межами діапазону вже створених вторинних зрізів\&. Якщо значенням ldap_idmap_helper_table_size буде 0, додаткові вторинні зрізи не створюватимуться\&.
+.sp
+Типове значення: 10
+.RE
+.RE
+.SS "Добре відомі SID"
+.PP
+У SSSD передбачено підтримку пошуку назв за добре відомими (Well\-Known) SID, тобто SID із особливим запрограмованим призначенням\&. Оскільки типові користувачі і групи, пов\(cqязані із цими добре відомими SID не мають еквівалентів у середовищі Linux/UNIX, ідентифікаторів POSIX для цих об\(cqєктів немає\&.
+.PP
+Простір назв SID упорядковано службами сертифікації, які виглядають як інші домени\&. Службами сертифікації для добре відомих (Well\-Known) SID є
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Фіктивна служба сертифікації (Null Authority)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Загальна служба сертифікації (World Authority)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Локальна служба сертифікації (Local Authority)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Авторська служба сертифікації (Creator Authority)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Служба сертифікації NT (NT Authority)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Вбудована (Built\-in)
+.RE
+.sp
+Написані літерами верхнього регістру ці назви буде використано як назви доменів для повернення повних назв добре відомих (Well\-Known) SID\&.
+.PP
+Оскільки деякі з програм надають змогу змінювати дані щодо керування доступом на основі SID за допомогою назви, а не безпосереднього використання, у SSSD передбачено підтримку пошуку SID за назвою\&. Щоб уникнути конфліктів, для пошуку добре відомих (Well\-Known) SID приймаються лише повні назви\&. Отже, не можна використовувати як назви доменів у
+sssd\&.conf
+такі назви: \(FoNULL AUTHORITY\(Fc, \(FoWORLD AUTHORITY\(Fc, \(FoLOCAL AUTHORITY\(Fc, \(FoCREATOR AUTHORITY\(Fc, \(FoNT AUTHORITY\(Fc та \(FoBUILTIN\(Fc\&.
+.SH "ПРИКЛАД"
+.PP
+У наведеному нижче прикладі припускаємо, що SSSD налаштовано належним чином, а example\&.com є одним з доменів у розділі
+\fI[sssd]\fR\&. У прикладі продемонстровано лише параметри доступу, специфічні для засобу AD\&.
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/EXAMPLE]
+id_provider = ad
+auth_provider = ad
+access_provider = ad
+chpass_provider = ad
+
+ad_server = dc1\&.example\&.com
+ad_hostname = client\&.example\&.com
+ad_domain = example\&.com
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "ЗАУВАЖЕННЯ"
+.PP
+Інструмент керування доступом AD перевіряє, чи не завершено строк дії облікового запису\&. Дає той самий результат, що і ось таке налаштовування інструмента надання даних LDAP:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+access_provider = ldap
+ldap_access_order = expire
+ldap_account_expire_policy = ad
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Втім, якщо явно не налаштовано засіб надання доступу \(Foad\(Fc, типовим засобом надання доступу буде \(Fopermit\(Fc\&. Будь ласка, зауважте, що якщо вами налаштовано засіб надання доступу, відмінний від \(Foad\(Fc, вам доведеться встановлювати усі параметри з\(cqєднання (зокрема адреси LDAP та параметри шифрування) вручну\&.
+.PP
+Якщо для засобу надання даних autofs встановлено значення
+\(lqad\(rq, використовується схема прив\*(Aqязки атрибутів RFC2307 (nisMap, nisObject, \&.\&.\&.), оскільки ці атрибути включено до типової схеми Active Directory\&.
+.PP
+.SH "ТАКОЖ ПЕРЕГЛЯНЬТЕ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBОсновна гілка розробки SSSD \(em
+https://pagure\&.io/SSSD/sssd/\fR
+.SH "NOTES"
+.IP " 1." 4
+[MS-ADTS] Правила встановлення відповідності у LDAP
+.RS 4
+\%https://msdn.microsoft.com/en-us/library/cc223367.aspx
+.RE

@@ -1,0 +1,142 @@
+'\" t
+.\"     Title: sss_usermod
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Pages de manuel de SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_USERMOD" "8" "12/09/2020" "SSSD" "Pages de manuel de SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_usermod \- modifier un compte utilisateur
+.SH "SYNOPSIS"
+.HP \w'\fBsss_usermod\fR\ 'u
+\fBsss_usermod\fR [\fIoptions\fR] \fILOGIN\fR
+.SH "DESCRIPTION"
+.PP
+\fBsss_usermod\fR
+modifie le compte défini par
+\fILOGIN\fR
+pour refléter les modifications fournies en ligne de commande\&.
+.SH "OPTIONS"
+.PP
+\fB\-c\fR,\fB\-\-gecos\fR \fICOMMENTAIRE\fR
+.RS 4
+Toute chaîne de caractère décrivant l\*(Aqutilisateur\&. Souvent utilisé comme champ pour le nom entier de l\*(Aqutilisateur\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-home\fR \fIHOME_DIR\fR
+.RS 4
+Le répertoire personnel du compte utilisateur\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-shell\fR \fISHELL\fR
+.RS 4
+L\*(Aqinterpréteur de commandes de l\*(Aqutilisateur\&.
+.RE
+.PP
+\fB\-a\fR,\fB\-\-append\-group\fR \fIGROUPS\fR
+.RS 4
+Ajouter cet utilisateur aux groupes spécifiés par le paramètre
+\fIGROUPS\fR\&. Le paramètre
+\fIGROUPS\fR
+est une liste séparée par des virgules de noms de groupes\&.
+.RE
+.PP
+\fB\-r\fR,\fB\-\-remove\-group\fR \fIGROUPS\fR
+.RS 4
+Retirer cet utilisateur de groupes spécifiés par le paramètre
+\fIGROUPS\fR\&.
+.RE
+.PP
+\fB\-l\fR,\fB\-\-lock\fR
+.RS 4
+Verrouiller le compte utilisateur\&. Il ne pourra plus se connecter\&.
+.RE
+.PP
+\fB\-u\fR,\fB\-\-unlock\fR
+.RS 4
+Déverrouiller le compte utilisateur\&.
+.RE
+.PP
+\fB\-Z\fR,\fB\-\-selinux\-user\fR \fIUTILISATEUR_SELINUX\fR
+.RS 4
+L\*(Aqutilisateur SELinux pour l\*(Aqidentifiant de connexion de l\*(Aqutilisateur\&.
+.RE
+.PP
+\fB\-\-addattr\fR \fIATTR_NAME_VAL\fR
+.RS 4
+Ajouter une paire attribut/valeur\&. Le format est nom_attribut=valeur\&.
+.RE
+.PP
+\fB\-\-setattr\fR \fIATTR_NAME_VAL\fR
+.RS 4
+Définir une paire attribut/valeur\&. Le format est nom_attribut=valeur\&. Pour les attributs multi\-valués, la commande remplace les valeurs déjà présentes\&.
+.RE
+.PP
+\fB\-\-delattr\fR \fIATTR_NAME_VAL\fR
+.RS 4
+Supprimer une paire attribut/valeur\&. Le format est nom_attribut=valeur\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Affiche l\*(Aqaide et quitte\&.
+.RE
+.SH "LE DOMAINE LOCAL"
+.PP
+Pour fonctionner correctement, un domaine avec
+\(lqid_provider = local\(rq
+doit être créé et SSSD doit s\*(Aqexécuter\&.
+.PP
+L\*(Aqadministrateur peut vouloir utiliser les utilisateurs locaux SSSD au lieu des utilisateurs UNIX traditionnels dans les cas où l\*(Aqimbrication de groupes (cf\&.
+\fBsss_groupadd\fR(8)) est nécessaire\&. Les utilisateurs locaux sont également utiles pour les tests et le développement de SSSD sans avoir à déployer un serveur distant complet\&. Les outils
+\fBsss_user *\fR
+et
+\fBsss_group *\fR
+utilisent alors un stockage local de type LDB pour les utilisateurs et les groupes\&.
+.SH "VOIR AUSSI"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

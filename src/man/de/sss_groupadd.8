@@ -1,0 +1,83 @@
+'\" t
+.\"     Title: sss_groupadd
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: SSSD-Handbuchseiten
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_GROUPADD" "8" "12/09/2020" "SSSD" "SSSD-Handbuchseiten"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_groupadd \- erstellt eine neue Gruppe
+.SH "SYNOPSIS"
+.HP \w'\fBsss_groupadd\fR\ 'u
+\fBsss_groupadd\fR [\fIOptionen\fR] \fIGRUPPE\fR
+.SH "BESCHREIBUNG"
+.PP
+\fBsss_groupadd\fR
+erstellt eine neue Gruppe\&. Diese Gruppen sind kompatibel mit POSIX\-Gruppen mit der zusätzlichen Funktionalität, dass sie andere Gruppen als Mitglieder enthalten können\&.
+.SH "OPTIONEN"
+.PP
+\fB\-g\fR,\fB\-\-gid\fR \fIGID\fR
+.RS 4
+setzt die GID der Gruppe auf den Wert von
+\fIGID\fR\&. Wurde der Wert nicht angegeben, wird er automatisch ausgewählt\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+zeigt den Hilfetext und beendet sich\&.
+.RE
+.SH "DIE LOKALE DOMAIN"
+.PP
+Für korrektes Funktionieren muss eine Domain mit \(Fcid_provider=local\(Fo erstellt sein und SSSD muss laufen\&.
+.PP
+Möglicherweise möchte der Administrator in Fällen, in denen Gruppenverschachtelung (siehe
+\fBsss_groupadd\fR(8)) benötigt wird, lokale Benutzer anstelle traditioneller UNIX\-Benutzer verwenden\&. Die lokalen Benutzer sind auch für das Testen und Entwickeln von SSSD nützlich, ohne dass ein vollständiger ferner Server bereitgestellt werden muss\&. Die
+\fBsss_user*\fR\- und
+\fBsss_group*\fR\-Werkzeuge benutzen einen lokalen LDB\-Speicher, um Benutzer und Gruppen abzulegen\&.
+.SH "SIEHE AUCH"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

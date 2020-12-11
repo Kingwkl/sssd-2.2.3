@@ -1,0 +1,144 @@
+'\" t
+.\"     Title: sssd-ifp
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Formats i convencions dels fitxers
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-IFP" "5" "12/09/2020" "SSSD" "Formats i convencions dels fit"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-ifp \- contestador de l\*(AqInfoPipe de l\*(AqSSSD
+.SH "DESCRIPCIÓ"
+.PP
+En aquesta pàgina del manual es descriu la configuració del contestador de l\*(AqInfoPipe per a
+\fBsssd\fR(8)\&. Per a una referència detallada de la sintaxi, consulteu la secció
+\(lqFORMAT DEL FITXER\(rq
+de la pàgina del manual
+\fBsssd.conf\fR(5)\&.
+.PP
+El contestador de l\*(AqInfoPipe proporciona una interfície D\-Bus publica que es pot accedir a través del bus del sistema\&. La interfície permet que l\*(Aqusuari consulti informació sobre els usuaris i els grups remots a través del bus del sistema\&.
+.SH "OPCIONS DE CONFIGURACIÓ"
+.PP
+Es poden utilitzar aquestes opcions per configurar el contestador de l\*(AqInfoPipe\&.
+.PP
+allowed_uids (cadena)
+.RS 4
+Especifica una llista separada per comes dels valors dels UID o dels noms d\*(Aqusuaris que estan assignats per accedir al contestador de l\*(AqInfoPipe\&. Els noms d\*(Aqusuaris es resolen als UID en la preparació\&.
+.sp
+Per defecte: 0 (únicament a l\*(Aqusuari root se li permet l\*(Aqaccés al contestador de l\*(AqInfoPipe)
+.sp
+Tingueu en compte que encara que s\*(Aqutilitzi l\*(AqUID 0 com a valor per defecte se sobreescriurà amb aquesta opció\&. Si encara voleu permetre que l\*(Aqusuari root accedeixi al contestador de l\*(AqInfoPipe, el que seria el cas típic, també cal afegir 0 a la llista dels UID permesos\&.
+.RE
+.PP
+user_attributes (cadena)
+.RS 4
+Especifica una llista separada per comes dels atributs de la llista negra o blanca\&.
+.sp
+Per defecte, el contestador de l\*(AqInfoPipe únicament permet que se sol\(mdlicitin el conjunt per defecte dels atributs POSIX\&. Aquest conjunt és el mateix que es retorna amb
+\fBgetpwnam\fR(3)
+i inclou:
+.PP
+name
+.RS 4
+nom d\*(Aqinici de sessió de l\*(Aqusuari
+.RE
+.PP
+uidNumber
+.RS 4
+id\&. de l\*(Aqusuari
+.RE
+.PP
+gidNumber
+.RS 4
+id\&. del grup primari
+.RE
+.PP
+gecos
+.RS 4
+informació de l\*(Aqusuari, normalment el nom complet
+.RE
+.PP
+homeDirectory
+.RS 4
+directori inicial
+.RE
+.PP
+loginShell
+.RS 4
+shell de l\*(Aqusuari
+.RE
+.sp
+Es poden afegir altres atributs a aquest conjunt amb
+\(lq+nom_atribut\(rq
+o suprimir explícitament un atribut amb
+\(lq\-nom_atribut\(rq\&. Per exemple, per permetre
+\(lqtelephoneNumber\(rq
+però denegar
+\(lqloginShell\(rq, podríeu utilitzar la següent configuració:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+user_attributes = +telephoneNumber, \-loginShell
+                        
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Per defecte: sense establir\&. Únicament es permet el conjunt per defecte dels atributs POSIX\&.
+.RE
+.PP
+wildcard_limit (integer)
+.RS 4
+Specifies an upper limit on the number of entries that are downloaded during a wildcard lookup that overrides caller\-supplied limit\&.
+.sp
+Default: 0 (let the caller set an upper limit)
+.RE
+.SH "VEGEU TAMBÉ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

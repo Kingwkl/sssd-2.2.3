@@ -1,0 +1,88 @@
+'\" t
+.\"     Title: sss_groupadd
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: SSSD マニュアル ページ
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_GROUPADD" "8" "12/09/2020" "SSSD" "SSSD マニュアル ページ"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_groupadd \- 新しいグループを作成する
+.SH "SYNOPSIS"
+.HP \w'\fBsss_groupadd\fR\ 'u
+\fBsss_groupadd\fR [\fIoptions\fR] \fIGROUP\fR
+.SH "概要"
+.PP
+\fBsss_groupadd\fR
+が新しいグループを作成します。これらのグループは POSIX グループと互換性があり、他のグループをメンバーとして含められる追加機能と互換性があります。
+.SH "オプション"
+.PP
+\fB\-g\fR,\fB\-\-gid\fR \fIGID\fR
+.RS 4
+グループの GID を
+\fIGID\fR
+の値に設定します。与えられないと、自動的に選択されます。
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+ヘルプメッセージを表示して終了します。
+.RE
+.SH "ローカルドメイン"
+.PP
+In order to function correctly, a domain with
+\(lqid_provider=local\(rq
+must be created and the SSSD must be running\&.
+.PP
+The administrator might want to use the SSSD local users instead of traditional UNIX users in cases where the group nesting (see
+\fBsss_groupadd\fR(8)) is needed\&. The local users are also useful for testing and development of the SSSD without having to deploy a full remote server\&. The
+\fBsss_user*\fR
+and
+\fBsss_group*\fR
+tools use a local LDB storage to store users and groups\&.
+.SH "関連項目"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

@@ -1,0 +1,96 @@
+'\" t
+.\"     Title: sss_obfuscate
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: SSSD-Handbuchseiten
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_OBFUSCATE" "8" "12/09/2020" "SSSD" "SSSD-Handbuchseiten"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_obfuscate \- verschleiert ein Klartextpasswort
+.SH "SYNOPSIS"
+.HP \w'\fBsss_obfuscate\fR\ 'u
+\fBsss_obfuscate\fR [\fIOptionen\fR] \fI[PASSWORT]\fR
+.SH "BESCHREIBUNG"
+.PP
+\fBsss_obfuscate\fR
+wandelt ein angegebenes Passwort in ein von Menschen nicht lesbares Format um und legt es in einem geeigneten Domain\-Abschnitt der SSSD\-Konfigurationsdatei ab\&.
+.PP
+Das Klartextpasswort wird von der Standardeingabe gelesen oder interaktiv eingegeben\&. Das verschleierte Passwort wird in den Parameter \(Fcldap_default_authtok\(Fo einer angegebenen SSSD\-Domain abgelegt und der Parameter \(Fcldap_default_authtok_type\(Fo wird auf \(Fcobfuscated_password\(Fo gesetzt\&. Weitere Einzelheiten über diese Parameter finden Sie unter
+\fBsssd-ldap\fR(5)\&.
+.PP
+Bitte beachten Sie, dass das Verschleiern von Passwörtern
+\fIkeinen wirklichen Sicherheitsgewinn\fR
+bietet, da es einem Angreifer immer noch möglich ist, das Passwort wieder herzuleiten\&. Es wird
+\fIdringend\fR
+geraten, bessere Authentifizierungsmechanismen wie Client\-seitige Zertifikate oder GSSAPI zu verwenden\&.
+.SH "OPTIONEN"
+.PP
+\fB\-h\fR,\fB\-\-help\fR
+.RS 4
+zeigt den Hilfetext und beendet sich\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-stdin\fR
+.RS 4
+Das Passwort, das verschleiert werden soll, wird von der Standardeingabe gelesen\&.
+.RE
+.PP
+\fB\-d\fR,\fB\-\-domain\fR \fIDOMAIN\fR
+.RS 4
+die SSSD\-Domain, in der das Passwort benutzt wird\&. Der Standardname ist \(Fcdefault\(Fo\&.
+.RE
+.PP
+\fB\-f\fR,\fB\-\-file\fR \fIDATEI\fR
+.RS 4
+liest die durch den Positionsparameter angegebene Konfigurationsdatei\&.
+.sp
+Voreinstellung:
+/etc/sssd/sssd\&.conf
+.RE
+.SH "SIEHE AUCH"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

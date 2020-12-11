@@ -1,0 +1,1559 @@
+'\" t
+.\"     Title: sssd-ad
+.\"    Author: SSSD uppströms \(en https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Filformat och konventioner
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-AD" "5" "12/09/2020" "SSSD" "Filformat och konventioner"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-ad \- SSSD Active Directory\-leverantör
+.SH "BESKRIVNING"
+.PP
+Denna manualsida besriver konfigurationen av leverantören AD till
+\fBsssd\fR(8)\&. För en detaljerad referens om syntaxen, se avsnittet
+\(lqFILFORMAT\(rq
+i manualsidan
+\fBsssd.conf\fR(5)\&.
+.PP
+Leverantören AD är en bakände som används för att ansluta till en Active Directory\-server\&. Leverantören att maskinen läggs in i AD\-domänen och en keytab är tillgänlig\&. Bakändekommunikationen sker över en GSSAPI\-krypterad kanal, SSL/TLS\-alternativ skall inte användas tillsammans med AD\-leverantören och kommer ersättas av Kerberos\-användning\&.
+.PP
+AD\-leverantören stödjer anslutning till Active Directory 2008 R2 eller senare\&. Tidigare versioner kan fungera, men stödjs inte\&.
+.PP
+AD\-leverantören kan användas för att få användarinformation och autentisera användare från betrodda domäner\&. För närvarande känns endast betrodda domäner i samma skog igen\&. Dessutom automatupptäcks alltid servrar från betrodda domäner\&.
+.PP
+AD\-leverantören gör att SSSD kan använda identitetsleverantören
+\fBsssd-ldap\fR(5)
+och autentiseringsleverantören
+\fBsssd-krb5\fR(5)
+med optimeringar för Active Directory\-miljöer\&. AD\-leverantören tar samma alternativ som aänvänds av leverantörerna sssd\-ldap och sssd\-krb5 med några undantag\&. Dock är det varken nödvändigt eller lämpligt att sätta dessa alternativ\&.
+.PP
+AD\-leverantören kopierar i huvudsak standardalternativen för de traditionella leverantörerna ldap och krb5 med några undantag\&. Skillnaderna listas i avsnittet
+\(lqÄNDRADE STANDARDINSTÄLLNINGAR\(rq\&.
+.PP
+AD\-leverantören kan även användas som en åtkomst\-, chpass\-, sudo\- och autofs\-leverantör\&. Ingen konfiguration av åtkomstleverantören behövs på klientsidan\&.
+.PP
+Om
+\(lqauth_provider=ad\(rq
+eller
+\(lqaccess_provider=ad\(rq
+konfigureras i sssd\&.conf måste id\-leverantören också sättas till
+\(lqad\(rq\&.
+.PP
+Som standard kommer AD\-leverantören översätta UID\- och GID\-värden från parametern objectSID i Active Directory\&. För detaljer om detta se avsnittet
+\(lqID\-ÖVERSÄTTNING\(rq
+nedan\&. Om du vill avaktivera ID\-översättning och istället lita på POSIX\-attribut definierade i Active Directory skall du sätta
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ldap_id_mapping = False
+            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+\&. Om POSIX\-attribut skall användas rekommenderas det av restandaskäl att attributen även replikeras till den globala katalogen\&. Om POSIX\-attribut replikeras kommer SSSD försöka att hitta domänen för den begärda numeriska ID:n med hjälp av den globala katalogen och endast söka i den domänen\&. Om POSIX\-attribut däremot inte replikeras till den globala katalogen måste SSSD söka i alla domänerna i skogen sekventiellt\&. Observera att alternativet
+\(lqcache_first\(rq
+också kan vara till hjälp för att snabba upp domänlösa sökningar\&. Observera att om endast en delmängd av POSIX\-attributen finns i den globala katalogen läses för närvarande inte de attribut som inte replikeras från LDAP\-porten\&.
+.PP
+Användare, grupper och andra enheter som servas av SSSD behandlas alltid som skiftlägesokänsliga i AD\-leverantören för kompatibilitet med Active Directorys LDAP\-implementation\&.
+.SH "KONFIGURATIONSALTERNATIV"
+.PP
+Se
+\(lqDOMÄNSEKTIONER\(rq
+i manualsidan
+\fBsssd.conf\fR(5)
+för detaljer om konfigurationen av en SSSD\-domän\&.
+.PP
+ad_domain (sträng)
+.RS 4
+Anger namnet på Active Directory\-domänen\&. Detta är frivilligt\&. Om det inte anges används namnet på den konfigurerade domänen\&.
+.sp
+För att fungera ordentligt skall detta alternativ anges som den gemena versionen av den långa versionen av Active Directorys domän\&.
+.sp
+Det korta domännamnet (även känt som NetBIOS\-\-namet eller det flata namnet) detekteras automatiskt av SSSD\&.
+.RE
+.PP
+ad_enabled_domains (sträng)
+.RS 4
+En kommaseparerad lista av aktiverade Active Directory\-domäner\&. Om det tillhandahålls kommer SSSD ignorera eventuella domäner som inte räknas upp i detta alternativ\&. Om det lämnas osatt kommer alla domäner från AD\-skogen vara tillgängliga\&.
+.sp
+För att fungera ordentligt bör detta alternativ anges helt i gemener och som det fullständigt kvalificerade namnet på Active Directorys domänen\&. Till exempel:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_enabled_domains = marknad\&.exempel\&.se, tekn\&.exempel\&.se
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Det korta domännamnet (även känt som NetBIOS\-\-namet eller det flata namnet) kommer detekteras automatiskt av SSSD\&.
+.sp
+Standard: inte satt
+.RE
+.PP
+ad_server, ad_backup_server (sträng)
+.RS 4
+Den kommaseparerade listan av värdnamn till AD\-servrar till vilka SSSD skall ansluta i prioritetsordning\&. För mer information om reserver och serverredundans se avsnittet
+\(lqRESERVER\(rq\&.
+.sp
+Detta är frivilligt om automatupptäckt är aktiverat\&. För mer information om tjänsteupptäckt se avsnittet
+\(lqTJÄNSTEUPPTÄCKT\(rq\&.
+.sp
+Observera: betrodda domäner kommer alltid automatiskt upptäcka servrar även om den primära servern definieras uttryckligen i alternativet ad_server\&.
+.RE
+.PP
+ad_hostname (sträng)
+.RS 4
+Valfri\&. Kan sättas på maskiner där hostname(5) inte avspeglar det fullständigt kvalificerade namnet som används i Active Directory\-domänen för att identifiera denna värd\&.
+.sp
+Detta fält används för att avgöra värd\-huvudmannen som används i keytab:en\&. Det måste stämma med värdnamnet som keytab:en gavs ut för\&.
+.RE
+.PP
+ad_enable_dns_sites (boolean)
+.RS 4
+Aktiverar DNS\-sajter \(en platsbaserat tjänsteupptäckt\&.
+.sp
+Om sant och tjänsteupptäckt (se stycket Tjänsteupptäckt i slutet av manualsidan) är aktiverat kommer SSSD först att försöka matt hitta en Active Directory\-server att ansluta till med Active Directory Site Discovery och sedan falla tillbaka på traditionell SRV\-upptäckt om ingen AD\-sajt hittas\&. Konfigurationen av DNS SRV, inklusive upptäcktsdomänen, används också under sajtupptäckten\&.
+.sp
+Standard: true
+.RE
+.PP
+ad_access_filter (sträng)
+.RS 4
+Detta alternativ anger LDAP:s åtkomstkontrollfilter som anändaren måste matcha för att tillåtas åtkomst\&. Observera att alternativet
+\(lqaccess_provider\(rq
+måste vara uttryckligen satt till
+\(lqad\(rq
+för att detta alternativ skall ha någon effekt\&.
+.sp
+Alternativet stödjer också att ange olika filter per domän eller skog\&. Detta utökade filter skulle bestå av:
+\(lqNYCKELORD:NAMN:FILTER\(rq\&. Nyckelordet kan vara antingen
+\(lqDOM\(rq,
+\(lqFOREST\(rq
+eller utelämnas\&.
+.sp
+Om nyckelordet är lika med
+\(lqDOM\(rq
+eller saknas anger
+\(lqNAMN\(rq
+domänen eller underdomänen filtret gäller för\&. Om nyckelordet är lika med
+\(lqFOREST\(rq
+är filtret lika för alla domäner från skogen som anges av
+\(lqNAMN\(rq\&.
+.sp
+Flera filter kan avgränsas med tecknet
+\(lq?\(rq, i likhet med hur sökbaser fungerar\&.
+.sp
+Nästade gruppmedlemskap måste sökas efter med en speciell OID
+\(lq:1\&.2\&.840\&.113556\&.1\&.4\&.1941:\(rq
+utöver den fullständiga syntaxen DOM:domän\&.exempel\&.se: för att säkerställa att tolken inte försöker tolka kolontecknen som hör till OID:n\&. Om man inte använder denna OID kommer nästade gruppmedlemskap inte slås upp\&. Se användningsexempel nedan och se här för ytterligare information om OID:n:
+\m[blue]\fB[MS\-ADTS] avsnittet LDAP\-utökningar\fR\m[]\&\s-2\u[1]\d\s+2
+.sp
+Den mest specifika matchingen används alltid\&. Till exempel, om alternativet angav filter för en domän användaren är medlem i och ett globalt filter skulle det domänspecifika filtret tillämpas\&. Om det finns fler matchningar med samma specifikation används den första\&.
+.sp
+Exempel:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+# tillämpla endast filtret på än domän som heter dom1:
+dom1:(memberOf=cn=admins,ou=groups,dc=dom1,dc=com)
+
+# tillämpa endast filtret på en domän som heter dom2:
+DOM:dom2:(memberOf=cn=admins,ou=groups,dc=dom2,dc=com)
+
+# tillämpa endast filtret på en skog som heter EXEMPEL\&.SE:
+FOREST:EXEMPEL\&.SE:(memberOf=cn=admins,ou=groups,dc=example,dc=com)
+
+# tillämpa filtret på en medlem av en nästad grupp i dom1:
+DOM:dom1:(memberOf:1\&.2\&.840\&.113556\&.1\&.4\&.1941:=cn=nestedgroup,ou=groups,dc=example,dc=com)
+                        
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Standard: inte satt
+.RE
+.PP
+ad_site (sträng)
+.RS 4
+Ange en AD\-sajt som klienten skall försöka ansluta till\&. Om detta alternativ inte anges kommer AD\-sajten att automatupptäckas\&.
+.sp
+Standard: inte satt
+.RE
+.PP
+ad_enable_gc (boolean)
+.RS 4
+Som standard ansluter SSSD till den globala katalogen först för att hämta användare från betrodda domäner och använder LDAP\-porten för att hämta gruppmedlemskap som en reserv\&. Att avaktivera detta alternativ gör att SSSD endast ansluter till lDAP\-porten på den aktuella AD\-servern\&.
+.sp
+Observera att att avaktivera stöd för den globala katalogen inte avaktiverar att hämta användare från betrodda domäner\&. SSSD skulle ansluta till LDAP\-porten på den betrodda domänen istället\&. Dock måste den globala katalogen användas för att slå upp gruppmedlemskap över domäner\&.
+.sp
+Standard: true
+.RE
+.PP
+ad_gpo_access_control (sträng)
+.RS 4
+Detta alternativ anger arbetsläget för GPO\-baserad åtkomstkontrollsfunktionalitet: huruvida det arbetar i avaktiverat läge, tvingande läge eller tillåtande läge\&. Observera att alternativet
+\(lqaccess_provider\(rq
+måste vara uttryckligen satt till
+\(lqad\(rq
+för att detta alternativ skall ha någon effekt\&.
+.sp
+GPO\-based access control functionality uses GPO policy settings to determine whether or not a particular user is allowed to logon to the host\&. For more information on the supported policy settings please refer to the
+\(lqad_gpo_map\(rq
+options\&.
+.sp
+Please note that current version of SSSD does not support Active Directory\*(Aqs built\-in groups\&. Built\-in groups (such as Administrators with SID S\-1\-5\-32\-544) in GPO access control rules will be ignored by SSSD\&. See upstream issue tracker https://pagure\&.io/SSSD/sssd/issue/4099 \&.
+.sp
+Before performing access control SSSD applies group policy security filtering on the GPOs\&. For every single user login, the applicability of the GPOs that are linked to the host is checked\&. In order for a GPO to apply to a user, the user or at least one of the groups to which it belongs must have following permissions on the GPO:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Read: The user or one of its groups must have read access to the properties of the GPO (RIGHT_DS_READ_PROPERTY)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Apply Group Policy: The user or at least one of its groups must be allowed to apply the GPO (RIGHT_DS_CONTROL_ACCESS)\&.
+.RE
+.sp
+By default, the Authenticated Users group is present on a GPO and this group has both Read and Apply Group Policy access rights\&. Since authentication of a user must have been completed successfully before GPO security filtering and access control are started, the Authenticated Users group permissions on the GPO always apply also to the user\&.
+.sp
+OBS: Den nuvarande versionen av SSSD stödjer inte värd\- (dator\-)poster i GPO:s \(rqsäkerhetsfilter\(rq\-lista\&. Endast användar\- och gruppposter stödjs\&. Värdposter i listan har ingen effekt\&.
+.sp
+NOTE: If the operation mode is set to enforcing, it is possible that users that were previously allowed logon access will now be denied logon access (as dictated by the GPO policy settings)\&. In order to facilitate a smooth transition for administrators, a permissive mode is available that will not enforce the access control rules, but will evaluate them and will output a syslog message if access would have been denied\&. By examining the logs, administrators can then make the necessary changes before setting the mode to enforcing\&. For logging GPO\-based access control debug level \*(Aqtrace functions\*(Aq is required (see
+\fBsssctl\fR(8)
+manual page)\&.
+.sp
+Det finns tre stödda värden för detta alternativ:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+disabled: GPO\-baserade åtkomstkontrollsregler varken evalueras eller påtvingas\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+enforcing: GPO\-baserade åtkomstkontrollregler evalueras och påtvingas\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+permissive: GPO\-baserade åtkomstkontrollregler evalueras men påtvingas inte\&. Istället skickas ett syslog\-meddelande ut om indikerar att användaren skulle ha nekats åtkomst om detta alternativs värde vore satt till enforcing\&.
+.RE
+.sp
+Standard: enforcing
+.RE
+.PP
+ad_gpo_implicit_deny (boolean)
+.RS 4
+Normalt när inga tillämpliga GPO:er finns tillåts användarna åtkomst\&. När detta alternativ är satt till True kommer användare att tillåtas åtkomst endast när det uttryckligen tillåts av en GPO\-regel\&. Annars kommer användare nekas åtkomst\&. Detta kan användas för att stärka säkerheten men var försiktig när detta alternativ används för det kan neka åtkomst även till användare i den inbyggda administratörsgruppen om inga GPO\-regler är tillämpliga på dem\&.
+.sp
+Default: False
+.RE
+.PP
+ad_gpo_ignore_unreadable (boolean)
+.RS 4
+Normalt när några gruppolicybehållare (AD\-objekt) av några tillämpliga gruppolicyobjekt inte är läsbara av SSSD så nekas användare åtkomst\&. Detta alternativ tillåter att man ignorerar gruppolicybehållare och med dem tillhörande policyer om deras attribut i gruppolicybehållare inte är läsbara för SSSD\&.
+.sp
+Default: False
+.RE
+.PP
+ad_gpo_cache_timeout (heltal)
+.RS 4
+Tiden mellan uppslagningar av GPO\-policyfiler AD\-servern\&. Detta kommer reducera tidsfördröjningen och lasten på AD\-servern om det görs många begäranden om åtkomstkontroll under en kort tid\&.
+.sp
+Standard: 5 (sekunder)
+.RE
+.PP
+ad_gpo_map_interactive (sträng)
+.RS 4
+A comma\-separated list of PAM service names for which GPO\-based access control is evaluated based on the InteractiveLogonRight and DenyInteractiveLogonRight policy settings\&. Only those GPOs are evaluated for which the user has Read and Apply Group Policy permission (see option
+\(lqad_gpo_access_control\(rq)\&. If an evaluated GPO contains the deny interactive logon setting for the user or one of its groups, the user is denied local access\&. If none of the evaluated GPOs has an interactive logon right defined, the user is granted local access\&. If at least one evaluated GPO contains interactive logon right settings, the user is granted local access only, if it or at least one of its groups is part of the policy settings\&.
+.sp
+Obs: när man använder gruppolicyhanteringsredigeraren kallas detta värde \(rqTillåt inloggning lokalt\(rq och \(rqNeka inloggning lokalt\(rq\&.
+.sp
+Det är möjligt att lägga till ett annat PAM\-tjänstnamn till standarduppsättninge genom att använda
+\(lq+tjänstenamn\(rq
+eller att uttryckligen ta bort ett PAM\-tjänstenamn från standarduppsättningen genom att använda
+\(lq\-tjänstenamn\(rq\&. Till exempel, för att byta ut ett standard\-PAM\-tjänstenamn för denna inloggningsrätt (t\&.ex\&.
+\(lqlogin\(rq) mot ett anpassat PAM\-tjänstenamn (t\&.ex\&.
+\(lqmin_pam\-tjänst\(rq) skulle man använda följande konfiguration:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_interactive = +min_pam_tjänst, \-login
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Standard: standarduppsättningen av PAM\-tjänstenamn innefattar:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+login
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+su
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+su\-l
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+gdm\-fingerprint
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+gdm\-password
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+gdm\-smartcard
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+kdm
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+lightdm
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+lxdm
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sddm
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+unity
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+xdm
+.RE
+.sp
+.RE
+.PP
+ad_gpo_map_remote_interactive (sträng)
+.RS 4
+A comma\-separated list of PAM service names for which GPO\-based access control is evaluated based on the RemoteInteractiveLogonRight and DenyRemoteInteractiveLogonRight policy settings\&. Only those GPOs are evaluated for which the user has Read and Apply Group Policy permission (see option
+\(lqad_gpo_access_control\(rq)\&. If an evaluated GPO contains the deny remote logon setting for the user or one of its groups, the user is denied remote interactive access\&. If none of the evaluated GPOs has a remote interactive logon right defined, the user is granted remote access\&. If at least one evaluated GPO contains remote interactive logon right settings, the user is granted remote access only, if it or at least one of its groups is part of the policy settings\&.
+.sp
+Obs: när man använder gruppolicyhanteringsredigeraren kallas detta värde \(rqTillåt inloggning via fjärrskrivbordstjänster\(rq och \(rqNeka inloggning via fjärrinloggningstjänter\(rq\&.
+.sp
+Det är möjligt att lägga till ett annat PAM\-tjänstnamn till standarduppsättninge genom att använda
+\(lq+tjänstenamn\(rq
+eller att uttryckligen ta bort ett PAM\-tjänstenamn från standarduppsättningen genom att använda
+\(lq\-tjänstenamn\(rq\&. Till exempel, för att byta ut ett standard\-PAM\-tjänstenamn för denna inloggningsrätt (t\&.ex\&.
+\(lqsshd\(rq) mot ett anpassat PAM\-tjänstenamn (t\&.ex\&.
+\(lqmin_pam\-tjänst\(rq) skulle man använda följande konfiguration:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_remote_interactive = +min_pam_tjänst, \-sshd
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Standard: standarduppsättningen av PAM\-tjänstenamn innefattar:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sshd
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+cockpit
+.RE
+.sp
+.RE
+.PP
+ad_gpo_map_network (sträng)
+.RS 4
+A comma\-separated list of PAM service names for which GPO\-based access control is evaluated based on the NetworkLogonRight and DenyNetworkLogonRight policy settings\&. Only those GPOs are evaluated for which the user has Read and Apply Group Policy permission (see option
+\(lqad_gpo_access_control\(rq)\&. If an evaluated GPO contains the deny network logon setting for the user or one of its groups, the user is denied network logon access\&. If none of the evaluated GPOs has a network logon right defined, the user is granted logon access\&. If at least one evaluated GPO contains network logon right settings, the user is granted logon access only, if it or at least one of its groups is part of the policy settings\&.
+.sp
+Obs: när man använder gruppolicyhanteringsredigeraren kallas detta värde \(rqKom åt denna dator från nätverket\(rq och \(rqNeka åtkomst till denna dator från nätverket\(rq\&.
+.sp
+Det är möjligt att lägga till ett annat PAM\-tjänstnamn till standarduppsättninge genom att använda
+\(lq+tjänstenamn\(rq
+eller att uttryckligen ta bort ett PAM\-tjänstenamn från standarduppsättningen genom att använda
+\(lq\-tjänstenamn\(rq\&. Till exempel, för att byta ut ett standard\-PAM\-tjänstenamn för denna inloggningsrätt (t\&.ex\&.
+\(lqftp\(rq) mot ett anpassat PAM\-tjänstenamn (t\&.ex\&.
+\(lqmin_pam\-tjänst\(rq) skulle man använda följande konfiguration:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_network = +min_pam_tjänst, \-ftp
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Standard: standarduppsättningen av PAM\-tjänstenamn innefattar:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ftp
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+samba
+.RE
+.sp
+.RE
+.PP
+ad_gpo_map_batch (sträng)
+.RS 4
+A comma\-separated list of PAM service names for which GPO\-based access control is evaluated based on the BatchLogonRight and DenyBatchLogonRight policy settings\&. Only those GPOs are evaluated for which the user has Read and Apply Group Policy permission (see option
+\(lqad_gpo_access_control\(rq)\&. If an evaluated GPO contains the deny batch logon setting for the user or one of its groups, the user is denied batch logon access\&. If none of the evaluated GPOs has a batch logon right defined, the user is granted logon access\&. If at least one evaluated GPO contains batch logon right settings, the user is granted logon access only, if it or at least one of its groups is part of the policy settings\&.
+.sp
+Obs: när man använder gruppolicyhanteringsredigeraren kallas detta värde \(rqTillåt inloggning som ett batch\-jobb\(rq och \(rqNeka inloggning som ett batch\-jobb\(rq\&.
+.sp
+Det är möjligt att lägga till ett annat PAM\-tjänstnamn till standarduppsättninge genom att använda
+\(lq+tjänstenamn\(rq
+eller att uttryckligen ta bort ett PAM\-tjänstenamn från standarduppsättningen genom att använda
+\(lq\-tjänstenamn\(rq\&. Till exempel, för att byta ut ett standard\-PAM\-tjänstenamn för denna inloggningsrätt (t\&.ex\&.
+\(lqcrond\(rq) mot ett anpassat PAM\-tjänstenamn (t\&.ex\&.
+\(lqmin_pam\-tjänst\(rq) skulle man använda följande konfiguration:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_batch = +min_pam_tjänst, \-crond
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Obs: cron\-tjänstenamn kan skilja beroende på vilken Linuxdistribution som används\&.
+.sp
+Standard: standarduppsättningen av PAM\-tjänstenamn innefattar:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+crond
+.RE
+.sp
+.RE
+.PP
+ad_gpo_map_service (sträng)
+.RS 4
+A comma\-separated list of PAM service names for which GPO\-based access control is evaluated based on the ServiceLogonRight and DenyServiceLogonRight policy settings\&. Only those GPOs are evaluated for which the user has Read and Apply Group Policy permission (see option
+\(lqad_gpo_access_control\(rq)\&. If an evaluated GPO contains the deny service logon setting for the user or one of its groups, the user is denied service logon access\&. If none of the evaluated GPOs has a service logon right defined, the user is granted logon access\&. If at least one evaluated GPO contains service logon right settings, the user is granted logon access only, if it or at least one of its groups is part of the policy settings\&.
+.sp
+Obs: när man använder gruppolicyhanteringsredigeraren kallas detta värde \(rqTillåt inloggning som en tjänst\(rq och \(rqNeka inloggning som en tjänst\(rq\&.
+.sp
+Det är möjligt att lägga till ett PAM\-tjänstnamn till standarduppsättningen genom att använda
+\(lq+tjänstenamn\(rq\&. Eftersom standarduppsättningen är tom är det inte möjligt att ta bort ett PAM\-tjänstenamn från standarduppsättningen\&. Till exempel, för att lägga till ett anpassat PAM\-tjänstenamn (t\&.ex\&.
+\(lqmin_pam\-tjänst\(rq) skulle man använda följande konfiguration:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_service = +min_pam_tjänst
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Standard: inte satt
+.RE
+.PP
+ad_gpo_map_permit (sträng)
+.RS 4
+En kommaseparerad lista av PAM\-tjänstenamn för vilka GPO\-baserad åtkomst alltid tillåts, oavsett några andra GPO\-inloggningsrättigheter\&.
+.sp
+Det är möjligt att lägga till ett annat PAM\-tjänstnamn till standarduppsättninge genom att använda
+\(lq+tjänstenamn\(rq
+eller att uttryckligen ta bort ett PAM\-tjänstenamn från standarduppsättningen genom att använda
+\(lq\-tjänstenamn\(rq\&. Till exempel, för att byta ut ett standard\-PAM\-tjänstenamn för ovillkorligt tillåten åtkomst (t\&.ex\&.
+\(lqsudo\(rq) mot ett anpassat PAM\-tjänstenamn (t\&.ex\&.
+\(lqmin_pam\-tjänst\(rq) skulle man använda följande konfiguration:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_permit = +min_pam_tjänst, \-sudo
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Standard: standarduppsättningen av PAM\-tjänstenamn innefattar:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+polkit\-1
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sudo
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sudo\-i
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+systemd\-user
+.RE
+.sp
+.RE
+.PP
+ad_gpo_map_deny (sträng)
+.RS 4
+En kommaseparerad lista av PAM\-tjänstenamn för vilka GPO\-baserad åtkomst alltid nekas, oavsett några andra GPO\-inloggningsrättigheter\&.
+.sp
+Det är möjligt att lägga till ett PAM\-tjänstnamn till standarduppsättningen genom att använda
+\(lq+tjänstenamn\(rq\&. Eftersom standarduppsättningen är tom är det inte möjligt att ta bort ett PAM\-tjänstenamn från standarduppsättningen\&. Till exempel, för att lägga till ett anpassat PAM\-tjänstenamn (t\&.ex\&.
+\(lqmin_pam\-tjänst\(rq) skulle man använda följande konfiguration:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ad_gpo_map_deny = +min_pam_tjänst
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Standard: inte satt
+.RE
+.PP
+ad_gpo_default_right (sträng)
+.RS 4
+Detta alternativ definierar hur åtkomstkontroll beräknas för PAM\-tjänstenamn som inte är uttryckligen listade i en av alternativen ad_gpo_map_*\&. Detta alternativ kan anges på två olika sätt\&. Antingen kan detta alternativ sättas till att ange standardinloggningsrättigheter\&. Till exempel, om detta alternativ är satt till \(rqinteractive\(rq betyder det att att omappade PAM\-tjänstenamn kommer bearbetas baserat på policyinställningarna InteractiveLogonRight och DenyInteractiveLogonRight\&. Alternativt kan detta alternativ sättas till att antingen alltid tillåta eller lltid neka åtkomst för omappade PAM\-tjänstenamn\&.
+.sp
+Värden som stödjs för detta alternativ inkluderar:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+interactive
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+remote_interactive
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+network
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+batch
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+service
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+permit
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+deny
+.RE
+.sp
+Standard: deny
+.RE
+.PP
+ad_maximum_machine_account_password_age (heltal)
+.RS 4
+SSSD kommer en gång om dagen kontrollera om maskinkontolösenordet är äldre än den givna ålder i dagar och försöka förnya det\&. Ett värde på 0 kommer förhindra förnyelseförsöket\&.
+.sp
+Standard: 30 dagar
+.RE
+.PP
+ad_machine_account_password_renewal_opts (sträng)
+.RS 4
+Detta alternativ skall endast användas för att testa maskinkontoförnyelsefunktionen\&. Alternativet förväntar sig 2 heltal separerade av ett kolon (\(rq:\(rq)\&. Det första heltalet anger intervallet i sekunder hur ofta funktionen körs\&. Det andra anger den initiala tidsgränsen i sekunder före funktionen körs för första gången efter uppstart\&.
+.sp
+Standard: 86400:750 (24h och 15m)
+.RE
+.PP
+dyndns_update (boolean)
+.RS 4
+Valfritt\&. Detta alternativ säger till SSSD att automatiskt uppdatera DNS\-servern i Active Directory med IP\-adressen för denna klient\&. Uppdateringen säkras med GSS\-TSIG\&. Som en konsekvens av det behöver Active Directory\-administratören bara tillåta säkra uppdateringar för DNS\-zonen\&. IP\-adressen för AD\-LDAP\-förbindelsen används för uppdateringar, om det inte specificeras på annat sätt med alternativet
+\(lqdyndns_iface\(rq\&.
+.sp
+OBS: på äldre system (såsom RHEL 5) måste standardriket för Kerberos sättas i /etc/krb5\&.conf för att detta beteende skall fungera pålitligt\&.
+.sp
+Standard: true
+.RE
+.PP
+dyndns_ttl (heltal)
+.RS 4
+TTL:en att använda för klientens DNS\-post vid uppdatering\&. Om dyndns_update är falsk har detta ingen effekt\&. Detta kommer åsidosätta TTL på serversidan om det är satt av en administratör\&.
+.sp
+Standard: 3600 (sekunder)
+.RE
+.PP
+dyndns_iface (sträng)
+.RS 4
+Valfri\&. Endast tillämpligt när dyndns_update är sann\&. Väl gränssnittet eller en lista av gränssnitt vars IP\-adresser skall användas för dynamiska DNS\-uppdateringar\&. Specialvärdet
+\(lq*\(rq
+betyder att IP:n från alla gränssnitt skall användas\&.
+.sp
+Standard: använd IP\-adresser för gränssnittet som används för AD LDAP\-förbindelsen
+.sp
+Exempel: dyndns_iface = em1, vnet1, vnet2
+.RE
+.PP
+dyndns_refresh_interval (heltal)
+.RS 4
+Hur ofta bakänden skall utföra periodiska DNS\-uppdateringar utöver den automatiska uppdateringen som utförs när bakänden kopplar upp\&. Detta alternativ är valfritt och tillämpligt endast när dyndns_update är sann\&. Observera att det lägsta möjliga värdet är 60 sekunder, ifall ett värde mindre än 60 ges kommer parametern endast anta det lägsta värdet\&.
+.sp
+Standard: 86400 (24 timmar)
+.RE
+.PP
+dyndns_update_ptr (bool)
+.RS 4
+Huruvida PTR\-posten också skall uppdateras explicit när klientens DNS\-post uppdateras\&. Tillämpligt endast när dyndsn_update är sann\&.
+.sp
+Standard: True
+.RE
+.PP
+dyndns_force_tcp (bool)
+.RS 4
+Huruvida nsupdate\-verktyget som standard skall använda TCP för kommunikation med DNS\-servern\&.
+.sp
+Standard: False (låt nsupdate välja protokollet)
+.RE
+.PP
+dyndns_auth (sträng)
+.RS 4
+Huruvida verktyget nsupdate skall använda GSS\-TSIG\-autentisering för säkra uppdateringar av DNS\-servern, osäkra uppdateringar kan skickas genom att sätta detta alternativ till \(rqnone\(rq\&.
+.sp
+Standard: GSS\-TSIG
+.RE
+.PP
+dyndns_server (sträng)
+.RS 4
+DNS\-servern som skall användas när en uppdatering av DNS utförs\&. I de flesta uppsättningar rekommenderas det att låta detta alternativ vara osatt\&.
+.sp
+Att sätta detta alternativ är meningsfullt i miljöer där DNS\-servern är skild från identitetsservern\&.
+.sp
+Observera att detta alternativ bara kommer användas i försök att falla tillbaka på när tidigare försök som använder automatiskt upptäckta inställningar misslyckas\&.
+.sp
+Standard: Ingen (låt nsupdate välja servern)
+.RE
+.PP
+dyndns_update_per_family (boolean)
+.RS 4
+DNS\-uppdateringar utförs som standard i två steg \(en IPv4\-uppdatering och sedan IPv6\-uppdatering\&. I några fall kan det vara önskvärt att utföra IPv4\- och IPv6\-uppdateringar i ett enda steg\&.
+.sp
+Standard: true
+.RE
+.PP
+override_homedir (sträng)
+.RS 4
+Åsidosätt användarens hemkatalog\&. Du kan antingen ge ett absolut värde eller en mall\&. I mallen ersätts följande sekvenser:
+.PP
+%u
+.RS 4
+inloggningsnamn
+.RE
+.PP
+%U
+.RS 4
+UID\-nummer
+.RE
+.PP
+%d
+.RS 4
+domännamn
+.RE
+.PP
+%f
+.RS 4
+fullständigt kvalificerat användarnamn (användare@domän)
+.RE
+.PP
+%l
+.RS 4
+Första bokstaven i inloggningsnamnet\&.
+.RE
+.PP
+%P
+.RS 4
+UPN \(en Användarens Huvudnamn (namn@RIKE)
+.RE
+.PP
+%o
+.RS 4
+Den ursprungliga hemkatalogen som hämtades från identitetsleverantören\&.
+.RE
+.PP
+%H
+.RS 4
+Värdet på konfigurationsalternativet
+\fIhomedir_substring\fR\&.
+.RE
+.PP
+%%
+.RS 4
+ett bokstavligt \(rq%\(rq
+.RE
+.sp
+Detta alternativ kan även sättas per domän\&.
+.sp
+exempel:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+override_homedir = /home/%u
+        
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Standard: Inte satt (SSSD kommer använda värdet som hämtas från LDAP)
+.RE
+.PP
+homedir_substring (sträng)
+.RS 4
+Värdet på detta alternativ kommer användas i expansionen av alternativet
+\fIoverride_homedir\fR
+om mallen innehåller formatsträngen
+\fI%H\fR\&. En LDAP\-katalogpost kan innehålla denna mall direkt så att detta alternativ kan användas för att expandera sökvägen till hemkatalogen för varje klientmaskin (eller operativsystem)\&. Den kan sättar per domän eller globalt i avsnittet [nss]\&. Ett värde som anges i ett domänavsnitt kommer åsidosätta ett som är satt i avsnittet [nss]\&.
+.sp
+Standard: /home
+.RE
+.PP
+krb5_confd_path (sträng)
+.RS 4
+Absolut sökväg till en katalog där SSSD skall placera konfigurtionsstycken för Kerberos\&.
+.sp
+För att förhindra att konfigurationsstycken skapas, sätt parametern till \(rqnone\(rq\&.
+.sp
+Standard: inte satt (underkatalogen krb5\&.include\&.d till SSSD:s pubconf\-katalog)
+.RE
+.SH "ÄNDRADE STANDARDALTERNATIV"
+.PP
+Vissa alternativs standardvärde stämmer inte med deras respektive bakänders standardvärden, dessa alternativnamn och AD\-leverantörspecifika standardvärden är uppräknade nedan:
+.SS "KRB5\-leverantör"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+krb5_validate = true
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+krb5_use_enterprise_principal = true
+.RE
+.SS "LDAP\-leverantör"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_schema = ad
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_force_upper_case_realm = true
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_id_mapping = true
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_sasl_mech = gssapi
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_referrals = false
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_account_expire_policy = ad
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_use_tokengroups = true
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_sasl_authid = sAMAccountName@RIKE (typiskt KORTNAMN$@RIKE)
+.sp
+AD\-leverantören letar efter en annan huvudman än LDAP\-leverantören som standard, eftersom huvudmännen i en Active Directory\-miljö är uppdelade i två grupper \(en användarhuvudmän och tjänstehuvudmän\&. Endast användarhuvudmannen kan användas för att hämta en TGT och som standard är datorobjekts huvudman konstruerade från dess sAMAccountName och AD\-riket\&. Den välkända huvudmannen för värd/värdnamn@RIKE är en tjänstehuvudman och kan därmed inte användas för att hämta en TGT\&.
+.RE
+.SS "NSS\-konfiguration"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+fallback_homedir = /home/%d/%u
+.sp
+AD\-leverantören sätter automatiskt \(rqfallback_homedir = /home/%d/%u\(rq för att tillhandahålla personliga hemkataloger för användare utan attributet homeDirectory\&. Om ens AD\-domän är vederbörligen populerad med Posix\-attribut, och man vill undvika att falla tillbaka på detta beteende, kan man uttryckligen sätta \(rqfallback_homedir = %o\(rq\&.
+.RE
+.SH "RESERVER"
+.PP
+Reservfunktionen gör att bakändar automatiskt kan byta till en annan server om den nuvarande servern slutar fungera\&.
+.SS "Reservsyntax"
+.PP
+Listand av servrar ges som en kommaseparerad lista; godtyckligt antal mellanslag tillåts runt kommatecknet\&. Servrarna listas i preferensordning\&. Listan kan innhålla obegränsat antal servrar\&.
+.PP
+För varje reservaktiverad konfigurationsalternativ finns det två varianter:
+\fIprimary\fR
+och
+\fIbackup\fR\&. Tanken är att servrar i den primära listan föredras och backup\-servrar bara provas om inga primära servrar kan nås\&. Om en backup\-server väljs sätts en tidsgräns på 31 sekunder\&. Efter demma todsgräns kommer SSSD periodiskt att försöka återansluta till en av de primära servrarna\&. Om det lyckas kommer den ersätta den nu aktiva (backup\-)servern\&.
+.SS "Reservmekanismen"
+.PP
+Reservmekanismen gör skillnad mellan en maskin och en tjänst\&. Bakänden försöker först att slå upp värdnamnet för en given maskin; om denna uppslagning misslyckas antas maskinen vara bortkopplad\&. Inga ytterligare försök görs att ansluta till denna maskin för någon annan tjänst\&. Om uppslagningsförsöket lyckas försöker bakänden ansluta till en tjänst på denna maskin\&. OM tjänsteanslutningen misslyckas anses bara just denna tjänst frånkopplad och bakänden byter automatiskt till nästa tjänst\&. Maskinen betraktas fortfarande som uppkopplad och kan användas vid försök att nå en annan tjänst\&.
+.PP
+Ytterligare försök att ansluta görs till maskiner eller tjänster som markerats som frånkopplade efter en viss tidsperiod, detta är för närvarande hårdkodat till 30 sekunder\&.
+.PP
+Om det inte finns några fler maskiner att prova byter bakänden i sin helhet till frånkopplat läge, och försöker sedan återansluta var 30:e sekund\&.
+.SS "Tidsgränser och trimning av reservfunktioner"
+.PP
+Att slå upp en server att ansluta till kan vara så enkelt som att göra en enstaka DNS\-fråga eller kan innebära flera steg, såsom att hitta den rätta sajten eller försöka med flera värdnamn ifall några av de konfigurerade servrarna inte kan nås\&. De mer komplexa scenariona kan ta en stund och SSSD behöver balansera mellan att tillhandahålla tillräckligt med tid för att färdigställa upplösningprocessen men å andra sidan inte försöka för länge före den faller tillbaka på frånkopplat läge\&. Om SSSD:s felsökningloggar visar att serverns upplösning överskrider tidsgränsen före en aktiv server nås kan du överväga att ändra tidsgränserna\&.
+.PP
+Detta avsnitt listar tillgängliga trimningsvariabler\&. Se deras beskrivning i manualsidan
+\fBsssd.conf\fR(5)\&.
+.PP
+dns_resolver_server_timeout
+.RS 4
+Time in milliseconds that sets how long would SSSD talk to a single DNS server before trying next one\&.
+.sp
+Standard: 1000
+.RE
+.PP
+dns_resolver_op_timeout
+.RS 4
+Time in seconds to tell how long would SSSD try to resolve single DNS query (e\&.g\&. resolution of a hostname or an SRV record) before trying the next hostname or discovery domain\&.
+.sp
+Standard: 2
+.RE
+.PP
+dns_resolver_timeout
+.RS 4
+Hur länge skall SSSD försöka slå upp en reservtjänst\&. Denna tjänsteuppslagning kan internt bestå av flera steg, såsom att slå upp DNS SRV\-frågor och lokalisera sajten\&.
+.sp
+Standard: 4
+.RE
+.PP
+For LDAP\-based providers, the resolve operation is performed as part of an LDAP connection operation\&. Therefore, also the
+\(lqldap_opt_timeout>\(rq
+timeout should be set to a larger value than
+\(lqdns_resolver_timeout\(rq
+which in turn should be set to a larger value than
+\(lqdns_resolver_op_timeout\(rq
+which should be larger than
+\(lqdns_resolver_server_timeout\(rq\&.
+.SH "TJÄNSTEUPPTÄCKT"
+.PP
+Tjänsteupptäcktsfunktionen gör att bakändar automatiskt kan hitta en lämplig server att ansluta till med en speciell DNS\-fråga\&. Denna funktion stödjs inte för backup\-servrar\&.
+.SS "Konfiguration"
+.PP
+Om inga servrar anges använder bakänden automatiskt tjänsteupptäckt för att försöka hitta en server\&. Användaren kan om så önskas välja att använda både en bestämd serveradress och tjänsteupptäckt genom att infoga ett speciellt nyckelord,
+\(lq_srv_\(rq, i listan av servrar\&. Prefernsordningen bibehålls\&. Denna funktion är användbar om, till exempel, användaren föredrar att använda tjänsteupptäckt närhelst det är möjligt, och falla tillbaka på en specifik server när inga servrar kan upptäckas med DNS\&.
+.SS "Domännamnet"
+.PP
+Se parametern
+\(lqdns_discovery_domain\(rq
+i manualsidan
+\fBsssd.conf\fR(5)
+för fler detaljer\&.
+.SS "Protokollet"
+.PP
+Frågorna anger vanligen _tcp som protokoll\&. Undantag är dokumenterade i respektive alternativs beskrivning\&.
+.SS "Se även"
+.PP
+För mer information om tjänsteupptäcktsmekanismen, se RFC 2782\&.
+.SH "ID\-MAPPNING"
+.PP
+ID\-mappningsfunktionen låter SSD fungera som en klient till Active Directory utan att kräva att administratörer utökar användarattribut till att stödja POSIX\-attribut för användar\- och gruppidentifierare\&.
+.PP
+OBSERVERA: När ID\-mappning aktiveras ignoreras attributen uidNumber och gidNumber\&. Detta är för att undvika möjligheten av konflikt mellan automatiskt tilldelade och manuellt tilldelade värden\&. Om du behöver använda manuellt tilldelade värden måste ALLA värden tilldelas manuellt\&.
+.PP
+Observera att byte av ID\-mappnings relaterade konfigurationsalternativ kommer få användar\- och grupp\-ID:n att ändras\&. För närvarande stödjer inte SSSD byte av ID:n, så SSSD\-databasen moste tas bort\&. Eftersom cachade lösenord också lagras i databasen skall databasen bara tas bort när autentiseringsservrarna kan nås, annars kan användare låsas ute\&. För att cacha lösenordet måste en autentisering göras\&. Det är inte tillräckligt att använda
+\fBsss_cache\fR(8)
+för att ta bort databasen, istället består processen av:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Se till att fjärservrarna är nåbara
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Stoppar tjänsten SSSD
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Tar bort databasen
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Startar tjänsten SSSD
+.RE
+.sp
+Dessutom, eftersom ändringen av ID:n kan göra det nödvändigt att justera andra systemegenskaper såsom ägare av filer och kataloger, är det lämpligt att planera i förväg och testa konfigurationen av ID\-översättningar noggrant\&.
+.SS "Översättningsalgoritm"
+.PP
+Aktive Directory tillandahåller ett objectSID för varje användar\- och gruppobjekt i katalogen\&. Detta objectSID kan delas upp i komponenter som representerar Active Directorys domänidentitet och den relativa identifieraren (RID) till användar\- eller gruppobjektet\&.
+.PP
+SSSD ID\-översättningsalgoritmen tar ett intervall av tillgängliga AID:er och delar upp det i lika stora komponentavsnitt \(en kallade \(lqskivor\(rq (\(rqslices\(rq) \(en\&. Varje skiva representerar utrymmet som är tillgängligt för en Active Directory\-domän\&.
+.PP
+När en användar\- eller gruppost för en viss domän påträffas för första gången allokerar SSSD en av tillgängliga skivorna för den domänen\&. För att göra denna skivtilldelning upprepbar på olika klientmaskiner väljer vi skivan baserat på följande algoritm:
+.PP
+SID\-strängen skickas genom algoritmen murmurhash3 för att konvertera den till ett 32\-bitars hash\-värde\&. Vi tar sedan modulo på detta värde med det totala antalet tillgängliga skivor och väljer den skivan\&.
+.PP
+OBSERVERA: Det är möjligt att träffa på kollisioner i hash:en och den påföljande moduloberäkningen\&. I dessa situationer kommer vi välja nästa tillgängliga skiva, men det är kanske inte möjligt att reproducera exakt samma uppsättning av skivor på andra maskiner (eftersom ordningen som de påträffas kommer avgöra deras skiva)\&. I den här situationen rekommenderas det att antingen byta till att använda explicita POSIX\-attribut i Active Directory (avaktivera ID\-mappningen) eller konfigurera en standarddomän för att garantera att åtminstone en alltid är konsistent\&. Se
+\(lqKonfiguration\(rq
+för detaljer\&.
+.SS "Konfiguration"
+.PP
+Minimikonfiguration (i avsnittet
+\(lq[domain/DOMÄNNAMN]\(rq):
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+ldap_id_mapping = True
+ldap_schema = ad
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Standardkonfigurationen resulterar i konfiguration av 10\ \&000 skivor, som var och en kan innehålla upp till 200\ \&000 ID:n, med början på 200\ \&000 och upp till 2\ \&000\ \&200\ \&000\&. Detta bör vara tillräckligt för de flesta installationer\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBAvancerad konfiguration\fR
+.RS 4
+.PP
+ldap_idmap_range_min (heltal)
+.RS 4
+Anger den lägre gränsen för intervallet av POSIX ID:n att använda för översättning av användar\- och grupp\-SID:n från Active Directory\&.
+.sp
+OBSERVERA: Detta alternativ är inte detsamma som
+\(lqmin_id\(rq
+eftersom
+\(lqmin_id\(rq
+fungerar som ett filter av utmatade begäranden till denna domän, medan detta alternativ styr intervallet av ID\-tilldelningen\&. Detta är en subtil distinktion, men det allmänna goda rådet skulle vara att ha
+\(lqmin_id\(rq
+mindre än eller lika med
+\(lqldap_idmap_range_min\(rq
+.sp
+Standard: 200000
+.RE
+.PP
+ldap_idmap_range_max (heltal)
+.RS 4
+Anger den övre gränsen för intervallet av POSIX ID:n att använda för översättning av användar\- och grupp\-SID:n från Active Directory\&.
+.sp
+OBSERVERA: Detta alternativ är inte detsamma som
+\(lqmax_id\(rq
+eftersom
+\(lqmax_id\(rq
+fungerar som ett filter av utmatade begäranden till denna domän, medan detta alternativ styr intervallet av ID\-tilldelningen\&. Detta är en subtil distinktion, men det allmänna goda rådet skulle vara att ha
+\(lqmax_id\(rq
+större än eller lika med
+\(lqldap_idmap_range_max\(rq
+.sp
+Standard: 2000200000
+.RE
+.PP
+ldap_idmap_range_size (heltal)
+.RS 4
+Anger antalet ID:n som är tillgängliga för varje skiva\&. Om storleken på intervallet inte delas jämnt mellan min\- och maxvärdena kommer den skapa så många fullständiga skivor den kan\&.
+.sp
+OBSERVERA: Värdet på detta alternativ måste vara åtminstone så stort som den högsta RID som planeras användas i Active Directory\-servern\&. Användaruppslagningar och inloggningar kommer misslyckas för eventuella användare vars RID är större än detta värde\&.
+.sp
+Till exempel, om den senaste tillagda Active Directory\-användaren har objectSid=S\-1\-5\-21\-2153326666\-2176343378\-3404031434\-1107,
+\(lqldap_idmap_range_size\(rq
+måste vara åtminstone 1108 eftersom intervallstorleken är lika med maximal SID minus minimal SID plus ett (t\&.ex\&. 1108 = 1107 \- 0 + 1)\&.
+.sp
+Det är viktigt att planera i förväg för framtida expansioner, eftersom ändring av detta värde skulle resultera i att ändra alla ID\-översättningar på systemet, vilket skulle leda till användare med andra lokala ID:n än de tidigare hade\&.
+.sp
+Standard: 200000
+.RE
+.PP
+ldap_idmap_default_domain_sid (sträng)
+.RS 4
+Ange domän\-SID:n för standarddomänen\&. Detta kommer garantera att denna domän alltid kommer tilldelas till skiva noll i ID\-översättningen, och undviker murmurhash\-algoritmen som beskrivs ovan\&.
+.sp
+Standard: inte satt
+.RE
+.PP
+ldap_idmap_default_domain (sträng)
+.RS 4
+Ange namnet på standarddomänen\&.
+.sp
+Standard: inte satt
+.RE
+.PP
+ldap_idmap_autorid_compat (boolean)
+.RS 4
+Ändrar beteendet på ID\-översättningsalgoritmen till att bete sig mer likt winbind:s
+\(lqidmap_autorid\(rq\-algoritm\&.
+.sp
+När detta alternativ konfigureras kommer domäner allokeras med början med skiva noll och ökar monotont med varje ytterligare domän\&.
+.sp
+OBSERVERA: Denna algoritm är inte deterministisk (den beror på ordningen som användare och grupper efterfrågas)\&. Om detta läge krävs för kompatibilitet med maskiner som kör winbind rekommenderas det att även använda alternativet
+\(lqldap_idmap_default_domain_sid\(rq
+för att garantera att åtminstone en domän är konsekvent allokerat till skiva noll\&.
+.sp
+Default: False
+.RE
+.PP
+ldap_idmap_helper_table_size (heltal)
+.RS 4
+Maximalt antal sekundära skivor som provas när mappningen från UNIX id till SID utförs\&.
+.sp
+Observera: ytterliga sekundära skivor kan genereras när en SID översätts till UNIX\-id och RID\-delen av SID:n är utanför intervallet för sekundära skivor som genererats hittills\&. OM värdet på ldap_idmap_helper_table_size är lika med 0 genereras inga ytterligare sekundära skivor\&.
+.sp
+Standard: 10
+.RE
+.RE
+.SS "Välkända SID:er"
+.PP
+SSSD stödjer upplsagning av namnen på välkända SID:er, d\&.v\&.s\&. SID:er med en speciell hårdkodad betydelse\&. Eftersom de allmänna användarna och grupperna relaterade till dessa välkända SID:er inte har någon motsvarighet i en Linux\-/UNIX\-miljö är inga POSIX\-ID:n tillgängliga för dessa objekt\&.
+.PP
+SID\-namnrymden är organiserad i auktoriteter som kan ses som olika domäner\&. Auktoriteterna för välkända SID:er är
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Null\-auktoritet
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Världsauktoritet
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Lokala auktoritet
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Skaparauktoritet
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+NT\-auktoritetet
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Inbyggd
+.RE
+.sp
+Den versala versionen av dessa namn används som domännamn när det fullständigt kvalificerade namnet på en välkänd SID returneras\&.
+.PP
+Eftersom några verktyg tillåter att man ändrar SID\-baserad åtkomststyrningsinformation med hjälp av ett namn istället för att använda SID:en direkt stödjer SSSD uppslagning av SID:en med detta namn också\&. För att undvika kollisioner kan bara de fullständigt kvalificerade namnen användas för att slå upp välkända SID:er\&. Som ett resultat skall domännamnen
+\(lqNULL AUTHORITY\(rq,
+\(lqWORLD AUTHORITY\(rq,
+\(lq LOCAL AUTHORITY\(rq,
+\(lqCREATOR AUTHORITY\(rq,
+\(lqNT AUTHORITY\(rq
+och
+\(lqBUILTIN\(rq
+inte användas som domännamn i
+sssd\&.conf\&.
+.SH "EXEMPEL"
+.PP
+Följande exempel antar att SSSD är korrekt konfigurerat och att exempel\&.se är en av domänerna i avsnittet
+\fI[sssd]\fR\&. Detta exempel visar endast alternativ som är specifika för leverantören AD\&.
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/EXEMPEL]
+id_provider = ad
+auth_provider = ad
+access_provider = ad
+chpass_provider = ad
+
+ad_server = dc1\&.exempel\&.se
+ad_hostname = client\&.exempel\&.se
+ad_domain = exempel\&.se
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "NOTER"
+.PP
+Leverantören AD av åtkomstkontroll kontrollerar om kontot har gått ut\&. Det har samma effekt som följande konfiguration av LDAP\-leverantören:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+access_provider = ldap
+ldap_access_order = expire
+ldap_account_expire_policy = ad
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Dock, om inte åtkomstleverantören
+\(lqad\(rq
+är konfigurerad explicit är standardåtkomstleverantören
+\(lqpermit\(rq\&. Observera att om man konfigurerar en annan åtkomstleverantör än
+\(lqad\(rq
+behöver man sätta alla anslutningsparametrarna (såsoms LDAP URI:er och krypteringsdetaljer) manuellt\&.
+.PP
+När autofs\-leverantören är satt till
+\(lqad\(rq
+används översättningen av schemaattribut enligt RFC2307 (nisMap, nisObject, \&...), för att dessa attribut inkluderas i standardschemat för Active Directory\&.
+.PP
+.SH "SE ÄVEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBSSSD uppströms \(en
+https://pagure\&.io/SSSD/sssd/\fR
+.SH "NOTES"
+.IP " 1." 4
+[MS-ADTS] avsnittet LDAP-utökningar
+.RS 4
+\%https://msdn.microsoft.com/en-us/library/cc223367.aspx
+.RE

@@ -1,0 +1,149 @@
+'\" t
+.\"     Title: sss_cache
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Pàgines del manual de l'SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_CACHE" "8" "12/09/2020" "SSSD" "Pàgines del manual de l'SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_cache \- fa neteja de la memòria cau
+.SH "SYNOPSIS"
+.HP \w'\fBsss_cache\fR\ 'u
+\fBsss_cache\fR [\fIopcions\fR]
+.SH "DESCRIPCIÓ"
+.PP
+\fBsss_cache\fR
+invalidates records in SSSD cache\&. Invalidated records are forced to be reloaded from server as soon as related SSSD backend is online\&. Options that invalidate a single object only accept a single provided argument\&.
+.SH "OPCIONS"
+.PP
+\fB\-E\fR,\fB\-\-everything\fR
+.RS 4
+Invalidate all cached entries\&.
+.RE
+.PP
+\fB\-u\fR,\fB\-\-user\fR \fIusuari\fR
+.RS 4
+Invalida un usuari específic\&.
+.RE
+.PP
+\fB\-U\fR,\fB\-\-users\fR
+.RS 4
+Invalida tots els registres dels usuaris\&. Aquesta opció anul\(mdla la invalidació d\*(Aqun usuari específic, si també es va especificar\&.
+.RE
+.PP
+\fB\-g\fR,\fB\-\-group\fR \fIgrup\fR
+.RS 4
+Invalida un grup específic\&.
+.RE
+.PP
+\fB\-G\fR,\fB\-\-groups\fR
+.RS 4
+Invalida tots els registres dels grups\&. Aquesta opció anul\(mdla la invalidació d\*(Aqun grup específic, si també es va especificar\&.
+.RE
+.PP
+\fB\-n\fR,\fB\-\-netgroup\fR \fIgrup\-de\-xarxa\fR
+.RS 4
+invalida un grup de xarxa específic\&.
+.RE
+.PP
+\fB\-N\fR,\fB\-\-netgroups\fR
+.RS 4
+Invalida tots els registres dels grups de xarxa\&. Aquesta opció anul\(mdla la invalidació d\*(Aqun grup de xarxa específic, si també es va especificar\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-service\fR \fIservei\fR
+.RS 4
+invalida un servei específic\&.
+.RE
+.PP
+\fB\-S\fR,\fB\-\-services\fR
+.RS 4
+Invalida tots els registres dels serveis\&. Aquesta opció anul\(mdla la invalidació d\*(Aqun servei específic, si també es va especificar\&.
+.RE
+.PP
+\fB\-a\fR,\fB\-\-autofs\-map\fR \fIassignació\-autofs\fR
+.RS 4
+Invalida una assignació autofs específica\&.
+.RE
+.PP
+\fB\-A\fR,\fB\-\-autofs\-maps\fR
+.RS 4
+Invalida tots els registres de les assignacions autofs\&. Aquesta opció anul\(mdla la invalidació d\*(Aquna assignació autofs específica, si també es va especificar\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-ssh\-host\fR \fInom\-amfitrió\fR
+.RS 4
+Invalida les claus públiques SSH d\*(Aqun amfitrió especific\&.
+.RE
+.PP
+\fB\-H\fR,\fB\-\-ssh\-hosts\fR
+.RS 4
+Invalida tots els registres de les claus públiques SSH de tots els amfitrions\&. Aquesta opció anul\(mdla la invalidació d\*(Aquna clau pública SSH d\*(Aqun amfitrió específic, si també es va especificar\&.
+.RE
+.PP
+\fB\-r\fR,\fB\-\-sudo\-rule\fR \fIrule\fR
+.RS 4
+Invalidate particular sudo rule\&.
+.RE
+.PP
+\fB\-R\fR,\fB\-\-sudo\-rules\fR
+.RS 4
+Invalidate all cached sudo rules\&. This option overrides invalidation of specific sudo rule if it was also set\&.
+.RE
+.PP
+\fB\-d\fR,\fB\-\-domain\fR \fIdomini\fR
+.RS 4
+Restringeix el procés d\*(Aqinvalidació a tan sols un domini concret\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Mostra el missatge d\*(Aqajuda i surt\&.
+.RE
+.SH "VEGEU TAMBÉ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

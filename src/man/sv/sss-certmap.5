@@ -1,0 +1,517 @@
+'\" t
+.\"     Title: sss-certmap
+.\"    Author: SSSD uppströms \(en https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Filformat och konventioner
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS\-CERTMAP" "5" "12/09/2020" "SSSD" "Filformat och konventioner"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss-certmap \- SSSD:s certifikatmatchnings\- och \-mappningsregler
+.SH "BESKRIVNING"
+.PP
+Manualsidan beskriver reglerna som kan användas av SSSD och andra komponenter för att matcha X\&.509\-certifikat och koppla dem till konton\&.
+.PP
+Varje regel har fyra komponenter, en
+\(lqprioritet\(rq, en
+\(lqmatchningsregel\(rq, en
+\(lqmappningsregel\(rq
+och en
+\(lqdomänlista\(rq\&. Alla komponenter är frivilliga\&. En saknad
+\(lqprioritet\(rq
+kommer lägga till regel med den lägsta prioriteten\&. Standard\-\(lqmatchningsregeln\(rq
+kommer matcha certifikat med digitalSignature\-nyckelanvändning och clientAuth\-utökadnyckelanvändning\&. Om
+\(lqmappningsregeln\(rq
+är tom kommer certifikaten sökas efter i attrubutet userCertificate som DER\-kodade binärer\&. Om inga domäner anges kommer endast den lokala domänen sökas\&.
+.SH "REGELKOMPONENTER"
+.SS "PRIORITET"
+.PP
+Reglerna bearbetas i prioritetsordning där \(rq0\(rq (noll) indikerar den högsta prioriteten\&. Ju högre talet är desto lägre är prioriteten\&. Ett saknat värde indikerar den lägsta prioriteten\&. Regelbearbetningen stoppas när en regel som matchar hittas och inga ytterligare regler kontrolleras\&.
+.PP
+Internt behandlas prioriteten som teckenlösa 32\-bitars heltal, att använda ett prioritetsvärde större än 4294967295 kommer orsaka ett fel\&.
+.SS "MATCHNINGSREGEL"
+.PP
+Matchningsregeln används för att välja ett certifikat som översättningsregeln skall tillämpas på\&. Det använder ett system liknande det som används av alternativet
+\(lqpkinit_cert_match\(rq
+i MIT Kerberos\&. Det består av ett nyckelord omgivet av \(rq<\(rq och \(rq>\(rq som identifierar en specifik del av certifikatet och ett mönster som skall finnas för att regeln skall matcha\&. Flera nyckelord/mönster\-par kan antingen sammanfogas med \(rq&&\(rq (och) eller \(rq||\(rq (eller)\&.
+.PP
+De tillgängliga alternativen är:
+.PP
+<SUBJECT>reguljärt\-uttryck
+.RS 4
+Med denna kan en del eller hela certifikatets subject\-namn matchas\&. För matchningen används POSIX syntax för utökade reguljära uttryck, se regex(7) för detaljer\&.
+.sp
+För matchningen konverteras subject\-namnet lagrat i certifikatet i DER\-kodad ASN\&.1 till en sträng i enlighet med RFC 4514\&. Detta betyder att den mest specifika namnkomponenten kommer först\&. Observera att inte alla möjliga attributnamn täcks av RFC 4514\&. De inkluderade namnen är \(rqCN\(rq, \(rqL\(rq, \(rqST\(rq, \(rqO\(rq, \(rqOU\(rq, \(rqC\(rq, \(rqSTREET\(rq, \(rqDC\(rq och \(rqUID\(rq\&.
+.sp
+Exempel: <SUBJECT>\&.*,DC=MIN,DC=DOMÄN
+.RE
+.PP
+<ISSUER>reguljärt\-uttryck
+.RS 4
+Med denna kan en del eller hela certifikatets issuer\-namn matchas\&. Alla kommentarer för <SUBJECT> är tillämpliga här också\&.
+.sp
+Exempel: <ISSUER>^CN=Min\-CA,DC=MIN,DC=DOMÄN$
+.RE
+.PP
+<KU>nyckelanvändning
+.RS 4
+Detta alternativ kan användas för att specificera vilka nyckelanvändningsvärden certifikatet skall ha\&. Följande värden kan användas i en kommaseparerad lista:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+digitalSignature
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+nonRepudiation
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+keyEncipherment
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+dataEncipherment
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+keyAgreement
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+keyCertSign
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+cRLSign
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+encipherOnly
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+decipherOnly
+.RE
+.sp
+Ett numeriskt värde i intervallet hos ett 32\-bitars teckenlöst heltal kan användas också för att täcka speciella användningsfall\&.
+.sp
+Exempel: <KU>digitalSignature,keyEncipherment
+.RE
+.PP
+<EKU>utökad\-nyckel\-användning
+.RS 4
+Detta alternativ kan användas för att specificera vilka utökade\-nyckel\-användningsvärden certifikatet skall ha\&. Följande värden kan användas i en kommaseparerad lista:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+serverAuth
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+clientAuth
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+codeSigning
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+emailProtection
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+timeStamping
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+OCSPSigning
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+KPClientAuth
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+pkinit
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+msScLogin
+.RE
+.sp
+Användningar av utökade nycklar som inte listas ovanför kan specificeras med sina OID:er i punktad decimal notation\&.
+.sp
+Exempel: <EKU>clientAuth,1\&.3\&.6\&.1\&.5\&.2\&.3\&.4
+.RE
+.PP
+<SAN>reguljärt\-uttryck
+.RS 4
+För att vara kompatibel med användningen av MIT Kerberos kommer detta alternativ matcha Kerberos\-huvudmän i PKINIT eller AD NT\-Principal SAN som <SAN:Principal> gör\&.
+.sp
+Exempel: <SAN>\&.*@MITT\e\&.RIKE
+.RE
+.PP
+<SAN:Principal>reguljärt\-uttryck
+.RS 4
+Matcha Kerberos\-huvudmännen i PKINIT eller AD NT Principal
+.sp
+Exempel: <SAN:Principal>\&.*@MITT\e\&.RIKE
+.RE
+.PP
+<SAN:ntPrincipalName>reguljärt\-uttryck
+.RS 4
+Matcha Kerberhos\-huvudmän från AD NT Principal SAN\&.
+.sp
+Exempel: <SAN:ntPrincipalName>\&.*@MITT\&.AD\&.RIKE
+.RE
+.PP
+<SAN:pkinit>reguljärt\-uttryck
+.RS 4
+Matcha Kerberos\-huvudmän från PKINIT SAN\&.
+.sp
+Exempel: <SAN:ntPrincipalName>\&.*@MITT\e\&.PKINIT\e\&.RIKE
+.RE
+.PP
+<SAN:dotted\-decimal\-oid>reguljärt\-uttryck
+.RS 4
+Ta värdet från otherName SAN\-komponenten som anges av OID:n i punktad decimal notation, tolka den som en sträng och försök att matcha den mot det reguljära uttrycket\&.
+.sp
+Exempel: <SAN:1\&.2\&.3\&.4>test
+.RE
+.PP
+<SAN:otherName>base64\-sträng
+.RS 4
+Gör en binär matchning med den base64\-kodade klicken mot alla otherName SAN\-komponenter\&. Med detta alternativ är det möjligt att macha mot anpassade otherName\-komponenter med speciella kodningar som inte kan hanteras som strängar\&.
+.sp
+Exempel: <SAN:otherName>MTIz
+.RE
+.PP
+<SAN:rfc822Name>reguljärt\-uttryck
+.RS 4
+Matcha värdet på rfc822Name SAN\&.
+.sp
+Exempel: <SAN:rfc822Name>\&.*@epost\e\&.domän
+.RE
+.PP
+<SAN:dNSName>reguljärt\-uttryck
+.RS 4
+Matcha värdet på dNSName SAN\&.
+.sp
+Exempel: <SAN:dNSName>\&.*\e\&.min\e\&.dns\e\&.domän
+.RE
+.PP
+<SAN:x400Address>base64\-sträng
+.RS 4
+Matcha binärt värdet på x400Address SAN\&.
+.sp
+Exempel: <SAN:x400Address>MTIz
+.RE
+.PP
+<SAN:directoryName>reguljärt\-uttryck
+.RS 4
+Matcha värdet på directoryName SAN\&. Samma kommentarer som gavs för <ISSUER> och <SUBJECT> gäller här också\&.
+.sp
+Exempel: <SAN:directoryName>\&.*,DC=com
+.RE
+.PP
+<SAN:ediPartyName>base64\-sträng
+.RS 4
+Matcha binärt värdet på ediPartyName SAN\&.
+.sp
+Exempel: <SAN:ediPartyName>MTIz
+.RE
+.PP
+<SAN:uniformResourceIdentifier>reguljärt\-uttryck
+.RS 4
+Matcha värdet på uniformResourceIdentifier SAN\&.
+.sp
+Exempel: <SAN:uniformResourceIdentifier>URN:\&.*
+.RE
+.PP
+<SAN:iPAddress>reguljärt\-uttryck
+.RS 4
+Matcha värdet på iPAddress SAN\&.
+.sp
+Exempel: <SAN:iPAddress>192\e\&.168\e\&.\&.*
+.RE
+.PP
+<SAN:registeredID>reguljärt\-uttryck
+.RS 4
+Matcha värdet på registeredID SAN som punktad decimal sträng\&.
+.sp
+Exempel: <SAN:registeredID>1\e\&.2\e\&.3\e\&.\&.*
+.RE
+.SS "MAPPNINGSREGEL"
+.PP
+Mappningsregeln används för att koppla ett certifikat med ett eller flera konton\&. Ett smartkort med certifik och den matchande privata nyckeln kan då användas för autentisering som ett av dessa konton\&.
+.PP
+För närvarande stödjer SSSD egentligen bara LDAP för att slå upp användarinformation (undantaget är proxy\-leverantören som inte är relevant här\&. På grund av detta är mappningsregeln baserad på syntaxen för LDAP\-sökfilter med mallar för att lägga till certifikatinnehåll till filtret\&. Det antas att filtret endast kommer innehålla de specifika data som behövs för mappningen och att anroparen kommer bädda in dem i ett annat filter för att göra den egentliga sökningen\&. Därför skall filtersträngen börja och sluta med \(rq(\(rq respektive \(rq)\(rq\&.
+.PP
+I allmänhet rekommenderas det att använda attribut från certifikatet och lägga till dem till speciella attribut till LDAP\-användarobjektet\&. T\&.ex\&. kan attributet \(rqaltSecurityIdentities\(rq i AD eller attributet \(rqipaCertMapData\(rq i IPA användas\&.
+.PP
+Detta bör hellre användas än att läsa användarspecifik data från certifikatet som t\&.ex\&. en e\-postadress och söka efter den i LDAP\-servern\&. Anledningen är att användarspecifika data i LDAP kan ändras av olika anledningar vilket skulle göra sönder mappningen\&. Å andra sidan skulle det vara svårt att bryta mappningen avsiktligt för en specifik användare\&.
+.PP
+Mallarna för att lägga till certifikatdata till sökfiltret baseras på formateringssträngar i Python\-stil\&. De består av ett nyckelord i krullparenteser med en valfri underkomponentspecificerare separerad av en \(rq\&.\(rq eller ett valfri konverterings\-/formateringsalternativ separerat av ett \(rq!\(rq\&. Tillåtna värden är:
+.PP
+{issuer_dn[!((ad|ad_x500)|ad_ldap|nss_x500|(nss|nss_ldap))]}
+.RS 4
+Mallen kommer lägga till den fullständiga utgivar\-DN:en konverterad till en strän enligt RFC 4514\&. OM X\&.500\-ordning (mest speccifik RDN kommer sist) skall ett alternativ med prefixet \(rq_x500\(rq användas\&.
+.sp
+Konverteringsalternativen som börjar med \(rqad_\(rq kommer använda attribut som de används av AD, t\&.ex\&. \(rqS\(rq istället för \(rqST\(rq\&.
+.sp
+Konverteringsalternativen som börjar med \(rqnss_\(rq kommer använda attributnamn som de används av NSS\&.
+.sp
+Standard för konverteringsalternativ är \(rqnss\(rq, d\&.v\&.s\&. attributnamn enligt NSS och LDAP/RFC 4514\-ordning\&.
+.sp
+Exempel: (ipacertmapdata=X509:<I>{issuer_dn!ad}<S>{subject_dn!ad})
+.RE
+.PP
+{subject_dn[!((ad|ad_x500)|ad_ldap|nss_x500|(nss|nss_ldap))]}
+.RS 4
+Mallen kommer lägga till den fullständiga subjekt\-DN:en konverterad till en strän enligt RFC 4514\&. OM X\&.500\-ordning (mest speccifik RDN kommer sist) skall ett alternativ med prefixet \(rq_x500\(rq användas\&.
+.sp
+Konverteringsalternativen som börjar med \(rqad_\(rq kommer använda attribut som de används av AD, t\&.ex\&. \(rqS\(rq istället för \(rqST\(rq\&.
+.sp
+Konverteringsalternativen som börjar med \(rqnss_\(rq kommer använda attributnamn som de används av NSS\&.
+.sp
+Standard för konverteringsalternativ är \(rqnss\(rq, d\&.v\&.s\&. attributnamn enligt NSS och LDAP/RFC 4514\-ordning\&.
+.sp
+Exempel: (ipacertmapdata=X509:<I>{issuer_dn!nss_x500}<S>{subject_dn!nss_x500})
+.RE
+.PP
+{cert[!(bin|base64)]}
+.RS 4
+Denna mall kommer lägga till hela det DER\-kodade certifikatet som än sträng till sökfiltret\&. Beroende på konverteringsalternativen konverteras antingen certifikatet till en hex\-sekvens med styrtecken \(rq\exx\(rq eller till base64\&. Hex\-strängen med styrtecken är standard och kan t\&.ex\&. användas med LDAP\-attributet \(rquserCertificate;binary\(rq\&.
+.sp
+Exempel: (userCertificate;binary={cert!bin})
+.RE
+.PP
+{subject_principal[\&.short_name]}
+.RS 4
+Denna mall kommer lägga Kerberos\-huvudmannen som hämtas antingen från den SAN som används av pkinit eller den som används av AD\&. Komponenten \(rqshort_name\(rq representerar första delen av huvudmannen före tecknet \(rq@\(rq\&.
+.sp
+Exempel: (|(userPrincipal={subject_principal})(samAccountName={subject_principal\&.short_name}))
+.RE
+.PP
+{subject_pkinit_principal[\&.short_name]}
+.RS 4
+Denna mall kommer lägga Kerberos\-huvudmannen som hämtas från den SAN som används av pkinit\&. Komponenten \(rqshort_name\(rq representerar första delen av huvudmannen före tecknet \(rq@\(rq\&.
+.sp
+Exempel: (|(userPrincipal={subject_pkinit_principal})(uid={subject_pkinit_principal\&.short_name}))
+.RE
+.PP
+{subject_nt_principal[\&.short_name]}
+.RS 4
+Denna mall kommer lägga Kerberos\-huvudmannen som hämtas från den SAN som används av AD\&. Komponenten \(rqshort_name\(rq representerar första delen av huvudmannen före tecknet \(rq@\(rq\&.
+.sp
+Exempel: (|(userPrincipal={subject_principal})(samAccountName={subject_principal\&.short_name}))
+.RE
+.PP
+{subject_rfc822_name[\&.short_name]}
+.RS 4
+Denna mall kommer lägga till strängen som lagras i komponenten rfc822Name SAN:en, normalt en e\-postadress\&. Komponenten \(rqshort_name\(rq representerar första delen av huvudmannen före tecknet \(rq@\(rq\&.
+.sp
+Exempel: (|(mail={subject_rfc822_name})(uid={subject_rfc822_name\&.short_name}))
+.RE
+.PP
+{subject_dns_name[\&.short_name]}
+.RS 4
+Denna mall kommer lägga till strängen som lagras i komponenten dNSName SAN:en, normalt ett fullständigt kvalificerat värdnamn\&. Komponenten \(rqshort_name\(rq representerar första delen av huvudmannen före det första \(rq\&.\(rq\-tecknet\&.
+.sp
+Exempel: (|(fqdn={subject_dns_name})(host={subject_dns_name\&.short_name}))
+.RE
+.PP
+{subject_uri}
+.RS 4
+Denna mall kommer lägga till strängen som lagras i komponenten uniformResourceIdentifier i SAN:en\&.
+.sp
+Exempel: (uri={subject_uri})
+.RE
+.PP
+{subject_ip_address}
+.RS 4
+Denna mall kommer lägga till strängen som lagras i komponenten iPAddress i SAN:en\&.
+.sp
+Exempel: (ip={subject_ip_address})
+.RE
+.PP
+{subject_x400_address}
+.RS 4
+Denna mall kommer lägga till värdet som lagras i komponenten x400Address i SAN:en som en hex\-sekvens med styrtecken\&.
+.sp
+Exempel: (attr:binary={subject_x400_address})
+.RE
+.PP
+{subject_directory_name[!((ad|ad_x500)|ad_ldap|nss_x500|(nss|nss_ldap))]}
+.RS 4
+Denna mall kommer lägga till DN\-strängen för värdet som lagras i komponenten directoryName i SAN:en\&.
+.sp
+Exempel: (orig_dn={subject_directory_name})
+.RE
+.PP
+{subject_ediparty_name}
+.RS 4
+Denna mall kommer lägga till värdet som lagras i komponenten ediPartyName i SAN:en som en hex\-sekvens med styrtecken\&.
+.sp
+Exempel: (attr:binary={subject_ediparty_name})
+.RE
+.PP
+{subject_registered_id}
+.RS 4
+Denna mall kommer lägga till OID:n som lagras i komponenten registeredID i SAN:en som en punktad decimal sträng\&.
+.sp
+Exempel: (oid={subject_registered_id})
+.RE
+.SS "DOMÄNLISTA"
+.PP
+Om domänlistan inte är tom söks inte användare mappade till ett givet certifikat bara i den lokala domänen utan i de listade domänerna också förutsatt att de är kända av SSSD\&. Domäner som SSSD inte känner till kommer ignoreras\&.
+.SH "AUTHORS"
+.PP
+\fBSSSD uppströms \(en
+https://pagure\&.io/SSSD/sssd/\fR

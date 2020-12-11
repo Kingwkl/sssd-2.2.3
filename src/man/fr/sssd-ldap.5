@@ -1,0 +1,1527 @@
+'\" t
+.\"     Title: sssd-ldap
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Formats de fichier et conventions
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-LDAP" "5" "12/09/2020" "SSSD" "Formats de fichier et conventi"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-ldap \- Fournisseur LDAP SSSD
+.SH "DESCRIPTION"
+.PP
+Ce manuel décrit la configuration des domaines LDAP pour
+\fBsssd\fR(8)\&. Se référer à la section
+\(lqFILE FORMAT\(rq
+du manuel
+\fBsssd.conf\fR(5)
+pour des informations sur la syntaxe détaillée\&.
+.PP
+Il est possible de configurer SSSD pour utiliser plus d\*(Aqun domaine LDAP\&.
+.PP
+Le moteur de traitement LDAP prend en charge les fournisseurs id, auth, access et chpass\&. Si vous voulez vous authentifier sur un serveur LDAP, il vous faut utiliser TLS/SSL ou LDAPS\&.
+\fBsssd\fR
+\fIne prend pas en charge\fR
+l\*(Aqauthentification sur un canal non chiffré\&. Si le serveur LDAP est utilisé seulement comme fournisseur d\*(Aqidentité, un canal crypté n\*(Aqest pas nécessaire\&. Se référer aux options de configurations
+\(lqldap_access_filter\(rq
+pour plus d\*(Aqinformation sur l\*(Aqutilisation en tant que fournisseur d\*(Aqaccès\&.
+.SH "OPTIONS DE CONFIGURATION"
+.PP
+All of the common configuration options that apply to SSSD domains also apply to LDAP domains\&. Refer to the
+\(lqDOMAIN SECTIONS\(rq
+section of the
+\fBsssd.conf\fR(5)
+manual page for full details\&. Note that SSSD LDAP mapping attributes are described in the
+\fBsssd-ldap-attributes\fR(5)
+manual page\&.
+.PP
+ldap_uri, ldap_backup_uri (string)
+.RS 4
+Spécifie par ordre de préférence la liste séparée par des virgules d\*(AqURI des serveurs LDAP auquel doit se connecter SSSD\&. Se reporter à la section de
+\(lqBASCULE\(rq
+pour plus d\*(Aqinformations sur le repli et la redondance de serveurs\&. Si aucune de ces options n\*(Aqest spécifiée, la découverte d\*(Aqun service est activé\&. Pour plus d\*(Aqinformations, se reporter à la section de
+\(lqDÉCOUVERTE DE SERVICE\(rq\&.
+.sp
+Le format de l\*(AqURI doit correspondre au format définit dans la RFC 2732 :
+.sp
+ldap[s]://<host>[:port]
+.sp
+Pour les adresses explicitement en IPv6, le composant <host> doit être entre crochets []
+.sp
+exemple : ldap://[fc00::126:25]:389
+.RE
+.PP
+ldap_chpass_uri, ldap_chpass_backup_uri (string)
+.RS 4
+Spécifie la liste d\*(AqURI séparée par des virgules des serveurs LDAP auquel doit se connecter DSSD par ordre de préférence pour changer le mot de passe d\*(Aqun utilisateur\&. Reportez\-vous à la section de
+\(lqbascule\(rq
+pour plus d\*(Aqinformations sur le repli et la redondance de serveurs\&.
+.sp
+Pour activer la découverte de services, ldap_chpass_dns_service_name doit être défini\&.
+.sp
+Par défaut : vide, ldap_uri est donc utilisé\&.
+.RE
+.PP
+ldap_search_base (chaîne)
+.RS 4
+Le DN de base par défaut à utiliser pour effectuer les opérations LDAP sur les utilisateurs\&.
+.sp
+À partir de SSSD 1\&.7\&.0, SSSD prend en charge plusieurs bases de recherche à l\*(Aqaide de la syntaxe :
+.sp
+search_base[?scope?[filter][?search_base?scope?[filter]]*]
+.sp
+La portée peut être l\*(Aqune des \(Fo base \(Fc, \(Fo onelevel \(Fc ou \(Fo subtree \(Fc\&.
+.sp
+Le filtre doit être un filtre de recherche LDAP valide tel que spécifié par http://www\&.ietf\&.org/rfc/rfc2254\&.txt
+.sp
+Exemples :
+.sp
+ldap_search_base = dc=example,dc=com (ce qui équivaut à) ldap_search_base = dc=example,dc=com?subtree?
+.sp
+ldap_search_base = cn=host_specific,dc=example,dc=com?subtree?(host=thishost)?dc=example\&.com?subtree?
+.sp
+Remarque\ \&: Il est n\*(Aqest pas possible d\*(Aqavoir plusieurs bases de recherche qui référencent des objets portant le même nom (par exemple, les groupes portant le même nom dans deux bases de recherche différents)\&. Cela conduira à un comportement imprévisible sur les ordinateurs clients\&.
+.sp
+Par défaut : si non définie, les valeurs des attributs defaultNamingContext ou namingContexts du RootDSE du serveur LDAP sont utilisées\&. Si defaultNamingContext n\*(Aqexiste pas ou a une valeur vide, namingContexts est utilisé\&. Les attributs namingContexts doivent avoir une seule valeur avec un DN de base de recherche pour le serveur LDAP pour que cela fonctionne\&. Des valeurs multiples ne sont pas permises\&.
+.RE
+.PP
+ldap_schema (chaîne)
+.RS 4
+Spécifie le type de schéma utilisé sur le serveur LDAP cible\&. Selon le schéma sélectionné, les noms d\*(Aqattributs par défaut provenant des serveurs peuvent varier\&. La manière dont certains attributs sont traités peut\-être également différer\&.
+.sp
+Quatre types de schéma sont actuellement pris en charge\ \&:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+rfc2307
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+rfc2307bis
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+IPA
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+AD
+.RE
+.sp
+La principale différence entre ces types de schéma est la façon dont les appartenances aux groupes sont enregistrés dans le serveur\&. Avec rfc2307, les membres du groupe sont répertoriées par nom dans l\*(Aqattribut
+\fImemberUid\fR\&. Avec rfc2307bis et IPA, les membres du groupe sont répertoriés par DN et stockées dans l\*(Aqattribut de
+\fImember\fR\&. Le type de schéma AD définit les attributs correspondant aux valeurs d\*(AqActive Directory 2008r2\&.
+.sp
+Par défaut : rfc2307
+.RE
+.PP
+ldap_pwmodify_mode (string)
+.RS 4
+Specify the operation that is used to modify user password\&.
+.sp
+Two modes are currently supported:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+exop \- Password Modify Extended Operation (RFC 3062)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_modify \- Direct modification of userPassword (not recommended)\&.
+.RE
+.sp
+Note: First, a new connection is established to verify current password by binding as the user that requested password change\&. If successful, this connection is used to change the password therefore the user must have write access to userPassword attribute\&.
+.sp
+Default: exop
+.RE
+.PP
+ldap_default_bind_dn (chaîne)
+.RS 4
+Le DN de connexion par défaut à utiliser pour effectuer les opérations LDAP\&.
+.RE
+.PP
+ldap_default_authtok_type (chaîne)
+.RS 4
+Le type de jeton d\*(Aqauthentification pour le DN de connexion par défaut\&.
+.sp
+Les deux mécanismes actuellement pris en charge sont :
+.sp
+password
+.sp
+obfuscated_password
+.sp
+Par défaut : password
+.RE
+.PP
+ldap_default_authtok (chaîne)
+.RS 4
+Le jeton d\*(Aqauthentification pour le DN de connexion par défaut\&. Seuls les mots de passe en clair sont actuellement pris en charge\&.
+.RE
+.PP
+ldap_force_upper_case_realm (booléen)
+.RS 4
+Certains serveurs d\*(Aqannuaire, comme par exemple Active Directory, peuvent délivrer la partie domaine de l\*(AqUPN en minuscules, ce qui peut faire échouer l\*(Aqauthentification\&. Définir cette option à une valeur non nulle pour utiliser un nom de domaine en majuscules\&.
+.sp
+Par défaut : false
+.RE
+.PP
+ldap_enumeration_refresh_timeout (entier)
+.RS 4
+Spécifie la durée en secondes pendant laquelle SSSD doit attendre avant d\*(Aqactualiser son cache d"énumération d\*(Aqenregistrements\&.
+.sp
+Par défaut : 300
+.RE
+.PP
+ldap_purge_cache_timeout (entier)
+.RS 4
+Détermine la fréquence de vérification de la présence d\*(Aqentrées inactives dans le cache (telles que groupes sans membres et utilisateurs ne s\*(Aqétant jamais connectés) et de suppression pour économiser de l\*(Aqespace\&.
+.sp
+Setting this option to zero will disable the cache cleanup operation\&. Please note that if enumeration is enabled, the cleanup task is required in order to detect entries removed from the server and can\*(Aqt be disabled\&. By default, the cleanup task will run every 3 hours with enumeration enabled\&.
+.sp
+Par défaut\ \&: 0 (désactivé)
+.RE
+.PP
+ldap_group_nesting_level (entier)
+.RS 4
+Si ldap_schema est défini comme un format prenant en charge les groupes imbriqués (par exemple RFC2307bis), alors cette option contrôle le nombre de niveaux d\*(Aqimbrication que SSSD suivra\&. Cette option n\*(Aqa pas d\*(Aqeffet sur le schéma RFC2307\&.
+.sp
+Note: This option specifies the guaranteed level of nested groups to be processed for any lookup\&. However, nested groups beyond this limit
+\fImay be\fR
+returned if previous lookups already resolved the deeper nesting levels\&. Also, subsequent lookups for other groups may enlarge the result set for original lookup if re\-queried\&.
+.sp
+If ldap_group_nesting_level is set to 0 then no nested groups are processed at all\&. However, when connected to Active\-Directory Server 2008 and later using
+\(lqid_provider=ad\(rq
+it is furthermore required to disable usage of Token\-Groups by setting ldap_use_tokengroups to false in order to restrict group nesting\&.
+.sp
+Par défaut : 2
+.RE
+.PP
+ldap_use_tokengroups
+.RS 4
+Cette option active ou désactive l\*(Aqutilisation de l\*(Aqattribut Token\-Groups lors de l\*(Aqinitialisation des groupes pour les utilisateurs Active Directory 2008 et versions ultérieures\&.
+.sp
+Default: True for AD and IPA otherwise False\&.
+.RE
+.PP
+ldap_host_search_base (string)
+.RS 4
+Facultatif\&. Utiliser la chaîne donnée comme base de recherche pour héberger des objets\&.
+.sp
+Cf\&.
+\(lqldap_search_base\(rq
+pour plus d\*(Aqinformations sur la configuration des bases de recherche multiples\&.
+.sp
+Par défaut : la valeur de
+\fIldap_search_base\fR
+.RE
+.PP
+ldap_service_search_base (string)
+.RS 4
+Un DN de base facultatif, une étendue de recherche et un filtre LDAP afin de restreindre les recherches LDAP pour ce type d\*(Aqattribut\&.
+.sp
+syntaxe :
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?scope?[filter][?search_base?scope?[filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+La portée peut être l\*(Aqune des \(Fo base \(Fc, \(Fo onelevel \(Fc ou \(Fo subtree \(Fc\&. Les fonctions de portée sont spécifiées dans la section 4\&.5\&.1\&.2 de http://tools\&.ietf\&.org/html/rfc4511
+.sp
+Le filtre doit être un filtre de recherche LDAP valide tel que spécifié par http://www\&.ietf\&.org/rfc/rfc2254\&.txt
+.sp
+Pour obtenir des exemples de cette syntaxe, reportez\-vous à la section d\*(Aqexemples
+\(lqldap_search_base\(rq\&.
+.sp
+Par défaut : la valeur de
+\fIldap_search_base\fR
+.sp
+Noter que la spécification de portée ou de filtre n\*(Aqest pas prise en charge pour les recherches sur un serveur Active Directory qui serait susceptible de produire un grand nombre de résultats et de déclencher l\*(Aqextension Range Retrieval dans sa réponse\&.
+.RE
+.PP
+ldap_search_timeout (entier)
+.RS 4
+Définit le délai d\*(Aqattente (en secondes) autorisé pour les recherches LDAP avant annulation et utilisation des résultats contenus dans le cache (et activation du mode hors ligne)
+.sp
+Note : cette option est susceptible de changer dans les prochaines version de SSSD\&. Elle sera sûrement remplacée par une série de délais d\*(Aqattente pour différents types de recherches\&.
+.sp
+Par défaut : 6
+.RE
+.PP
+ldap_enumeration_search_timeout (entier)
+.RS 4
+Définit le délai d\*(Aqattente (en secondes) autorisé pour les recherches LDAP sur les utilisateurs et groupes avant annulation et utilisation des résultats mis en cache (et activation du mode hors ligne)
+.sp
+Par défaut : 60
+.RE
+.PP
+ldap_network_timeout (entier)
+.RS 4
+Définit le délai d\*(Aqattente (en secondes) après lequel les fonctions
+\fBpoll\fR(2)/\fBselect\fR(2)
+suivant un
+\fBconnect\fR(2)
+rendent la main en cas d\*(Aqinactivité\&.
+.sp
+Par défaut : 6
+.RE
+.PP
+ldap_opt_timeout (entier)
+.RS 4
+Specifies a timeout (in seconds) after which calls to synchronous LDAP APIs will abort if no response is received\&. Also controls the timeout when communicating with the KDC in case of SASL bind, the timeout of an LDAP bind operation, password change extended operation and the StartTLS operation\&.
+.sp
+Par défaut\ \&: 8
+.RE
+.PP
+ldap_connection_expire_timeout (entier)
+.RS 4
+Spécifie un délai d\*(Aqattente (en secondes) pendant laquelle une connexion à un serveur LDAP est maintenue\&. Passé ce délai, la connexion devra être rétablie\&. Si ce paramètre est utilisé en parallèle avec SASL/GSSAPI, la plus courte des deux valeurs entre celle\-ci et la durée de vie TGT sera utilisée\&.
+.sp
+Par défaut : 900 (15 minutes)
+.RE
+.PP
+ldap_page_size (entier)
+.RS 4
+Définit le nombre d\*(Aqenregistrements à récupérer lors d\*(Aqune requête LDAP\&. Certains serveurs LDAP imposent une limite maximale par requête\&.
+.sp
+Par défaut : 1000
+.RE
+.PP
+ldap_disable_paging (boolean)
+.RS 4
+Désactiver le contrôle de pagination LDAP\&. Cette option doit être utilisée si le serveur LDAP signale qu\*(Aqil prend en charge le contrôle de pagination LDAP de l\*(Aqobjet RootDSE, mais qu\*(Aqil n\*(Aqest pas activé ou ne se comporte pas correctement\&.
+.sp
+Exemple\ \&: le serveurs OpenLDAP avec le module de contrôle de pagination installé sur le serveur mais non activé le signaleront dans RootDSE mais il sera impossible de l\*(Aqutiliser\&.
+.sp
+Exemple\ \&: 389 DS a un bogue où il ne peut que soutenir qu\*(Aqun seul contrôle de pagination à la fois sur une connexion donnée\&. Sur les clients chargés, cela peut entraîner l\*(Aqéchec de certaines demandes\&.
+.sp
+Par défaut : False
+.RE
+.PP
+ldap_disable_range_retrieval (booléen)
+.RS 4
+Désactiver la récupération de plage Active Directory\&.
+.sp
+Active Directory limite le nombre de membres à récupérer par recherche à l\*(Aqaide de la stratégie MaxValRange (qui prend la valeur par défaut de 1500 membres)\&. Si un groupe contient plus de membres, la réponse inclura une extension de plage spécifique à Active Directory\&. Cette option désactive l\*(Aqanalyse de cette extension de plage, les groupes de grande taille apparaissant ainsi sans aucun membre\&.
+.sp
+Par défaut : False
+.RE
+.PP
+ldap_sasl_minssf (integer)
+.RS 4
+Lors de la communication avec un serveur LDAP en utilisant SASL, spécifie le niveau de sécurité minimal nécessaire pour établir la connexion\&. Les valeurs de cette option sont définies par OpenLDAP\&.
+.sp
+Par défaut : Utiliser la valeur par défaut du système (généralement spécifié par ldap\&.conf)
+.RE
+.PP
+ldap_deref_threshold (entier)
+.RS 4
+Définit le nombre de membres du groupe qui doivent manquer au sein du cache interne afin de déclencher une recherche de déréférencement\&. Si le nombre de membres manquants est inférieur, ils sont recherchés individuellement\&.
+.sp
+You can turn off dereference lookups completely by setting the value to 0\&. Please note that there are some codepaths in SSSD, like the IPA HBAC provider, that are only implemented using the dereference call, so even with dereference explicitly disabled, those parts will still use dereference if the server supports it and advertises the dereference control in the rootDSE object\&.
+.sp
+Une recherche de déréférencement est un moyen pour récupérer tous les membres d\*(Aqun groupe avec un seul appel LDAP\&. Plusieurs serveurs LDAP peuvent avoir différentes méthodes de déréférencement\&. Les serveurs actuellement acceptés sont 389/RHDS, OpenLDAP et Active Directory\&.
+.sp
+\fIRemarque :\fR
+Si l\*(Aqune des bases de recherche spécifie un filtre de recherche, alors l\*(Aqamélioration de la performance de recherche de déréférencement est désactivée indépendamment de ce paramètre\&.
+.sp
+Par défaut : 10
+.RE
+.PP
+ldap_tls_reqcert (chaîne)
+.RS 4
+Définit les vérifications à effectuer sur les certificats serveur sur une session TLS, si elle existe\&. Une des valeurs suivantes est utilisable :
+.sp
+\fInever\fR
+: le client ne demandera ni ne vérifiera un quelconque certificat du serveur\&.
+.sp
+\fIallow\fR
+: le certificat serveur est demandé\&. Si aucun certificat n\*(Aqest fournit, la session continue normalement\&. Si un mauvais certificat est fourni, il est ignoré et la session continue normalement\&.
+.sp
+\fItry\fR
+: le certificat serveur est demandé\&. Si aucun certificat n\*(Aqest fourni, la session continue normalement\&. Si un mauvais certificat est fourni, la session se termine immédiatement\&.
+.sp
+\fIdemand\fR
+: le certificat serveur est demandé\&. Si aucun certificat ou un mauvais certificat est fourni, la session se termine immédiatement\&.
+.sp
+\fIhard\fR
+: identique à
+\(lqdemand\(rq
+.sp
+Par défaut : hard
+.RE
+.PP
+ldap_tls_cacert (chaîne)
+.RS 4
+Définit le fichier qui contient les certificats pour toutes les autorités de certification que
+\fBsssd\fR
+reconnaîtra\&.
+.sp
+Par défaut : utilise les paramètres par défaut de OpenLDAP, en général dans
+/etc/openldap/ldap\&.conf
+.RE
+.PP
+ldap_tls_cacertdir (chaîne)
+.RS 4
+Spécifie le chemin d\*(Aqun dossier qui contient les certificats de l\*(Aqautorité de certificats dans des fichiers séparés\&. Usuellement, les noms de fichiers sont la somme de contrôle du certificat suivi de \(Fo \&.0 \(Fc\&. Si disponible,
+\fBcacertdir_rehash\fR
+peut être utilisé pour créer les noms corrects\&.
+.sp
+Par défaut : utilise les paramètres par défaut de OpenLDAP, en général dans
+/etc/openldap/ldap\&.conf
+.RE
+.PP
+ldap_tls_cert (chaîne)
+.RS 4
+Définit le fichier qui contient le certificat pour la clef du client\&.
+.sp
+Par défaut : non défini
+.RE
+.PP
+ldap_tls_key (chaîne)
+.RS 4
+Définit le fichier qui contient la clef du client\&.
+.sp
+Par défaut : non défini
+.RE
+.PP
+ldap_tls_cipher_suite (chaîne)
+.RS 4
+Specifies acceptable cipher suites\&. Typically this is a colon separated list\&. See
+\fBldap.conf\fR(5)
+for format\&.
+.sp
+Par défaut : utilise les paramètres par défaut de OpenLDAP, en général dans
+/etc/openldap/ldap\&.conf
+.RE
+.PP
+ldap_id_use_start_tls (booléen)
+.RS 4
+Définit le fait que le fournisseur d\*(Aqidentité de connexion doit aussi utiliser
+tls
+pour protéger le canal\&.
+.sp
+Par défaut : false
+.RE
+.PP
+ldap_id_mapping (boolean)
+.RS 4
+Indique que SSSD doit tenter de trouver les correspondances des ID d\*(Aqutilisateur et de groupe dans les attributs ldap_user_objectsid et ldap_group_objectsid au lieu d\*(Aqutiliser ldap_user_uid_number et ldap_group_gid_number\&.
+.sp
+Cette fonctionnalité ne prend actuellement en charge que la correspondance par objectSID avec Active Directory\&.
+.sp
+Par défaut : false
+.RE
+.PP
+ldap_min_id, ldap_max_id (integer)
+.RS 4
+Au contraire de la mise en correspondance d\*(Aqidentifiants s\*(Aqappuyant sur les SID utilisée si ldap_id_mapping est positionné à true, les plages d\*(Aqidentifiants autorisés pour ldap_user_uid_number et ldap_group_gid_number n\*(Aqont pas de limite\&. Dans une configuration avec des sous\-domaines ou des domaines approuvés, cela peut engendrer des collisions\&. Pour les éviter, ldap_min_id et ldap_max_id peuvent être configurés afin de restreindre les plages d\*(Aqidentifiants autorisées lues directement depuis le serveur\&. Les sous\-domaines peuvent ensuite choisir d\*(Aqautres plages pour leurs propres identifiants\&.
+.sp
+Par défaut\ \&: non indiqué (les deux options sont à 0)
+.RE
+.PP
+ldap_sasl_mech (chaîne)
+.RS 4
+Specify the SASL mechanism to use\&. Currently only GSSAPI and GSS\-SPNEGO are tested and supported\&.
+.sp
+If the backend supports sub\-domains the value of ldap_sasl_mech is automatically inherited to the sub\-domains\&. If a different value is needed for a sub\-domain it can be overwritten by setting ldap_sasl_mech for this sub\-domain explicitly\&. Please see TRUSTED DOMAIN SECTION in
+\fBsssd.conf\fR(5)
+for details\&.
+.sp
+Par défaut : non défini
+.RE
+.PP
+ldap_sasl_authid (chaîne)
+.RS 4
+Specify the SASL authorization id to use\&. When GSSAPI/GSS\-SPNEGO are used, this represents the Kerberos principal used for authentication to the directory\&. This option can either contain the full principal (for example host/myhost@EXAMPLE\&.COM) or just the principal name (for example host/myhost)\&. By default, the value is not set and the following principals are used:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+hostname@REALM
+netbiosname$@REALM
+host/hostname@REALM
+*$@REALM
+host/*@REALM
+host/*
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+If none of them are found, the first principal in keytab is returned\&.
+.sp
+Par défaut : host/hostname@REALM
+.RE
+.PP
+ldap_sasl_realm (chaîne)
+.RS 4
+Spécifie le domaine SASL à utiliser\&. Si non spécifié, cette option prend par défaut la valeur de krb5_realm\&. Si le ldap_sasl_authid contient aussi le domaine, cette option est ignorée\&.
+.sp
+Par défaut\ \&: la valeur de krb5_realm\&.
+.RE
+.PP
+ldap_sasl_canonicalize (booléen)
+.RS 4
+Si true, la bibliothèque LDAP effectue une recherche inversée pour canoniser le nom de l\*(Aqhôte au cours d\*(Aqune liaison SASL\&.
+.sp
+Défaut : false;
+.RE
+.PP
+ldap_krb5_keytab (chaîne)
+.RS 4
+Specify the keytab to use when using SASL/GSSAPI/GSS\-SPNEGO\&.
+.sp
+Par défaut : le fichier keytab du système, normalement
+/etc/krb5\&.keytab
+.RE
+.PP
+ldap_krb5_init_creds (booléen)
+.RS 4
+Specifies that the id_provider should init Kerberos credentials (TGT)\&. This action is performed only if SASL is used and the mechanism selected is GSSAPI or GSS\-SPNEGO\&.
+.sp
+Par défaut : true
+.RE
+.PP
+ldap_krb5_ticket_lifetime (entier)
+.RS 4
+Specifies the lifetime in seconds of the TGT if GSSAPI or GSS\-SPNEGO is used\&.
+.sp
+Par défaut : 86400 (24 heures)
+.RE
+.PP
+krb5_server, krb5_backup_server (string)
+.RS 4
+Spécifie par ordre de préférence la liste séparée par des virgules des adresses IP ou des noms de systèmes des serveurs Kerberos auquel SSSD doit se connecter\&. Pour plus d\*(Aqinformations sur la redondance de bascule et la redondance de serveur, consulter la section
+\(lqBASCULE\(rq\&. Un numéro de port facultatif (précédé de deux\-points) peut être ajouté aux adresses ou aux noms de systèmes\&. Si vide, la découverte de services est activée \- pour plus d\*(Aqinformations, se reporter à la section de
+\(lqDÉCOUVERTE DE SERVICES\(rq\&.
+.sp
+Lors de l\*(Aqutilisation de découverte de services pour le KDC ou les serveurs kpasswd, SSSD recherche en premier les entrées DNS qui définissent _udp comme protocole, et passe sur _tcp si aucune entrée n\*(Aqest trouvée\&.
+.sp
+Cette option s\*(Aqappelait
+\(lqkrb5_kdcip\(rq
+dans les versions précédentes de SSSD\&. Bien que ce nom soit toujours reconnu à l\*(Aqheure actuelle, il est conseillé de migrer les fichiers de configuration vers l\*(Aqutilisation de
+\(lqkrb5_server\(rq\&.
+.RE
+.PP
+krb5_realm (chaîne)
+.RS 4
+Specify the Kerberos REALM (for SASL/GSSAPI/GSS\-SPNEGO auth)\&.
+.sp
+Par défaut : valeur par défaut du système, voir
+/etc/krb5\&.conf
+.RE
+.PP
+krb5_canonicalize (booléen)
+.RS 4
+Spécifie si le principal de l\*(Aqhôte doit être rendu canonique lors de la connexion au serveur LDAP\&. Cette fonctionnalité est disponible avec MIT Kerberos > = 1\&.7
+.sp
+Par défaut : false
+.RE
+.PP
+krb5_use_kdcinfo (booléen)
+.RS 4
+Indique si SSSD doit préciser aux bibliothèques Kerberos quels domaine et KDC utiliser\&. Cette option est activée par défaut, si elle est désactivée, la bibliothèque Kerberos doit être configurée à l\*(Aqaide du fichier de configuration
+\fBkrb5.conf\fR(5)\&.
+.sp
+Consulter la page de manuel de
+\fBsssd_krb5_locator_plugin\fR(8)
+pour plus d\*(Aqinformations sur le greffon de localisation\&.
+.sp
+Par défaut : true
+.RE
+.PP
+ldap_pwd_policy (chaîne)
+.RS 4
+Détermine la politique d\*(Aqexpiration des mots de passe côté client\&. Les valeurs suivantes sont acceptées :
+.sp
+\fInone\fR
+: aucun évaluation du côté client\&. Cette option ne peut pas désactiver la politique sur les mots de passe du côté serveur\&.
+.sp
+\fIshadow\fR
+\- Utiliser les attributs de style
+\fBshadow\fR(5)
+pour évaluer si le mot de passe a expiré\&.
+.sp
+\fImit_kerberos\fR
+: utilise les attributs utilisés par MIT Kerberos pour déterminer si le mot de passe a expiré\&. Utiliser chpass_provider=krb5 afin de modifier ces attributs lorsque le mot de passe est changé\&.
+.sp
+Par défaut : aucun
+.sp
+\fINote\fR\ \&: si une politique de mots de passe est configurée côté serveur, elle prend le pas sur la politique indiquée avec cette option\&.
+.RE
+.PP
+ldap_referrals (booléen)
+.RS 4
+Définit si le déréférencement automatique doit être activé\&.
+.sp
+Veuillez noter que sssd ne supporte que le déréférencement que lorsqu\*(Aqil est compilé avec OpenLDAP version 2\&.4\&.13 ou supérieur\&.
+.sp
+La déréférenciation de références peut subir une altération notable des performances dans les environnements qui les utilisent fortement, un exemple notable étant Microsoft Active Directory\&. Si votre installation ne nécessite pas l\*(Aqutilisation des références, affecter false à cette option devrait permettre d\*(Aqaméliorer de façon notable les performances\&.
+.sp
+Par défaut : true
+.RE
+.PP
+ldap_dns_service_name (chaîne)
+.RS 4
+Définit le nom de service à utiliser quand la découverte de services est activée\&.
+.sp
+Par défaut : ldap
+.RE
+.PP
+ldap_chpass_dns_service_name (chaîne)
+.RS 4
+Définit le nom de service à utiliser pour trouver un serveur LDAP autorisant un changement de mot de passe quand la découverte de services est activée\&.
+.sp
+Par défaut : non défini, c\*(Aqest\-à\-dire que le service de découverte est désactivé\&.
+.RE
+.PP
+ldap_chpass_update_last_change (bool)
+.RS 4
+Spécifie s\*(Aqil faut mettre à jour l\*(Aqattribut ldap_user_shadow_last_change avec le nombre de jours depuis Epoch après l\*(Aqopération de changement de mot de passe\&.
+.sp
+Par défaut : False
+.RE
+.PP
+ldap_access_filter (chaîne)
+.RS 4
+If using access_provider = ldap and ldap_access_order = filter (default), this option is mandatory\&. It specifies an LDAP search filter criteria that must be met for the user to be granted access on this host\&. If access_provider = ldap, ldap_access_order = filter and this option is not set, it will result in all users being denied access\&. Use access_provider = permit to change this default behavior\&. Please note that this filter is applied on the LDAP user entry only and thus filtering based on nested groups may not work (e\&.g\&. memberOf attribute on AD entries points only to direct parents)\&. If filtering based on nested groups is required, please see
+\fBsssd-simple\fR(5)\&.
+.sp
+Exemple :
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+access_provider = ldap
+ldap_access_filter = (employeeType=admin)
+                        
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Cet exemple signifie que l\*(Aqaccès à cet hôte est restreint aux utilisateurs dont l\*(Aqattribut employeeType est \(Fo\ \&admin\ \&\(Fc\&.
+.sp
+Offline caching for this feature is limited to determining whether the user\*(Aqs last online login was granted access permission\&. If they were granted access during their last login, they will continue to be granted access while offline and vice versa\&.
+.sp
+Par défaut : vide
+.RE
+.PP
+ldap_account_expire_policy (chaîne)
+.RS 4
+Avec cette option une évaluation du côté client des contrôles d\*(Aqaccès peut être activée\&.
+.sp
+Veuillez noter qu\*(Aqil est toujours recommandé d\*(Aqutiliser un contrôle d\*(Aqaccès du côté serveur, c\*(Aqest\-à\-dire que le serveur LDAP doit refuser une requête de connexion avec un code erreur approprié même si le mot de passe est correct\&.
+.sp
+Les valeurs suivantes sont autorisées :
+.sp
+\fIshadow\fR
+: utiliser la valeur de ldap_user_shadow_expire pour déterminer si le compte a expiré\&.
+.sp
+\fIad\fR
+: utilise la valeur du champ 32 bits ldap_user_ad_user_account_control et autorise l\*(Aqaccès si le deuxième bit n\*(Aqest pas défini\&. Si l\*(Aqattribut est manquant, l\*(Aqaccès est autorisé\&. La date d\*(Aqexpiration du compte est aussi vérifiée\&.
+.sp
+\fIrhds\fR,
+\fIipa\fR,
+\fI389ds\fR
+: utilise la valeur de ldap_ns_account_lock afin de vérifier si l\*(Aqaccès est autorisé ou non\&.
+.sp
+\fInds\fR
+: les valeurs de ldap_user_nds_login_allowed_time_map, ldap_user_nds_login_disabled et ldap_user_nds_login_expiration_time sont utilisées pour vérifier si l\*(Aqaccès est autorisé\&. Si les deux attributs sont manquants, l\*(Aqaccès est autorisé\&.
+\fI This is an experimental feature, please use https://pagure\&.io/SSSD/sssd/ to report any issues\&. \fR
+.sp
+Noter que l\*(Aqoption de configuration ldap_access_order
+\fIdoit\fR
+inclure
+\(lqexpire\(rq
+de façon à permettre à l\*(Aqoption ldap_account_expire_policy de fonctionner\&.
+.sp
+Par défaut : vide
+.RE
+.PP
+ldap_access_order (chaîne)
+.RS 4
+Liste séparées par des virgules des options de contrôles d\*(Aqaccès\&. Les valeurs autorisées sont\ \&:
+.sp
+\fIfilter\fR
+: utiliser ldap_access_filter
+.sp
+\fIlockout\fR: use account locking\&. If set, this option denies access in case that ldap attribute \*(AqpwdAccountLockedTime\*(Aq is present and has value of \*(Aq000001010000Z\*(Aq\&. Please see the option ldap_pwdlockout_dn\&. Please note that \*(Aqaccess_provider = ldap\*(Aq must be set for this feature to work\&.
+.sp
+\fI Please note that this option is superseded by the \fR\fI\(lqppolicy\(rq\fR\fI option and might be removed in a future release\&. \fR
+.sp
+\fIppolicy\fR: use account locking\&. If set, this option denies access in case that ldap attribute \*(AqpwdAccountLockedTime\*(Aq is present and has value of \*(Aq000001010000Z\*(Aq or represents any time in the past\&. The value of the \*(AqpwdAccountLockedTime\*(Aq attribute must end with \*(AqZ\*(Aq, which denotes the UTC time zone\&. Other time zones are not currently supported and will result in "access\-denied" when users attempt to log in\&. Please see the option ldap_pwdlockout_dn\&. Please note that \*(Aqaccess_provider = ldap\*(Aq must be set for this feature to work\&.
+.sp
+\fIexpire\fR: utiliser ldap_account_expire_policy
+.sp
+\fIpwd_expire_policy_reject, pwd_expire_policy_warn, pwd_expire_policy_renew: \fR
+These options are useful if users are interested in being warned that password is about to expire and authentication is based on using a different method than passwords \- for example SSH keys\&.
+.sp
+The difference between these options is the action taken if user password is expired: pwd_expire_policy_reject \- user is denied to log in, pwd_expire_policy_warn \- user is still able to log in, pwd_expire_policy_renew \- user is prompted to change his password immediately\&.
+.sp
+Note If user password is expired no explicit message is prompted by SSSD\&.
+.sp
+Please note that \*(Aqaccess_provider = ldap\*(Aq must be set for this feature to work\&. Also \*(Aqldap_pwd_policy\*(Aq must be set to an appropriate password policy\&.
+.sp
+\fIauthorized_service\fR
+: utiliser l\*(Aqattribut authorizedService pour déterminer l\*(Aqaccès
+.sp
+\fIhost\fR
+: utilise l\*(Aqattribut host pour déterminer l\*(Aqaccès
+.sp
+\fIrhost\fR: use the rhost attribute to determine whether remote host can access
+.sp
+Please note, rhost field in pam is set by application, it is better to check what the application sends to pam, before enabling this access control option
+.sp
+Par défaut : filter
+.sp
+Veuillez noter qu\*(Aqune valeur utilisée plusieurs fois résulte en une erreur de configuration\&.
+.RE
+.PP
+ldap_pwdlockout_dn (chaîne)
+.RS 4
+This option specifies the DN of password policy entry on LDAP server\&. Please note that absence of this option in sssd\&.conf in case of enabled account lockout checking will yield access denied as ppolicy attributes on LDAP server cannot be checked properly\&.
+.sp
+Exemple : cn=ppolicy,ou=policies,dc=example,dc=com
+.sp
+Default: cn=ppolicy,ou=policies,$ldap_search_base
+.RE
+.PP
+ldap_deref (chaînes)
+.RS 4
+Définit comment le déréférencement de l\*(Aqalias est effectué lors d\*(Aqune recherche\&. Les options suivantes sont autorisées :
+.sp
+\fInever\fR
+: les alias ne sont jamais déréférencés\&.
+.sp
+\fIsearching\fR
+: Les alias sont déréférencés comme des subordonnés de l\*(Aqobjet de base, mais pas en localisant l\*(Aqobjet de base de la recherche\&.
+.sp
+\fIfinding\fR
+: les alias sont seulement déréférencés lors de la localisation de l\*(Aqobjet de base de la recherche\&.
+.sp
+\fIalways\fR
+: les alias sont déréférencés à la fois pour la recherche et et la localisation de l\*(Aqobjet de base de la recherche\&.
+.sp
+Par défaut : vide (ceci est traité comme
+\fInever\fR
+par les bibliothèques clientes LDAP)
+.RE
+.PP
+ldap_rfc2307_fallback_to_local_users (booléen)
+.RS 4
+Permet de conserver les utilisateurs locaux en tant que membres d\*(Aqun groupe LDAP pour les serveurs qui utilisent le schéma RFC2307\&.
+.sp
+Dans certains environnements où le schéma RFC2307 est utilisé, les utilisateurs locaux deviennent membres du groupes LDAP en ajoutant leurs noms à l\*(Aqattribut memberUid\&. La cohérence du domaine est compromise quand cela est fait, SSSD supprimerait normalement les utilisateurs \(Fo disparus \(Fc des appartenances aux groupes mises en cache dès que nsswitch essaie de récupérer des informations sur l\*(Aqutilisateur via des appels à getpw*() ou initgoups()\&.
+.sp
+Cette option vérifie en dernier recours si les utilisateurs locaux sont référencés et les met en cache afin que des appels ultérieurs à initgoups() ajoutent les utilisateurs locaux aux groupes LDAP\&.
+.sp
+Par défaut : false
+.RE
+.PP
+wildcard_limit (integer)
+.RS 4
+Specifies an upper limit on the number of entries that are downloaded during a wildcard lookup\&.
+.sp
+At the moment, only the InfoPipe responder supports wildcard lookups\&.
+.sp
+Default: 1000 (often the size of one page)
+.RE
+.SH "OPTIONS DE SUDO"
+.PP
+The detailed instructions for configuration of sudo_provider are in the manual page
+\fBsssd-sudo\fR(5)\&.
+.PP
+.PP
+ldap_sudo_full_refresh_interval (integer)
+.RS 4
+La durée en secondes pendant laquelle SSSD va attendre entre deux actualisations complètes des règles de sudo (qui téléchargent toutes les règles qui sont stockées sur le serveur)\&.
+.sp
+La valeur doit être supérieure à
+\fIldap_sudo_smart_refresh_interval\fR
+.sp
+Par défaut : 21600 (6 heures)
+.RE
+.PP
+ldap_sudo_smart_refresh_interval (integer)
+.RS 4
+How many seconds SSSD has to wait before executing a smart refresh of sudo rules (which downloads all rules that have USN higher than the highest server USN value that is currently known by SSSD)\&.
+.sp
+Si les attributs USN ne sont pas pris en charge par le serveur, l\*(Aqattribut modifyTimestamp est utilisé à la place\&.
+.sp
+\fINote:\fR
+the highest USN value can be updated by three tasks: 1) By sudo full and smart refresh (if updated rules are found), 2) by enumeration of users and groups (if enabled and updated users or groups are found) and 3) by reconnecting to the server (by default every 15 minutes, see
+\fIldap_connection_expire_timeout\fR)\&.
+.sp
+Par défaut : 900 (15 minutes)
+.RE
+.PP
+ldap_sudo_use_host_filter (boolean)
+.RS 4
+Si true, SSSD téléchargera les seules règles qui s\*(Aqappliquent à cette machine (à l\*(Aqaide de l\*(Aqadresse de système ou de réseau IPv4 ou IPv6 et des noms de systèmes)\&.
+.sp
+Par défaut : true
+.RE
+.PP
+ldap_sudo_hostnames (string)
+.RS 4
+Liste séparés par des espaces des noms de systèmes ou de domaines qui doivent être utilisés pour filtrer les règles\&.
+.sp
+Si cette option est vide, SSSD va essayer de découvrir automatiquement le nom de système et le nom de domaine pleinement qualifié\&.
+.sp
+Si
+\fIldap_sudo_use_host_filter\fR
+est
+\fIfalse\fR, alors cette option n\*(Aqa aucun effet\&.
+.sp
+Par défaut : non spécifié
+.RE
+.PP
+ldap_sudo_ip (string)
+.RS 4
+Liste séparés par des espaces d\*(Aqadresses de système ou de réseaux IPv4 ou IPv6 qui doivent être utilisés pour filtrer les règles\&.
+.sp
+Si cette option est vide, SSSD va essayer de découvrir les adresses automatiquement\&.
+.sp
+Si
+\fIldap_sudo_use_host_filter\fR
+est
+\fIfalse\fR, alors cette option n\*(Aqa aucun effet\&.
+.sp
+Par défaut : non spécifié
+.RE
+.PP
+ldap_sudo_include_netgroups (boolean)
+.RS 4
+Si elle est vraie alors SSSD téléchargera toutes les règles qui contient un netgroup dans l\*(Aqattribut sudoHost\&.
+.sp
+Si
+\fIldap_sudo_use_host_filter\fR
+est
+\fIfalse\fR, alors cette option n\*(Aqa aucun effet\&.
+.sp
+Par défaut : true
+.RE
+.PP
+ldap_sudo_include_regexp (boolean)
+.RS 4
+Si positionnée à true, SSSD téléchargera toutes les règles qui contiennent un joker dans l\*(Aqattribut sudoHost\&.
+.sp
+Si
+\fIldap_sudo_use_host_filter\fR
+est
+\fIfalse\fR, alors cette option n\*(Aqa aucun effet\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+Using wildcard is an operation that is very costly to evaluate on the LDAP server side!
+.sp .5v
+.RE
+Par défaut : false
+.RE
+.PP
+Cette page de manuel décrit uniquement le mappage de noms d\*(Aqattribut\&. Pour une explication détaillée des sémantiques d\*(Aqattributs relatives à sudo, cf\&.
+\fBsudoers.ldap\fR(5)
+.SH "OPTIONS AUTOFS"
+.PP
+Some of the defaults for the parameters below are dependent on the LDAP schema\&.
+.PP
+.PP
+ldap_autofs_map_master_name (chaîne)
+.RS 4
+Le nom de la table de montage automatique maîtresse dans LDAP\&.
+.sp
+Par défaut\ \&: auto\&.master
+.RE
+.PP
+ldap_autofs_map_object_class (string)
+.RS 4
+La classe d\*(Aqobjet d\*(Aqune entrée de table de montage automatique dans LDAP\&.
+.sp
+Default: nisMap (rfc2307, autofs_provider=ad), otherwise automountMap
+.RE
+.PP
+ldap_autofs_map_name (string)
+.RS 4
+Le nom d\*(Aqune entrée de table de montage automatique dans LDAP\&.
+.sp
+Default: nisMapName (rfc2307, autofs_provider=ad), otherwise automountMapName
+.RE
+.PP
+ldap_autofs_entry_object_class (string)
+.RS 4
+The object class of an automount entry in LDAP\&. The entry usually corresponds to a mount point\&.
+.sp
+Default: nisObject (rfc2307, autofs_provider=ad), otherwise automount
+.RE
+.PP
+ldap_autofs_entry_key (string)
+.RS 4
+La clé d\*(Aqune entrée de montage automatique dans LDAP\&. L\*(Aqentrée correspond généralement à un point de montage\&.
+.sp
+Default: cn (rfc2307, autofs_provider=ad), otherwise automountKey
+.RE
+.PP
+ldap_autofs_entry_value (string)
+.RS 4
+La clé d\*(Aqune entrée de montage automatique dans LDAP\&. L\*(Aqentrée correspond généralement à un point de montage\&.
+.sp
+Default: nisMapEntry (rfc2307, autofs_provider=ad), otherwise automountInformation
+.RE
+.PP
+Veuillez noter que l\*(Aqautomounter ne lit que la carte maîtresse au démarrage\&. Ainsi, si des modifications liées à autofs sont apportées à sssd\&.conf, vous devrez généralement redémarrer le démon automounter après le redémarrage de SSSD
+.SH "OPTIONS AVANCÉES"
+.PP
+These options are supported by LDAP domains, but they should be used with caution\&. Please include them in your configuration only if you know what you are doing\&.
+.PP
+ldap_netgroup_search_base (chaînes)
+.RS 4
+Un DN de base facultatif, une étendue de recherche et un filtre LDAP afin de restreindre les recherches LDAP pour ce type d\*(Aqattribut\&.
+.sp
+syntaxe :
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?scope?[filter][?search_base?scope?[filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+La portée peut être l\*(Aqune des \(Fo base \(Fc, \(Fo onelevel \(Fc ou \(Fo subtree \(Fc\&. Les fonctions de portée sont spécifiées dans la section 4\&.5\&.1\&.2 de http://tools\&.ietf\&.org/html/rfc4511
+.sp
+Le filtre doit être un filtre de recherche LDAP valide tel que spécifié par http://www\&.ietf\&.org/rfc/rfc2254\&.txt
+.sp
+Pour obtenir des exemples de cette syntaxe, reportez\-vous à la section d\*(Aqexemples
+\(lqldap_search_base\(rq\&.
+.sp
+Par défaut : la valeur de
+\fIldap_search_base\fR
+.sp
+Noter que la spécification de portée ou de filtre n\*(Aqest pas prise en charge pour les recherches sur un serveur Active Directory qui serait susceptible de produire un grand nombre de résultats et de déclencher l\*(Aqextension Range Retrieval dans sa réponse\&.
+.RE
+.PP
+ldap_user_search_base (chaînes)
+.RS 4
+Un DN de base facultatif, une étendue de recherche et un filtre LDAP afin de restreindre les recherches LDAP pour ce type d\*(Aqattribut\&.
+.sp
+syntaxe :
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?scope?[filter][?search_base?scope?[filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+La portée peut être l\*(Aqune des \(Fo base \(Fc, \(Fo onelevel \(Fc ou \(Fo subtree \(Fc\&. Les fonctions de portée sont spécifiées dans la section 4\&.5\&.1\&.2 de http://tools\&.ietf\&.org/html/rfc4511
+.sp
+Le filtre doit être un filtre de recherche LDAP valide tel que spécifié par http://www\&.ietf\&.org/rfc/rfc2254\&.txt
+.sp
+Pour obtenir des exemples de cette syntaxe, reportez\-vous à la section d\*(Aqexemples
+\(lqldap_search_base\(rq\&.
+.sp
+Par défaut : la valeur de
+\fIldap_search_base\fR
+.sp
+Noter que la spécification de portée ou de filtre n\*(Aqest pas prise en charge pour les recherches sur un serveur Active Directory qui serait susceptible de produire un grand nombre de résultats et de déclencher l\*(Aqextension Range Retrieval dans sa réponse\&.
+.RE
+.PP
+ldap_group_search_base (chaînes)
+.RS 4
+Un DN de base facultatif, une étendue de recherche et un filtre LDAP afin de restreindre les recherches LDAP pour ce type d\*(Aqattribut\&.
+.sp
+syntaxe :
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?scope?[filter][?search_base?scope?[filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+La portée peut être l\*(Aqune des \(Fo base \(Fc, \(Fo onelevel \(Fc ou \(Fo subtree \(Fc\&. Les fonctions de portée sont spécifiées dans la section 4\&.5\&.1\&.2 de http://tools\&.ietf\&.org/html/rfc4511
+.sp
+Le filtre doit être un filtre de recherche LDAP valide tel que spécifié par http://www\&.ietf\&.org/rfc/rfc2254\&.txt
+.sp
+Pour obtenir des exemples de cette syntaxe, reportez\-vous à la section d\*(Aqexemples
+\(lqldap_search_base\(rq\&.
+.sp
+Par défaut : la valeur de
+\fIldap_search_base\fR
+.sp
+Noter que la spécification de portée ou de filtre n\*(Aqest pas prise en charge pour les recherches sur un serveur Active Directory qui serait susceptible de produire un grand nombre de résultats et de déclencher l\*(Aqextension Range Retrieval dans sa réponse\&.
+.RE
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+If the option
+\(lqldap_use_tokengroups\(rq
+is enabled, the searches against Active Directory will not be restricted and return all groups memberships, even with no GID mapping\&. It is recommended to disable this feature, if group names are not being displayed correctly\&.
+.sp .5v
+.RE
+.PP
+ldap_sudo_search_base (string)
+.RS 4
+Un DN de base facultatif, une étendue de recherche et un filtre LDAP afin de restreindre les recherches LDAP pour ce type d\*(Aqattribut\&.
+.sp
+syntaxe :
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?scope?[filter][?search_base?scope?[filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+La portée peut être l\*(Aqune des \(Fo base \(Fc, \(Fo onelevel \(Fc ou \(Fo subtree \(Fc\&. Les fonctions de portée sont spécifiées dans la section 4\&.5\&.1\&.2 de http://tools\&.ietf\&.org/html/rfc4511
+.sp
+Le filtre doit être un filtre de recherche LDAP valide tel que spécifié par http://www\&.ietf\&.org/rfc/rfc2254\&.txt
+.sp
+Pour obtenir des exemples de cette syntaxe, reportez\-vous à la section d\*(Aqexemples
+\(lqldap_search_base\(rq\&.
+.sp
+Par défaut : la valeur de
+\fIldap_search_base\fR
+.sp
+Noter que la spécification de portée ou de filtre n\*(Aqest pas prise en charge pour les recherches sur un serveur Active Directory qui serait susceptible de produire un grand nombre de résultats et de déclencher l\*(Aqextension Range Retrieval dans sa réponse\&.
+.RE
+.PP
+ldap_autofs_search_base (string)
+.RS 4
+Un DN de base facultatif, une étendue de recherche et un filtre LDAP afin de restreindre les recherches LDAP pour ce type d\*(Aqattribut\&.
+.sp
+syntaxe :
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?scope?[filter][?search_base?scope?[filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+La portée peut être l\*(Aqune des \(Fo base \(Fc, \(Fo onelevel \(Fc ou \(Fo subtree \(Fc\&. Les fonctions de portée sont spécifiées dans la section 4\&.5\&.1\&.2 de http://tools\&.ietf\&.org/html/rfc4511
+.sp
+Le filtre doit être un filtre de recherche LDAP valide tel que spécifié par http://www\&.ietf\&.org/rfc/rfc2254\&.txt
+.sp
+Pour obtenir des exemples de cette syntaxe, reportez\-vous à la section d\*(Aqexemples
+\(lqldap_search_base\(rq\&.
+.sp
+Par défaut : la valeur de
+\fIldap_search_base\fR
+.sp
+Noter que la spécification de portée ou de filtre n\*(Aqest pas prise en charge pour les recherches sur un serveur Active Directory qui serait susceptible de produire un grand nombre de résultats et de déclencher l\*(Aqextension Range Retrieval dans sa réponse\&.
+.RE
+.SH "BASCULE"
+.PP
+La fonctionnalité de bascule autorise le moteur à basculer automatiquement sur un serveur différent si le serveur actuel est défaillant\&.
+.SS "Syntaxe de bascule"
+.PP
+La liste des serveurs est donnée sous forme de liste séparée par des virgules ; un nombre quelconque d\*(Aqespaces est autorisé autour de la virgule\&. Les serveurs sont répertoriés par ordre de préférence\&. La liste peut contenir un nombre quelconque de serveurs\&.
+.PP
+Pour chaque option de configuration alors que la bascule est activée, il existe deux variantes\ \&:
+\fIprimary\fR
+et
+\fIbackup\fR\&. L\*(Aqidée est que les serveurs dans la liste principale sont préférés et les serveurs de secours sont interrogés uniquement si aucun serveur primaire ne peut être atteint\&. Si un serveur de secours est sélectionné, un délai d\*(Aqattente de 31 secondes est défini\&. Après ce délai d\*(Aqattente, SSSD tentera périodiquement de se reconnecter à un des serveurs primaires\&. S\*(Aqil réussit, il remplacera l\*(Aqactuel serveur (de secours) actif\&.
+.SS "Mécanisme de bascule"
+.PP
+Le mécanisme de bascule fait la distinction entre une machine et d\*(Aqun service\&. Le moteur tente d\*(Aqabord de résoudre le nom d\*(Aqhôte d\*(Aqun ordinateur donné ; en cas d\*(Aqéchec de cette tentative de résolution, la machine est considérée comme hors ligne\&. Aucune autre tentative n\*(Aqest faite pour se connecter à cette machine pour tout autre service\&. Si la tentative de résolution réussit, le serveur principal tente de se connecter à un service sur cette machine\&. Si la tentative de connexion de service échoue, alors ce seul service est considéré comme hors ligne et le moteur passe automatiquement au service suivant\&. La machine est toujours considérée en ligne et peut toujours être considérée pour une tentative d\*(Aqaccès à un autre service\&.
+.PP
+Les tentatives de connexion ultérieures sont faites vers des machines ou des services marqués comme hors connexion après un délai spécifié\ \&; ce délai est actuellement spécifié en dur à 30 secondes\&.
+.PP
+S\*(Aqil n\*(Aqy a plus aucune machine à essayer, le moteur dans son ensemble bascule dans le mode hors connexion et tente ensuite de se reconnecter toutes les 30 secondes\&.
+.SS "Failover time outs and tuning"
+.PP
+Resolving a server to connect to can be as simple as running a single DNS query or can involve several steps, such as finding the correct site or trying out multiple host names in case some of the configured servers are not reachable\&. The more complex scenarios can take some time and SSSD needs to balance between providing enough time to finish the resolution process but on the other hand, not trying for too long before falling back to offline mode\&. If the SSSD debug logs show that the server resolution is timing out before a live server is contacted, you can consider changing the time outs\&.
+.PP
+This section lists the available tunables\&. Please refer to their description in the
+\fBsssd.conf\fR(5), manual page\&.
+.PP
+dns_resolver_server_timeout
+.RS 4
+Time in milliseconds that sets how long would SSSD talk to a single DNS server before trying next one\&.
+.sp
+Par défaut : 1000
+.RE
+.PP
+dns_resolver_op_timeout
+.RS 4
+Time in seconds to tell how long would SSSD try to resolve single DNS query (e\&.g\&. resolution of a hostname or an SRV record) before trying the next hostname or discovery domain\&.
+.sp
+Par défaut : 2
+.RE
+.PP
+dns_resolver_timeout
+.RS 4
+How long would SSSD try to resolve a failover service\&. This service resolution internally might include several steps, such as resolving DNS SRV queries or locating the site\&.
+.sp
+Default: 4
+.RE
+.PP
+For LDAP\-based providers, the resolve operation is performed as part of an LDAP connection operation\&. Therefore, also the
+\(lqldap_opt_timeout>\(rq
+timeout should be set to a larger value than
+\(lqdns_resolver_timeout\(rq
+which in turn should be set to a larger value than
+\(lqdns_resolver_op_timeout\(rq
+which should be larger than
+\(lqdns_resolver_server_timeout\(rq\&.
+.SH "DÉCOUVERTE DE SERVICE"
+.PP
+La fonctionnalité de découverte de services permet aux moteurs de trouver automatiquement les serveurs appropriés auxquels se connecter à l\*(Aqaide d\*(Aqune requête DNS spéciale\&. Cette fonctionnalité n\*(Aqest pas pris en charge pour sur les serveurs secondaires\&.
+.SS "Configuration"
+.PP
+Si aucun serveur n\*(Aqest spécifié, le moteur utilise automatiquement la découverte de services pour tenter de trouver un serveur\&. L\*(Aqutilisateur peut aussi choisir d\*(Aqutiliser des adresses de serveur et de découverte de services fixes en insérant un mot\-clé spécial,
+\(lq_srv_\(rq, dans la liste des serveurs\&. L\*(Aqordre de préférence est maintenu\&. Cette fonctionnalité est utile si, par exemple, l\*(Aqutilisateur préfère utiliser la découverte de services chaque fois que possible et se replier vers un serveur spécifique lorsqu\*(Aqaucun serveur ne peut être découvert à l\*(Aqaide du DNS\&.
+.SS "Le nom de domaine"
+.PP
+Se reporter au paramètre
+\(lqdns_discovery_domain\(rq
+dans la page de manuel
+\fBsssd.conf\fR(5)
+pour plus de détails\&.
+.SS "Le protocole"
+.PP
+Les requêtes spécifient généralement _tcp comme protocole\&. Les exceptions sont documentées dans les descriptions respectives des options\&.
+.SS "Voir aussi"
+.PP
+Pour plus d\*(Aqinformations sur le mécanisme de découverte de services, se reporter à la RFC 2782\&.
+.SH "CORRESPONDANCE D\*(AQIDENTIFIANTS"
+.PP
+La fonctionnalité de correspondance d\*(AqID permet à SSSD d\*(Aqagir comme un client de Active Directory sans demander aux administrateurs d\*(Aqétendre les attributs utilisateur pour prendre en charge les attributs POSIX pour les identifiants d\*(Aqutilisateur et de groupe\&.
+.PP
+Remarque\ \&: Lorsque la mise en correspondance des ID est activée, les attributs uidNumber et gidNumber sont ignorés\&. Ceci afin d\*(Aqéviter les risques de conflit entre les valeurs attribuées automatiquement et assignées manuellement\&. Si vous avez besoin d\*(Aqutiliser des valeurs attribuées manuellement, TOUTES les valeurs doivent être assignées manuellement\&.
+.PP
+Please note that changing the ID mapping related configuration options will cause user and group IDs to change\&. At the moment, SSSD does not support changing IDs, so the SSSD database must be removed\&. Because cached passwords are also stored in the database, removing the database should only be performed while the authentication servers are reachable, otherwise users might get locked out\&. In order to cache the password, an authentication must be performed\&. It is not sufficient to use
+\fBsss_cache\fR(8)
+to remove the database, rather the process consists of:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Making sure the remote servers are reachable
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Arrêter le service SSSD
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Supprimer la base de donnée
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Démarrer le service SSSD
+.RE
+.sp
+Moreover, as the change of IDs might necessitate the adjustment of other system properties such as file and directory ownership, it\*(Aqs advisable to plan ahead and test the ID mapping configuration thoroughly\&.
+.SS "Algorithme de correspondance"
+.PP
+Active Directory fournit un objectSID pour chaque objet d\*(Aqutilisateur et de groupe dans l\*(Aqannuaire\&. Cet objectSID peut être divisé en composants qui représentent l\*(Aqidentité de domaine Active Directory et l\*(Aqidentificateur relatif (RID) de l\*(Aqobjet utilisateur ou groupe\&.
+.PP
+L\*(Aqalgorithme de mise en correspondance des ID de SSSD tient un éventail d\*(Aquid disponibles et le divise en sections de même taille, appelées \(Fo tranches \(Fc\&. Chaque tranche représente l\*(Aqespace disponible dans un domaine Active Directory\&.
+.PP
+Lorsqu\*(Aqune entrée d\*(Aqutilisateur ou de groupe pour un domaine particulier est rencontrée pour la première fois, SSSD alloue une des plages disponibles pour ce domaine\&. Afin de rendre cette affectation de plage reproductible sur les ordinateurs clients différents, l\*(Aqalgorithme de sélection de plage suivant est utilisé :
+.PP
+La chaîne du SID est passée par l\*(Aqintermédiaire de l\*(Aqalgorithme murmurhash3 pour le convertir en une valeur de hachage de 32 bits\&. Nous prenons ensuite le modulo de cette valeur avec le nombre total des tranches disponibles pour prendre la tranche\&.
+.PP
+Remarque : Il est possible de rencontrer les collisions dans le hachage et le modulo en découlant\&. Dans ces situations, la tranche suivante disponible sera sélectionnée, mais il n\*(Aqest pas possible de reproduire le même jeu exact des tranches sur d\*(Aqautres machines (puisque l\*(Aqordre dans lequel elles sont rencontrées déterminera leur tranche)\&. Dans ce cas, il est recommandé de passer à l\*(Aqutilisation des attributs POSIX explicites dans Active Directory (en désactivant la correspondance d\*(AqID) ou configurer un domaine par défaut afin de garantir qu\*(Aqau moins un est toujours cohérent\&. Pour plus d\*(Aqinformations, voir
+\(lqConfiguration\(rq\&.
+.SS "Configuration"
+.PP
+Configuration minimale (dans la section
+\(lq[domain/DOMAINNAME]\(rq) :
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+ldap_id_mapping = True
+ldap_schema = ad
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The default configuration results in configuring 10,000 slices, each capable of holding up to 200,000 IDs, starting from 200,000 and going up to 2,000,200,000\&. This should be sufficient for most deployments\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBConfiguration avancée\fR
+.RS 4
+.PP
+ldap_idmap_range_min (integer)
+.RS 4
+Spécifie la limite inférieure de la plage d\*(AqID POSIX à utiliser pour la mise en correspondance d\*(Aqidentifiants utilisateurs et groupes Active Directory\&.
+.sp
+NOTE : Cette option est différente de
+\(lqmin_id\(rq
+en ce sens que
+\(lqmin_id\(rq
+agit comme filtre sur le résultat des requêtes vers ce domaine, alors que cette option contrôle les plages de correspondance d\*(AqID\&. Il s\*(Aqagit d\*(Aqune distinction subtile, mais les bonnes pratiques conseillent d\*(Aqavoir
+\(lqmin_id\(rq
+inférieur ou égal à
+\(lqldap_idmap_range_min\(rq
+.sp
+Par défaut : 200000
+.RE
+.PP
+ldap_idmap_range_max (integer)
+.RS 4
+Spécifie la limite supérieure de la plage d\*(AqID POSIX à utiliser pour la mise en correspondance d\*(Aqidentifiants utilisateurs et groupes Active Directory\&.
+.sp
+NOTE : Cette option est différente de
+\(lqmax_id\(rq
+en ce sens que
+\(lqmax_id\(rq
+agit comme filtre sur le résultat des requêtes vers ce domaine, alors que cette option contrôle les plages de correspondance d\*(AqID\&. Il s\*(Aqagit d\*(Aqune distinction subtile, mais les bonnes pratiques conseillent d\*(Aqavoir
+\(lqmax_id\(rq
+supérieur ou égal à
+\(lqldap_idmap_range_max\(rq
+.sp
+Par défaut : 2000200000
+.RE
+.PP
+ldap_idmap_range_size (integer)
+.RS 4
+Spécifie le nombre d\*(Aqidentifiants pour chaque tranche\&. Si la taille de la plage ne divise pas uniformément dans les valeurs minimale et maximale, des tranches complètes seront créées autant que possible\&.
+.sp
+NOTE: The value of this option must be at least as large as the highest user RID planned for use on the Active Directory server\&. User lookups and login will fail for any user whose RID is greater than this value\&.
+.sp
+For example, if your most recently\-added Active Directory user has objectSid=S\-1\-5\-21\-2153326666\-2176343378\-3404031434\-1107,
+\(lqldap_idmap_range_size\(rq
+must be at least 1108 as range size is equal to maximal SID minus minimal SID plus one (e\&.g\&. 1108 = 1107 \- 0 + 1)\&.
+.sp
+It is important to plan ahead for future expansion, as changing this value will result in changing all of the ID mappings on the system, leading to users with different local IDs than they previously had\&.
+.sp
+Par défaut : 200000
+.RE
+.PP
+ldap_idmap_default_domain_sid (chaîne)
+.RS 4
+Spécifier le SID de domaine du domaine par défaut\&. Cela garantira que ce domaine est toujours affecté à la tranche zéro dans la carte d\*(AqID, sans passer par l\*(Aqalgorithme murmurhash décrit ci\-dessus\&.
+.sp
+Par défaut : non défini
+.RE
+.PP
+ldap_idmap_default_domain (chaîne)
+.RS 4
+Spécifier le nom de domaine par défaut\&.
+.sp
+Par défaut : non défini
+.RE
+.PP
+ldap_idmap_autorid_compat (boolean)
+.RS 4
+Modifie le comportement de l\*(Aqalgorithme de mise en correspondance des ID afin qu\*(Aqil se comporte de manière identique à celui
+\(lqidmap_autorid\(rq
+de winbind\&.
+.sp
+Lorsque cette option est configurée, les domaines seront alloués en commençant par la tranche zéro et augmentant de manière monotone pour chaque domaine supplémentaire\&.
+.sp
+Remarque : Cet algorithme n\*(Aqest pas déterministe (il dépend de l\*(Aqordre dans lequel utilisateurs et groupes sont invités)\&. Si ce mode est nécessaire pour assurer la compatibilité avec les ordinateurs qui utilisent winbind, il est recommandé d\*(Aqutiliser également l\*(Aqoption
+\(lqldap_idmap_default_domain_sid\(rq
+pour garantir qu\*(Aqau moins un domaine est systématiquement alloué à la tranche zéro\&.
+.sp
+Par défaut : False
+.RE
+.PP
+ldap_idmap_helper_table_size (integer)
+.RS 4
+Maximal number of secondary slices that is tried when performing mapping from UNIX id to SID\&.
+.sp
+Note: Additional secondary slices might be generated when SID is being mapped to UNIX id and RID part of SID is out of range for secondary slices generated so far\&. If value of ldap_idmap_helper_table_size is equal to 0 then no additional secondary slices are generated\&.
+.sp
+Par défaut : 10
+.RE
+.RE
+.SS "SID bien connus"
+.PP
+SSSD supports to look up the names of Well\-Known SIDs, i\&.e\&. SIDs with a special hardcoded meaning\&. Since the generic users and groups related to those Well\-Known SIDs have no equivalent in a Linux/UNIX environment no POSIX IDs are available for those objects\&.
+.PP
+The SID name space is organized in authorities which can be seen as different domains\&. The authorities for the Well\-Known SIDs are
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Null Authority
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+World Authority
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Local Authority
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Creator Authority
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+NT Authority
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Built\-in
+.RE
+.sp
+The capitalized version of these names are used as domain names when returning the fully qualified name of a Well\-Known SID\&.
+.PP
+Since some utilities allow to modify SID based access control information with the help of a name instead of using the SID directly SSSD supports to look up the SID by the name as well\&. To avoid collisions only the fully qualified names can be used to look up Well\-Known SIDs\&. As a result the domain names
+\(lqNULL AUTHORITY\(rq,
+\(lqWORLD AUTHORITY\(rq,
+\(lq LOCAL AUTHORITY\(rq,
+\(lqCREATOR AUTHORITY\(rq,
+\(lqNT AUTHORITY\(rq
+and
+\(lqBUILTIN\(rq
+should not be used as domain names in
+sssd\&.conf\&.
+.SH "EXEMPLE"
+.PP
+L\*(Aqexemple suivant suppose que SSSD est correctement configuré et que LDAP pointe sur un des domaines de la section
+\fI[domains]\fR\&.
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/LDAP]
+id_provider = ldap
+auth_provider = ldap
+ldap_uri = ldap://ldap\&.mydomain\&.org
+ldap_search_base = dc=mydomain,dc=org
+ldap_tls_reqcert = demand
+cache_credentials = true
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "LDAP ACCESS FILTER EXAMPLE"
+.PP
+The following example assumes that SSSD is correctly configured and to use the ldap_access_order=lockout\&.
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/LDAP]
+id_provider = ldap
+auth_provider = ldap
+access_provider = ldap
+ldap_access_order = lockout
+ldap_pwdlockout_dn = cn=ppolicy,ou=policies,dc=mydomain,dc=org
+ldap_uri = ldap://ldap\&.mydomain\&.org
+ldap_search_base = dc=mydomain,dc=org
+ldap_tls_reqcert = demand
+cache_credentials = true
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "NOTES"
+.PP
+Les descriptions de quelques unes des options de configuration des pages de manuel sont basées sur le manuel de
+\fBldap.conf\fR(5)
+de la distribution de OpenLDAP 2\&.4\&.
+.SH "VOIR AUSSI"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

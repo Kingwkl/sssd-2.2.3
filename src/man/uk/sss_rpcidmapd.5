@@ -1,0 +1,103 @@
+'\" t
+.\"     Title: sss_rpcidmapd
+.\"    Author: Noam Meltzer
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Формати файлів та правила
+.\"    Source: sss rpc.idmapd plugin
+.\"  Language: English
+.\"
+.TH "SSS_RPCIDMAPD" "5" "12/09/2020" "sss rpc.idmapd plugin" "Формати файлів та правила"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_rpcidmapd \- Директиви налаштовування додатка sss для rpc\&.idmapd
+.SH "ФАЙЛ НАЛАШТУВАНЬ"
+.PP
+Файл налаштувань rpc\&.idmapd зазвичай зберігається тут:
+\fI/etc/idmapd\&.conf\fR\&. Див\&. підручник з
+\fBidmapd.conf\fR(5), щоб дізнатися більше\&.
+.SH "РОЗШИРЕННЯ НАЛАШТОВУВАННЯ SSS"
+.SS "Вмикання додатка SSS"
+.PP
+У розділі \(Fo[Translation]\(Fc змініть або додайте атрибут \(FoMethod\(Fc із вмістом
+\fIsss\fR\&.
+.SS "Розділ налаштовування [sss]"
+.PP
+Якщо вам потрібно змінити типове значення одного з атрибутів налаштувань, перелічених нижче, додатка
+\fIsss\fR, вам слід створити розділ налаштувань для нього з назвою \(Fo[sss]\(Fc\&.
+.PP
+\fBАтрибути налаштувань\fR
+.PP
+memcache (булеве значення)
+.RS 4
+Визначає, чи слід використовувати методику оптимізації кешу у пам\(cqяті\&.
+.sp
+Типове значення: True
+.RE
+.SH "ІНТЕГРАЦІЯ З SSSD"
+.PP
+Додаток sss потребує вмикання
+\fIВідповідача NSS\fR
+у sssd\&.
+.PP
+Атрибут \(Fouse_fully_qualified_names\(Fc має бути увімкнено для усіх доменів (клієнти NFSv4 очікують на те, що надсилається назва повністю)\&.
+.SH "ПРИКЛАД"
+.PP
+У наведеному нижче прикладі показано мінімальний вигляд idmapd\&.conf, де використовується додаток sss\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[General]
+Verbosity = 2
+# домен має бути синхронізовано між сервером NFSv4 та клієнтами
+# У Solaris/Illumos/AIX типово використовується "локальний домен"!
+Domain = default
+
+[Mapping]
+Nobody\-User = nfsnobody
+Nobody\-Group = nfsnobody
+
+[Translation]
+Method = sss
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "ТАКОЖ ПЕРЕГЛЯНЬТЕ"
+.PP
+\fBsssd\fR(8),
+\fBidmapd.conf\fR(5)
+.SH "AUTHORS"
+.PP
+\fBNoam Meltzer\fR
+.br
+Primary Data Inc\&.
+.RS 4
+Розробник (2013\-2014)
+.RE
+.PP
+\fBNoam Meltzer\fR <\&tsnoam@gmail\&.com\&>
+.RS 4
+Розробник (2014\-)
+.RE

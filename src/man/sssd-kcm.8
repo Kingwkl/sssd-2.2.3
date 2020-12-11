@@ -1,0 +1,244 @@
+'\" t
+.\"     Title: sssd-kcm
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: File Formats and Conventions
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-KCM" "8" "12/09/2020" "SSSD" "File Formats and Conventions"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-kcm \- SSSD Kerberos Cache Manager
+.SH "DESCRIPTION"
+.PP
+This manual page describes the configuration of the SSSD Kerberos Cache Manager (KCM)\&. KCM is a process that stores, tracks and manages Kerberos credential caches\&. It originates in the Heimdal Kerberos project, although the MIT Kerberos library also provides client side (more details on that below) support for the KCM credential cache\&.
+.PP
+In a setup where Kerberos caches are managed by KCM, the Kerberos library (typically used through an application, like e\&.g\&.,
+\fBkinit\fR(1), is a
+\(lq"KCM client"\(rq
+and the KCM daemon is being referred to as a
+\(lq"KCM server"\(rq\&. The client and server communicate over a UNIX socket\&.
+.PP
+The KCM server keeps track of each credential caches\*(Aqs owner and performs access check control based on the UID and GID of the KCM client\&. The root user has access to all credential caches\&.
+.PP
+The KCM credential cache has several interesting properties:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+since the process runs in userspace, it is subject to UID namespacing, unlike the kernel keyring
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+unlike the kernel keyring\-based cache, which is shared between all containers, the KCM server is a separate process whose entry point is a UNIX socket
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+the SSSD implementation stores the ccaches in a database, typically located at
+\fI/var/lib/sss/secrets\fR
+allowing the ccaches to survive KCM server restarts or machine reboots\&.
+.RE
+.sp
+This allows the system to use a collection\-aware credential cache, yet share the credential cache between some or no containers by bind\-mounting the socket\&.
+.SH "USING THE KCM CREDENTIAL CACHE"
+.PP
+In order to use KCM credential cache, it must be selected as the default credential type in
+\fBkrb5.conf\fR(5), The credentials cache name must be only
+\(lqKCM:\(rq
+without any template expansions\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[libdefaults]
+    default_ccache_name = KCM:
+            
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Next, make sure the Kerberos client libraries and the KCM server must agree on the UNIX socket path\&. By default, both use the same path
+\fI/var/run/\&.heim_org\&.h5l\&.kcm\-socket\fR\&. To configure the Kerberos library, change its
+\(lqkcm_socket\(rq
+option which is described in the
+\fBkrb5.conf\fR(5)
+manual page\&.
+.PP
+Finally, make sure the SSSD KCM server can be contacted\&. The KCM service is typically socket\-activated by
+\fBsystemd\fR(1)\&. Unlike other SSSD services, it cannot be started by adding the
+\(lqkcm\(rq
+string to the
+\(lqservice\(rq
+directive\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+systemctl start sssd\-kcm\&.socket
+systemctl enable sssd\-kcm\&.socket
+            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Please note your distribution may already configure the units for you\&.
+.SH "THE CREDENTIAL CACHE STORAGE"
+.PP
+The credential caches are stored in a database, much like SSSD caches user or group entries\&. The database is typically located at
+\(lq/var/lib/sss/secrets\(rq\&.
+.SH "OBTAINING DEBUG LOGS"
+.PP
+The sssd\-kcm service is typically socket\-activated
+\fBsystemd\fR(1)\&. To generate debug logs, add the following either to the
+/etc/sssd/sssd\&.conf
+file directly or as a configuration snippet to
+/etc/sssd/conf\&.d/
+directory:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[kcm]
+debug_level = 10
+            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Then, restart the sssd\-kcm service:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+systemctl restart sssd\-kcm\&.service
+            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Finally, run whatever use\-case doesn\*(Aqt work for you\&. The KCM logs will be generated at
+/var/log/sssd/sssd_kcm\&.log\&. It is recommended to disable the debug logs when you no longer need the debugging to be enabled as the sssd\-kcm service can generate quite a large amount of debugging information\&.
+.PP
+Please note that configuration snippets are, at the moment, only processed if the main configuration file at
+/etc/sssd/sssd\&.conf
+exists at all\&.
+.SH "CONFIGURATION OPTIONS"
+.PP
+The KCM service is configured in the
+\(lqkcm\(rq
+section of the sssd\&.conf file\&. Please note that because the KCM service is typically socket\-activated, it is enough to just restart the
+\(lqsssd\-kcm\(rq
+service after changing options in the
+\(lqkcm\(rq
+section of sssd\&.conf:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+systemctl restart sssd\-kcm\&.service
+            
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The KCM service is configured in the
+\(lqkcm\(rq
+For a detailed syntax reference, refer to the
+\(lqFILE FORMAT\(rq
+section of the
+\fBsssd.conf\fR(5)
+manual page\&.
+.PP
+The generic SSSD service options such as
+\(lqdebug_level\(rq
+or
+\(lqfd_limit\(rq
+are accepted by the kcm service\&. Please refer to the
+\fBsssd.conf\fR(5)
+manual page for a complete list\&. In addition, there are some KCM\-specific options as well\&.
+.PP
+socket_path (string)
+.RS 4
+The socket the KCM service will listen on\&.
+.sp
+Default:
+\fI/var/run/\&.heim_org\&.h5l\&.kcm\-socket\fR
+.RE
+.PP
+max_ccaches (integer)
+.RS 4
+How many credential caches does the KCM database allow for all users\&.
+.sp
+Default: 0 (unlimited, only the per\-UID quota is enforced)
+.RE
+.PP
+max_uid_ccaches (integer)
+.RS 4
+How many credential caches does the KCM database allow per UID\&. This is equivalent to
+\(lqwith how many principals you can kinit\(rq\&.
+.sp
+Default: 64
+.RE
+.PP
+max_ccache_size (integer)
+.RS 4
+How big can a credential cache be per ccache\&. Each service ticket accounts into this quota\&.
+.sp
+Default: 65536
+.RE
+.SH "SEE ALSO"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \- https://pagure\&.io/SSSD/sssd/\fR

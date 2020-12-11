@@ -1,0 +1,139 @@
+'\" t
+.\"     Title: sss_useradd
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: SSSD-Handbuchseiten
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_USERADD" "8" "12/09/2020" "SSSD" "SSSD-Handbuchseiten"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_useradd \- erstellt einen neuen Benutzer
+.SH "SYNOPSIS"
+.HP \w'\fBsss_useradd\fR\ 'u
+\fBsss_useradd\fR [\fIOptionen\fR] \fIANMELDUNG\fR
+.SH "BESCHREIBUNG"
+.PP
+\fBsss_useradd\fR
+erstellt mittels der auf der Befehlszeile angegebenen Werte sowie der Standardwerte des Systems ein neues Benutzerkonto\&.
+.SH "OPTIONEN"
+.PP
+\fB\-u\fR,\fB\-\-uid\fR \fIUID\fR
+.RS 4
+setzt die UID des Benutzers auf den Wert von
+\fIUID\fR\&. Wurde der Wert nicht angegeben, wird er automatisch ausgewählt\&.
+.RE
+.PP
+\fB\-c\fR,\fB\-\-gecos\fR \fIKOMMENTAR\fR
+.RS 4
+irgendeine Zeichenkette, die den Benutzer beschreibt\&. Dieses Feld wird oft für den vollständigen Namen des Benutzers verwendet\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-home\fR \fIHOME_VERZ\fR
+.RS 4
+das Home\-Verzeichnis des Benutzerkontos\&. Standardmäßig wird der Name für die
+\fIANMELDUNG\fR
+an
+/home
+angehängt und dies dann als Home\-Verzeichnis benutzt\&. Das Basisverzeichnis, das
+\fIANMELDUNG\fR
+vorangestellt wird, ist über die Einstellung \(Fcuser_defaults/baseDirectory\(Fo in der \(Fcsssd\&.conf\(Fo einstellbar\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-shell\fR \fISHELL\fR
+.RS 4
+die Anmelde\-Shell des Benutzers\&. Voreinstellung ist derzeit
+/bin/bash\&. Die Voreinstellung kann über die Einstellung \(Fcuser_defaults/defaultShell\(Fo in der \(Fcsssd\&.conf\(Fo geändert werden\&.
+.RE
+.PP
+\fB\-G\fR,\fB\-\-groups\fR \fIGRUPPEN\fR
+.RS 4
+eine Liste existierender Gruppen, denen dieser Benutzer auch angehört
+.RE
+.PP
+\fB\-m\fR,\fB\-\-create\-home\fR
+.RS 4
+erstellt das Home\-Verzeichnis des Benutzers, falls es nicht existiert\&. Die Dateien und Verzeichnisse, die in der Verzeichnisvorlage (die mit der Option \-k oder in der Konfigurationsdatei definiert werden kann) enthalten sind, werden in das Home\-Verzeichnis kopiert\&.
+.RE
+.PP
+\fB\-M\fR,\fB\-\-no\-create\-home\fR
+.RS 4
+erstellt nicht das Home\-Verzeichnis des Benutzers und setzt Konfigurationseinstellungen außer Kraft\&.
+.RE
+.PP
+\fB\-k\fR,\fB\-\-skel\fR \fISKEL\-VERZ\fR
+.RS 4
+die Verzeichnisvorlage mit Dateien und Verzeichnissen, die in das durch
+\fBsss_useradd\fR
+neu erstellte Home\-Verzeichnis des Benutzers kopiert werden\&.
+.sp
+Spezialdateien (block\- und zeichenorientierte Geräte, benannte Pipes und Unix\-Sockets) werden nicht kopiert\&.
+.sp
+Diese Option ist nur gültig, falls die Option
+\fB\-m\fR
+(oder
+\fB\-\-create\-home\fR) angegeben wurde oder das Erstellen von Home\-Verzeichnissen in der Konfiguration auf \(FcTRUE\(Fo gesetzt ist\&.
+.RE
+.PP
+\fB\-Z\fR,\fB\-\-selinux\-user\fR \fISELINUX_BENUTZER\fR
+.RS 4
+der SELinux\-Benutzer für die Anmeldung des Benutzers\&. Ist er nicht angegeben, wird die Voreinstellung des Systems benutzt\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+zeigt den Hilfetext und beendet sich\&.
+.RE
+.SH "DIE LOKALE DOMAIN"
+.PP
+Für korrektes Funktionieren muss eine Domain mit \(Fcid_provider=local\(Fo erstellt sein und SSSD muss laufen\&.
+.PP
+Möglicherweise möchte der Administrator in Fällen, in denen Gruppenverschachtelung (siehe
+\fBsss_groupadd\fR(8)) benötigt wird, lokale Benutzer anstelle traditioneller UNIX\-Benutzer verwenden\&. Die lokalen Benutzer sind auch für das Testen und Entwickeln von SSSD nützlich, ohne dass ein vollständiger ferner Server bereitgestellt werden muss\&. Die
+\fBsss_user*\fR\- und
+\fBsss_group*\fR\-Werkzeuge benutzen einen lokalen LDB\-Speicher, um Benutzer und Gruppen abzulegen\&.
+.SH "SIEHE AUCH"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

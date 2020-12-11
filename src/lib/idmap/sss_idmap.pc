@@ -1,0 +1,11 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: sss_idmap
+Description: SSS idmap (SID <-> uid,gid) library
+Version: 2.2.3
+Libs: -L${libdir} -lsss_idmap
+Cflags:
+URL: https://pagure.io/SSSD/sssd/

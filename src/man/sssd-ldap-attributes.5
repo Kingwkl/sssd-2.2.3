@@ -1,0 +1,689 @@
+'\" t
+.\"     Title: sssd-ldap-attributes
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: File Formats and Conventions
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-LDAP\-ATTRIBUT" "5" "12/09/2020" "SSSD" "File Formats and Conventions"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-ldap-attributes \- SSSD LDAP Provider: Mapping Attributes
+.SH "DESCRIPTION"
+.PP
+This manual page describes the mapping attributes of SSSD LDAP provider
+\fBsssd-ldap\fR(5)\&. Refer to the
+\fBsssd-ldap\fR(5)
+manual page for full details about SSSD LDAP provider configuration options\&.
+.SH "USER ATTRIBUTES"
+.PP
+.PP
+ldap_user_object_class (string)
+.RS 4
+The object class of a user entry in LDAP\&.
+.sp
+Default: posixAccount
+.RE
+.PP
+ldap_user_name (string)
+.RS 4
+The LDAP attribute that corresponds to the user\*(Aqs login name\&.
+.sp
+Default: uid (rfc2307, rfc2307bis and IPA), sAMAccountName (AD)
+.RE
+.PP
+ldap_user_uid_number (string)
+.RS 4
+The LDAP attribute that corresponds to the user\*(Aqs id\&.
+.sp
+Default: uidNumber
+.RE
+.PP
+ldap_user_gid_number (string)
+.RS 4
+The LDAP attribute that corresponds to the user\*(Aqs primary group id\&.
+.sp
+Default: gidNumber
+.RE
+.PP
+ldap_user_primary_group (string)
+.RS 4
+Active Directory primary group attribute for ID\-mapping\&. Note that this attribute should only be set manually if you are running the
+\(lqldap\(rq
+provider with ID mapping\&.
+.sp
+Default: unset (LDAP), primaryGroupID (AD)
+.RE
+.PP
+ldap_user_gecos (string)
+.RS 4
+The LDAP attribute that corresponds to the user\*(Aqs gecos field\&.
+.sp
+Default: gecos
+.RE
+.PP
+ldap_user_home_directory (string)
+.RS 4
+The LDAP attribute that contains the name of the user\*(Aqs home directory\&.
+.sp
+Default: homeDirectory (LDAP and IPA), unixHomeDirectory (AD)
+.RE
+.PP
+ldap_user_shell (string)
+.RS 4
+The LDAP attribute that contains the path to the user\*(Aqs default shell\&.
+.sp
+Default: loginShell
+.RE
+.PP
+ldap_user_uuid (string)
+.RS 4
+The LDAP attribute that contains the UUID/GUID of an LDAP user object\&.
+.sp
+Default: not set in the general case, objectGUID for AD and ipaUniqueID for IPA
+.RE
+.PP
+ldap_user_objectsid (string)
+.RS 4
+The LDAP attribute that contains the objectSID of an LDAP user object\&. This is usually only necessary for ActiveDirectory servers\&.
+.sp
+Default: objectSid for ActiveDirectory, not set for other servers\&.
+.RE
+.PP
+ldap_user_modify_timestamp (string)
+.RS 4
+The LDAP attribute that contains timestamp of the last modification of the parent object\&.
+.sp
+Default: modifyTimestamp
+.RE
+.PP
+ldap_user_shadow_last_change (string)
+.RS 4
+When using ldap_pwd_policy=shadow, this parameter contains the name of an LDAP attribute corresponding to its
+\fBshadow\fR(5)
+counterpart (date of the last password change)\&.
+.sp
+Default: shadowLastChange
+.RE
+.PP
+ldap_user_shadow_min (string)
+.RS 4
+When using ldap_pwd_policy=shadow, this parameter contains the name of an LDAP attribute corresponding to its
+\fBshadow\fR(5)
+counterpart (minimum password age)\&.
+.sp
+Default: shadowMin
+.RE
+.PP
+ldap_user_shadow_max (string)
+.RS 4
+When using ldap_pwd_policy=shadow, this parameter contains the name of an LDAP attribute corresponding to its
+\fBshadow\fR(5)
+counterpart (maximum password age)\&.
+.sp
+Default: shadowMax
+.RE
+.PP
+ldap_user_shadow_warning (string)
+.RS 4
+When using ldap_pwd_policy=shadow, this parameter contains the name of an LDAP attribute corresponding to its
+\fBshadow\fR(5)
+counterpart (password warning period)\&.
+.sp
+Default: shadowWarning
+.RE
+.PP
+ldap_user_shadow_inactive (string)
+.RS 4
+When using ldap_pwd_policy=shadow, this parameter contains the name of an LDAP attribute corresponding to its
+\fBshadow\fR(5)
+counterpart (password inactivity period)\&.
+.sp
+Default: shadowInactive
+.RE
+.PP
+ldap_user_shadow_expire (string)
+.RS 4
+When using ldap_pwd_policy=shadow or ldap_account_expire_policy=shadow, this parameter contains the name of an LDAP attribute corresponding to its
+\fBshadow\fR(5)
+counterpart (account expiration date)\&.
+.sp
+Default: shadowExpire
+.RE
+.PP
+ldap_user_krb_last_pwd_change (string)
+.RS 4
+When using ldap_pwd_policy=mit_kerberos, this parameter contains the name of an LDAP attribute storing the date and time of last password change in kerberos\&.
+.sp
+Default: krbLastPwdChange
+.RE
+.PP
+ldap_user_krb_password_expiration (string)
+.RS 4
+When using ldap_pwd_policy=mit_kerberos, this parameter contains the name of an LDAP attribute storing the date and time when current password expires\&.
+.sp
+Default: krbPasswordExpiration
+.RE
+.PP
+ldap_user_ad_account_expires (string)
+.RS 4
+When using ldap_account_expire_policy=ad, this parameter contains the name of an LDAP attribute storing the expiration time of the account\&.
+.sp
+Default: accountExpires
+.RE
+.PP
+ldap_user_ad_user_account_control (string)
+.RS 4
+When using ldap_account_expire_policy=ad, this parameter contains the name of an LDAP attribute storing the user account control bit field\&.
+.sp
+Default: userAccountControl
+.RE
+.PP
+ldap_ns_account_lock (string)
+.RS 4
+When using ldap_account_expire_policy=rhds or equivalent, this parameter determines if access is allowed or not\&.
+.sp
+Default: nsAccountLock
+.RE
+.PP
+ldap_user_nds_login_disabled (string)
+.RS 4
+When using ldap_account_expire_policy=nds, this attribute determines if access is allowed or not\&.
+.sp
+Default: loginDisabled
+.RE
+.PP
+ldap_user_nds_login_expiration_time (string)
+.RS 4
+When using ldap_account_expire_policy=nds, this attribute determines until which date access is granted\&.
+.sp
+Default: loginDisabled
+.RE
+.PP
+ldap_user_nds_login_allowed_time_map (string)
+.RS 4
+When using ldap_account_expire_policy=nds, this attribute determines the hours of a day in a week when access is granted\&.
+.sp
+Default: loginAllowedTimeMap
+.RE
+.PP
+ldap_user_principal (string)
+.RS 4
+The LDAP attribute that contains the user\*(Aqs Kerberos User Principal Name (UPN)\&.
+.sp
+Default: krbPrincipalName
+.RE
+.PP
+ldap_user_extra_attrs (string)
+.RS 4
+Comma\-separated list of LDAP attributes that SSSD would fetch along with the usual set of user attributes\&.
+.sp
+The list can either contain LDAP attribute names only, or colon\-separated tuples of SSSD cache attribute name and LDAP attribute name\&. In case only LDAP attribute name is specified, the attribute is saved to the cache verbatim\&. Using a custom SSSD attribute name might be required by environments that configure several SSSD domains with different LDAP schemas\&.
+.sp
+Please note that several attribute names are reserved by SSSD, notably the
+\(lqname\(rq
+attribute\&. SSSD would report an error if any of the reserved attribute names is used as an extra attribute name\&.
+.sp
+Examples:
+.sp
+ldap_user_extra_attrs = telephoneNumber
+.sp
+Save the
+\(lqtelephoneNumber\(rq
+attribute from LDAP as
+\(lqtelephoneNumber\(rq
+to the cache\&.
+.sp
+ldap_user_extra_attrs = phone:telephoneNumber
+.sp
+Save the
+\(lqtelephoneNumber\(rq
+attribute from LDAP as
+\(lqphone\(rq
+to the cache\&.
+.sp
+Default: not set
+.RE
+.PP
+ldap_user_ssh_public_key (string)
+.RS 4
+The LDAP attribute that contains the user\*(Aqs SSH public keys\&.
+.sp
+Default: sshPublicKey
+.RE
+.PP
+ldap_user_fullname (string)
+.RS 4
+The LDAP attribute that corresponds to the user\*(Aqs full name\&.
+.sp
+Default: cn
+.RE
+.PP
+ldap_user_member_of (string)
+.RS 4
+The LDAP attribute that lists the user\*(Aqs group memberships\&.
+.sp
+Default: memberOf
+.RE
+.PP
+ldap_user_authorized_service (string)
+.RS 4
+If access_provider=ldap and ldap_access_order=authorized_service, SSSD will use the presence of the authorizedService attribute in the user\*(Aqs LDAP entry to determine access privilege\&.
+.sp
+An explicit deny (!svc) is resolved first\&. Second, SSSD searches for explicit allow (svc) and finally for allow_all (*)\&.
+.sp
+Please note that the ldap_access_order configuration option
+\fImust\fR
+include
+\(lqauthorized_service\(rq
+in order for the ldap_user_authorized_service option to work\&.
+.sp
+Some distributions (such as Fedora\-29+ or RHEL\-8) always include the
+\(lqsystemd\-user\(rq
+PAM service as part of the login process\&. Therefore when using service\-based access control, the
+\(lqsystemd\-user\(rq
+service might need to be added to the list of allowed services\&.
+.sp
+Default: authorizedService
+.RE
+.PP
+ldap_user_authorized_host (string)
+.RS 4
+If access_provider=ldap and ldap_access_order=host, SSSD will use the presence of the host attribute in the user\*(Aqs LDAP entry to determine access privilege\&.
+.sp
+An explicit deny (!host) is resolved first\&. Second, SSSD searches for explicit allow (host) and finally for allow_all (*)\&.
+.sp
+Please note that the ldap_access_order configuration option
+\fImust\fR
+include
+\(lqhost\(rq
+in order for the ldap_user_authorized_host option to work\&.
+.sp
+Default: host
+.RE
+.PP
+ldap_user_authorized_rhost (string)
+.RS 4
+If access_provider=ldap and ldap_access_order=rhost, SSSD will use the presence of the rhost attribute in the user\*(Aqs LDAP entry to determine access privilege\&. Similarly to host verification process\&.
+.sp
+An explicit deny (!rhost) is resolved first\&. Second, SSSD searches for explicit allow (rhost) and finally for allow_all (*)\&.
+.sp
+Please note that the ldap_access_order configuration option
+\fImust\fR
+include
+\(lqrhost\(rq
+in order for the ldap_user_authorized_rhost option to work\&.
+.sp
+Default: rhost
+.RE
+.PP
+ldap_user_certificate (string)
+.RS 4
+Name of the LDAP attribute containing the X509 certificate of the user\&.
+.sp
+Default: userCertificate;binary
+.RE
+.PP
+ldap_user_email (string)
+.RS 4
+Name of the LDAP attribute containing the email address of the user\&.
+.sp
+Note: If an email address of a user conflicts with an email address or fully qualified name of another user, then SSSD will not be able to serve those users properly\&. If for some reason several users need to share the same email address then set this option to a nonexistent attribute name in order to disable user lookup/login by email\&.
+.sp
+Default: mail
+.RE
+.SH "GROUP ATTRIBUTES"
+.PP
+.PP
+ldap_group_object_class (string)
+.RS 4
+The object class of a group entry in LDAP\&.
+.sp
+Default: posixGroup
+.RE
+.PP
+ldap_group_name (string)
+.RS 4
+The LDAP attribute that corresponds to the group name\&.
+.sp
+Default: cn (rfc2307, rfc2307bis and IPA), sAMAccountName (AD)
+.RE
+.PP
+ldap_group_gid_number (string)
+.RS 4
+The LDAP attribute that corresponds to the group\*(Aqs id\&.
+.sp
+Default: gidNumber
+.RE
+.PP
+ldap_group_member (string)
+.RS 4
+The LDAP attribute that contains the names of the group\*(Aqs members\&.
+.sp
+Default: memberuid (rfc2307) / member (rfc2307bis)
+.RE
+.PP
+ldap_group_uuid (string)
+.RS 4
+The LDAP attribute that contains the UUID/GUID of an LDAP group object\&.
+.sp
+Default: not set in the general case, objectGUID for AD and ipaUniqueID for IPA
+.RE
+.PP
+ldap_group_objectsid (string)
+.RS 4
+The LDAP attribute that contains the objectSID of an LDAP group object\&. This is usually only necessary for ActiveDirectory servers\&.
+.sp
+Default: objectSid for ActiveDirectory, not set for other servers\&.
+.RE
+.PP
+ldap_group_modify_timestamp (string)
+.RS 4
+The LDAP attribute that contains timestamp of the last modification of the parent object\&.
+.sp
+Default: modifyTimestamp
+.RE
+.PP
+ldap_group_type (string)
+.RS 4
+The LDAP attribute that contains an integer value indicating the type of the group and maybe other flags\&.
+.sp
+This attribute is currently only used by the AD provider to determine if a group is a domain local groups and has to be filtered out for trusted domains\&.
+.sp
+Default: groupType in the AD provider, otherwise not set
+.RE
+.PP
+ldap_group_external_member (string)
+.RS 4
+The LDAP attribute that references group members that are defined in an external domain\&. At the moment, only IPA\*(Aqs external members are supported\&.
+.sp
+Default: ipaExternalMember in the IPA provider, otherwise unset\&.
+.RE
+.SH "NETGROUP ATTRIBUTES"
+.PP
+.PP
+ldap_netgroup_object_class (string)
+.RS 4
+The object class of a netgroup entry in LDAP\&.
+.sp
+In IPA provider, ipa_netgroup_object_class should be used instead\&.
+.sp
+Default: nisNetgroup
+.RE
+.PP
+ldap_netgroup_name (string)
+.RS 4
+The LDAP attribute that corresponds to the netgroup name\&.
+.sp
+In IPA provider, ipa_netgroup_name should be used instead\&.
+.sp
+Default: cn
+.RE
+.PP
+ldap_netgroup_member (string)
+.RS 4
+The LDAP attribute that contains the names of the netgroup\*(Aqs members\&.
+.sp
+In IPA provider, ipa_netgroup_member should be used instead\&.
+.sp
+Default: memberNisNetgroup
+.RE
+.PP
+ldap_netgroup_triple (string)
+.RS 4
+The LDAP attribute that contains the (host, user, domain) netgroup triples\&.
+.sp
+This option is not available in IPA provider\&.
+.sp
+Default: nisNetgroupTriple
+.RE
+.PP
+ldap_netgroup_modify_timestamp (string)
+.RS 4
+The LDAP attribute that contains timestamp of the last modification of the parent object\&.
+.sp
+This option is not available in IPA provider\&.
+.sp
+Default: modifyTimestamp
+.RE
+.SH "HOST ATTRIBUTES"
+.PP
+.PP
+ldap_host_object_class (string)
+.RS 4
+The object class of a host entry in LDAP\&.
+.sp
+Default: ipService
+.RE
+.PP
+ldap_host_name (string)
+.RS 4
+The LDAP attribute that corresponds to the host\*(Aqs name\&.
+.sp
+Default: cn
+.RE
+.PP
+ldap_host_fqdn (string)
+.RS 4
+The LDAP attribute that corresponds to the host\*(Aqs fully\-qualified domain name\&.
+.sp
+Default: fqdn
+.RE
+.PP
+ldap_host_serverhostname (string)
+.RS 4
+The LDAP attribute that corresponds to the host\*(Aqs name\&.
+.sp
+Default: serverHostname
+.RE
+.PP
+ldap_host_member_of (string)
+.RS 4
+The LDAP attribute that lists the host\*(Aqs group memberships\&.
+.sp
+Default: memberOf
+.RE
+.PP
+ldap_host_ssh_public_key (string)
+.RS 4
+The LDAP attribute that contains the host\*(Aqs SSH public keys\&.
+.sp
+Default: sshPublicKey
+.RE
+.PP
+ldap_host_uuid (string)
+.RS 4
+The LDAP attribute that contains the UUID/GUID of an LDAP host object\&.
+.sp
+Default: not set
+.RE
+.SH "SERVICE ATTRIBUTES"
+.PP
+.PP
+ldap_service_object_class (string)
+.RS 4
+The object class of a service entry in LDAP\&.
+.sp
+Default: ipService
+.RE
+.PP
+ldap_service_name (string)
+.RS 4
+The LDAP attribute that contains the name of service attributes and their aliases\&.
+.sp
+Default: cn
+.RE
+.PP
+ldap_service_port (string)
+.RS 4
+The LDAP attribute that contains the port managed by this service\&.
+.sp
+Default: ipServicePort
+.RE
+.PP
+ldap_service_proto (string)
+.RS 4
+The LDAP attribute that contains the protocols understood by this service\&.
+.sp
+Default: ipServiceProtocol
+.RE
+.SH "SUDO ATTRIBUTES"
+.PP
+.PP
+ldap_sudorule_object_class (string)
+.RS 4
+The object class of a sudo rule entry in LDAP\&.
+.sp
+Default: sudoRole
+.RE
+.PP
+ldap_sudorule_name (string)
+.RS 4
+The LDAP attribute that corresponds to the sudo rule name\&.
+.sp
+Default: cn
+.RE
+.PP
+ldap_sudorule_command (string)
+.RS 4
+The LDAP attribute that corresponds to the command name\&.
+.sp
+Default: sudoCommand
+.RE
+.PP
+ldap_sudorule_host (string)
+.RS 4
+The LDAP attribute that corresponds to the host name (or host IP address, host IP network, or host netgroup)
+.sp
+Default: sudoHost
+.RE
+.PP
+ldap_sudorule_user (string)
+.RS 4
+The LDAP attribute that corresponds to the user name (or UID, group name or user\*(Aqs netgroup)
+.sp
+Default: sudoUser
+.RE
+.PP
+ldap_sudorule_option (string)
+.RS 4
+The LDAP attribute that corresponds to the sudo options\&.
+.sp
+Default: sudoOption
+.RE
+.PP
+ldap_sudorule_runasuser (string)
+.RS 4
+The LDAP attribute that corresponds to the user name that commands may be run as\&.
+.sp
+Default: sudoRunAsUser
+.RE
+.PP
+ldap_sudorule_runasgroup (string)
+.RS 4
+The LDAP attribute that corresponds to the group name or group GID that commands may be run as\&.
+.sp
+Default: sudoRunAsGroup
+.RE
+.PP
+ldap_sudorule_notbefore (string)
+.RS 4
+The LDAP attribute that corresponds to the start date/time for when the sudo rule is valid\&.
+.sp
+Default: sudoNotBefore
+.RE
+.PP
+ldap_sudorule_notafter (string)
+.RS 4
+The LDAP attribute that corresponds to the expiration date/time, after which the sudo rule will no longer be valid\&.
+.sp
+Default: sudoNotAfter
+.RE
+.PP
+ldap_sudorule_order (string)
+.RS 4
+The LDAP attribute that corresponds to the ordering index of the rule\&.
+.sp
+Default: sudoOrder
+.RE
+.SH "AUTOFS ATTRIBUTES"
+.PP
+.PP
+ldap_autofs_map_object_class (string)
+.RS 4
+The object class of an automount map entry in LDAP\&.
+.sp
+Default: nisMap (rfc2307, autofs_provider=ad), otherwise automountMap
+.RE
+.PP
+ldap_autofs_map_name (string)
+.RS 4
+The name of an automount map entry in LDAP\&.
+.sp
+Default: nisMapName (rfc2307, autofs_provider=ad), otherwise automountMapName
+.RE
+.PP
+ldap_autofs_entry_object_class (string)
+.RS 4
+The object class of an automount entry in LDAP\&. The entry usually corresponds to a mount point\&.
+.sp
+Default: nisObject (rfc2307, autofs_provider=ad), otherwise automount
+.RE
+.PP
+ldap_autofs_entry_key (string)
+.RS 4
+The key of an automount entry in LDAP\&. The entry usually corresponds to a mount point\&.
+.sp
+Default: cn (rfc2307, autofs_provider=ad), otherwise automountKey
+.RE
+.PP
+ldap_autofs_entry_value (string)
+.RS 4
+The key of an automount entry in LDAP\&. The entry usually corresponds to a mount point\&.
+.sp
+Default: nisMapEntry (rfc2307, autofs_provider=ad), otherwise automountInformation
+.RE
+.SH "SEE ALSO"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \- https://pagure\&.io/SSSD/sssd/\fR

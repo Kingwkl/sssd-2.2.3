@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<reference>
+<title>Páginas de manual de SSSD</title>
+<refentry>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+                href="include/upstream.xml" />
+
+    <refmeta>
+        <refentrytitle>pam_sss</refentrytitle>
+        <manvolnum>8</manvolnum>
+    </refmeta>
+
+    <refnamediv id='name'>
+        <refname>pam_sss</refname>
+        <refpurpose>Módulo PAM para SSSD</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv id='synopsis'>
+        <cmdsynopsis>
+<command>pam_sss.so</command> <arg choice='opt'>
+<replaceable>quiet</replaceable> </arg> <arg choice='opt'>
+<replaceable>forward_pass</replaceable> </arg> <arg choice='opt'>
+<replaceable>use_first_pass</replaceable> </arg> <arg choice='opt'>
+<replaceable>use_authtok</replaceable> </arg> <arg choice='opt'>
+<replaceable>retry=N</replaceable> </arg> <arg choice='opt'>
+<replaceable>ignore_unknown_user</replaceable> </arg> <arg choice='opt'>
+<replaceable>ignore_authinfo_unavail</replaceable> </arg> <arg choice='opt'>
+<replaceable>domains=X</replaceable> </arg> <arg choice='opt'>
+<replaceable>allow_missing_name</replaceable> </arg> <arg choice='opt'>
+<replaceable>prompt_always</replaceable> </arg> <arg choice='opt'>
+<replaceable>try_cert_auth</replaceable> </arg> <arg choice='opt'>
+<replaceable>require_cert_auth</replaceable> </arg></cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1 id='description'>
+        <title>DESCRIPCION</title>
+        <para><command>pam_sss.so</command> es la interfaz PAM para el demonio Servicios
+de Seguridad de Sistema (SSSD). Los errores y resultados son registrados a
+través de <command>syslog(3)</command> con la facilidad LOG_AUTHPRIV.</para>
+    </refsect1>
+
+    <refsect1 id='options'>
+        <title>OPCIONES</title>
+        <variablelist remap='IP'>
+            <varlistentry>
+                <term>
+                    <option>quiet</option>
+                </term>
+                <listitem>
+                    <para>Suprime el registro de mensajes de usuarios desconocidos.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>forward_pass</option>
+                </term>
+                <listitem>
+                    <para>Si <option>forward_pass</option> está fijada el password introducido se pone
+en la pila para que lo usen otros módulos PAM.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>use_first_pass</option>
+                </term>
+                <listitem>
+                    <para>El argumento use_first_pass fuerza al módulo a usar un módulo de password
+apilado previamente y nunca preguntará al usuario - si no hay password
+disponible o el password no es apropiado, se denegará el acceso al usuario.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>use_authtok</option>
+                </term>
+                <listitem>
+                    <para>Cuando cambia el password fuerza al módulo a fijar el nuevo password a uno
+suministrado por un módulo de password previamente apilado.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>retry=N</option>
+                </term>
+                <listitem>
+                    <para>Si el usuario especificado es preguntado N veces por un password si la
+autenticación falla. Por defecto es 0.</para>
+                    <para>Por favor advierta que esta opción puede no trabajar como se espera llamando
+PAM a manejar el diálogo de usuario por el mismo. Un ejecplo típico es
+<command>sshd</command> con <option>PasswordAuthentication</option>.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>ignore_unknown_user</option>
+                </term>
+                <listitem>
+                    <para>Si se especifica esta opción y el usuario no existe, el módulo PAM devolverá
+PAM_IGNORE. Esto origina que el marco de referencia PAM ignore este módulo.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>ignore_authinfo_unavail</option>
+                </term>
+                <listitem>
+                    <para>
+                    Especifica que el módulo PAM debería devolver PAM_IGNORE si no puede
+contactar con el demonio SSSD. Esto causa que el marco de referencia PAM
+ignore este módulo.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>domains</option>
+                </term>
+                <listitem>
+                    <para>
+                        Permite al administrador restringir los dominios contra los que un servicio
+PAM particular puede autenticarse. El formato es una lista separada por
+comas de nombres de dominio SSSD, como se especifica en el fichero
+sssd.conf.
+                    </para>
+                    <para>
+                        AVISO: Se debe usar junto con las opciones <quote>pam_trusted_users</quote>
+y <quote>pam_public_domains</quote>. Por favor vea la página de manual
+<citerefentry> <refentrytitle>sssd.conf</refentrytitle>
+<manvolnum>5</manvolnum> </citerefentry> para mas información sobre estas
+dos opciones del respondedor PAM.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>allow_missing_name</option>
+                </term>
+                <listitem>
+                    <para>
+                        El propósito principal de esta opción es dejar que SSSD determine el nombre
+de usuario en base a información adicional, e.g. el certificado de una
+Smartcard.
+                    </para>
+                    <para>
+                        El caso de uso actual son los administradores de inicio de sesión que pueden
+monitorear un lector de tarjetas inteligentes para eventos de tarjetas. En
+el caso de que una Smartcard se inserte el administrador de inicio de sesión
+llamara a la pila PAM que incluye una línea como <programlisting>
+auth sufficient pam_sss.so allow_missing_name
+                        </programlisting> En este caso SSSD intentará determinar el
+nobre de usuairo en base al contenido de la tarjeta inteligente, se lo
+devolverá a pam_sss quien finalmente lo pondrá en la pila PAM.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>prompt_always</option>
+                </term>
+                <listitem>
+                    <para>
+                        Solicita siempre al usuario las credenciales. Con esta opción las
+credenciales pedidas por otros módulos PAM, normalmente una contraseña,
+serán ignoradas y pam_sss solicitará las credenciales otra vez. En base a la
+respuesta pre autorización de SSSD pam_sss debe solicitar una contraseña, un
+Smartcard PIN u otras credenciales.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>try_cert_auth</option>
+                </term>
+                <listitem>
+                    <para>
+                        Intenta usar autenticación basada en certificado, i.e. autenticación con una
+tarjeta inteligente o dispositivos similares. Si hay disponible una
+Smartcard y el servicio tiene permitido la autenticación Smartcard se le
+pedirá al usuario un PIN y continuará la autenticación basada en certificado
+                    </para>
+                    <para>
+                        Si no hay Smartcard disponible o la autenticación basada en certificado no
+está permitida para el servicio actual se devuelve PAM_AUTHINFO_UNAVAIL.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>require_cert_auth</option>
+                </term>
+                <listitem>
+                    <para>
+                        Hace la autenticación en base a certificado, i.e.  autenticación con
+Smartcard o dispositivos similares. Si no hay una Smartcard disponible se
+pedirá al usuario que inserte una. SSSD esperará una Smartcard hasta el
+tiempo límite definido por p11_wait_for_card_timeout passed, más detalles en
+<citerefentry><refentrytitle>sssd.conf</refentrytitle>
+<manvolnum>5</manvolnum></citerefentry>.
+                    </para>
+                    <para>
+                        Si no hay Smartcard disponible después del tiempo límite o no está pemitida
+la autenticación basada en certificado para el servicio actual se devolverá
+PAM_AUTHINFO_UNAVAIL.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+
+    <refsect1 id='module_types_provides'>
+        <title>TIPOS DE MÓDULOS SUMINISTRADOS</title>
+        <para>Todos los tipos de módulos (<option>account</option>, <option>auth</option>,
+<option>password</option> y <option>session</option>) son suministrados.
+        </para>
+        <para>Si el respondedor PAM de SSSD no está corriendo, e.g. si el socket
+respondedor PAM no esta disponible, pam_sss devolverá PAM_USER_UNKNOWN
+cuando se llame como módulo <option>account</option> para evitar problemas
+con usuarios de otras fuentes durante el control de acceso.</para>
+    </refsect1>
+
+    <refsect1 id='files'>
+        <title>ARCHIVOS</title>
+        <para>Si un password se resetea por un fallo de root, como el correspondiente
+proveedor SSSD no soporta el reseteo de password, se puede mostrar un
+mensaje individual. Este mensaje puede, por ejemplo, contener instrucciones
+sobre como resetear un password.</para>
+
+        <para>El mensaje se lee desde el fichero
+<filename>pam_sss_pw_reset_message.LOC</filename> donde LOC destaca una
+cadena de lugar devuelta por <citerefentry>
+<refentrytitle>setlocale</refentrytitle><manvolnum>3</manvolnum>
+</citerefentry>. Si no hay fichero coincidente se muestra el contenido de
+<filename>pam_sss_pw_reset_message.txt</filename>. Root debe ser el
+propietario de los ficheros y sólo root puede tener permisos de lectura y
+escritura mientras que todos los demás usuarios sólo tienen permisos de
+lectura.</para>
+
+        <para>Estos ficheros son buscados en el directorio
+<filename>/etc/sssd/customize/DOMAIN_NAME/</filename>. Si no hay archivos
+coincidentes se muestra un mensaje genérico.</para>
+    </refsect1>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/seealso.xml" />
+
+</refentry>
+</reference>

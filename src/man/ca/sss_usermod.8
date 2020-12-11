@@ -1,0 +1,143 @@
+'\" t
+.\"     Title: sss_usermod
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Pàgines del manual de l'SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_USERMOD" "8" "12/09/2020" "SSSD" "Pàgines del manual de l'SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_usermod \- modifica el compte d\*(Aqun usuari
+.SH "SYNOPSIS"
+.HP \w'\fBsss_usermod\fR\ 'u
+\fBsss_usermod\fR [\fIOPCIONS\fR] \fIUSUARI\fR
+.SH "DESCRIPCIÓ"
+.PP
+\fBsss_usermod\fR
+modifica el compte especificat amb
+\fIUSUARI\fR
+per reflectir els canvis que s\*(Aqespecifiquen a la línia d\*(Aqordres\&.
+.SH "OPCIONS"
+.PP
+\fB\-c\fR,\fB\-\-gecos\fR \fICOMMENTARI\fR
+.RS 4
+Qualsevol cadena de text amb la descripció de l\*(Aqusuari\&. Sovint s\*(Aqutilitza com a camp per al nom complet de l\*(Aqusuari\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-home\fR \fIDIRECTORI_INICIAL\fR
+.RS 4
+El directori inicial del compte de l\*(Aqusuari\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-shell\fR \fISHELL\fR
+.RS 4
+El shell d\*(Aqinici de sessió de l\*(Aqusuari\&.
+.RE
+.PP
+\fB\-a\fR,\fB\-\-append\-group\fR \fIGRUPS\fR
+.RS 4
+Annexa aquest usuari als grups que s\*(Aqespecifiquen amb el paràmetre dels
+\fIGRUPS\fR\&. El paràmetre dels
+\fIGRUPS\fR
+és una llista delimitada per comes dels noms dels grups\&.
+.RE
+.PP
+\fB\-r\fR,\fB\-\-remove\-group\fR \fIGRUPS\fR
+.RS 4
+Remove this user from groups specified by the
+\fIGROUPS\fR
+parameter\&.
+.RE
+.PP
+\fB\-l\fR,\fB\-\-lock\fR
+.RS 4
+Bloqueja el compte de l\*(Aqusuari\&. L\*(Aqusuari no podrà iniciar la sessió\&.
+.RE
+.PP
+\fB\-u\fR,\fB\-\-unlock\fR
+.RS 4
+Desbloqueja el compte de l\*(Aqusuari\&.
+.RE
+.PP
+\fB\-Z\fR,\fB\-\-selinux\-user\fR \fISELINUX_USER\fR
+.RS 4
+L\*(Aqusuari de SELinux per a l\*(Aqinici de sessió de l\*(Aqusuari\&.
+.RE
+.PP
+\fB\-\-addattr\fR \fINOM_ATRIBUT_VALOR\fR
+.RS 4
+Afegeix una parella atribut/valor\&. El format és nomatribut=valor\&.
+.RE
+.PP
+\fB\-\-setattr\fR \fINOM_ATRIBUT_VALOR\fR
+.RS 4
+Estableix un atribut a la parella nom/valor\&. El format és nomatribut=valor\&. Per als atributs amb múltiples valors, l\*(Aqordre substitueix els valors ja presents
+.RE
+.PP
+\fB\-\-delattr\fR \fINOM_ATRIBUT_VALOR\fR
+.RS 4
+Elimina una parella atribut/valor\&. El format és nomatribut=valor\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Mostra el missatge d\*(Aqajuda i surt\&.
+.RE
+.SH "EL DOMINI LOCAL"
+.PP
+Per a un funcionament correcte, s\*(Aqha de crear un domini amb
+\(lqid_provider=local\(rq
+i l\*(AqSSSD ha d\*(Aqestar en execució\&.
+.PP
+L\*(Aqadministrador pot ser que vulgui utilitzar els usuaris locals de l\*(AqSSSD en lloc dels usuaris tradicionals d\*(AqUNIX en els casos en què es requereixi la imbricació dels grups (vegeu
+\fBsss_groupadd\fR(8))\&. Els usuaris locals també són útils per provar i desplegar l\*(AqSSSD sense haver de desplegar tot un servidor remot\&. Les eines
+\fBsss_user*\fR
+i
+\fBsss_group*\fR
+utilitzen l\*(Aqemmagatzematge LDB local per emmagatzemar els usuaris i els grups\&.
+.SH "VEGEU TAMBÉ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

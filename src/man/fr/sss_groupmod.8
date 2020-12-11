@@ -1,0 +1,95 @@
+'\" t
+.\"     Title: sss_groupmod
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Pages de manuel de SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_GROUPMOD" "8" "12/09/2020" "SSSD" "Pages de manuel de SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_groupmod \- modifier un groupe
+.SH "SYNOPSIS"
+.HP \w'\fBsss_groupmod\fR\ 'u
+\fBsss_groupmod\fR [\fIoptions\fR] \fIGROUP\fR
+.SH "DESCRIPTION"
+.PP
+\fBsss_groupmod\fR
+modifie le groupe pour refléter les changements spécifiés sur la ligne de commande\&.
+.SH "OPTIONS"
+.PP
+\fB\-a\fR,\fB\-\-append\-group\fR \fIGROUPS\fR
+.RS 4
+Ajouter ce groupe aux groupes spécifiés par le paramètre
+\fIGROUPS\fR\&. Le paramètre
+\fIGROUPS\fR
+est une liste séparée par des virgules de noms de groupe\&.
+.RE
+.PP
+\fB\-r\fR,\fB\-\-remove\-group\fR \fIGROUPS\fR
+.RS 4
+Supprime ce groupe des groupes spécifiés par le paramètre
+\fIGROUPS\fR\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Affiche l\*(Aqaide et quitte\&.
+.RE
+.SH "LE DOMAINE LOCAL"
+.PP
+Pour fonctionner correctement, un domaine avec
+\(lqid_provider = local\(rq
+doit être créé et SSSD doit s\*(Aqexécuter\&.
+.PP
+L\*(Aqadministrateur peut vouloir utiliser les utilisateurs locaux SSSD au lieu des utilisateurs UNIX traditionnels dans les cas où l\*(Aqimbrication de groupes (cf\&.
+\fBsss_groupadd\fR(8)) est nécessaire\&. Les utilisateurs locaux sont également utiles pour les tests et le développement de SSSD sans avoir à déployer un serveur distant complet\&. Les outils
+\fBsss_user *\fR
+et
+\fBsss_group *\fR
+utilisent alors un stockage local de type LDB pour les utilisateurs et les groupes\&.
+.SH "VOIR AUSSI"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

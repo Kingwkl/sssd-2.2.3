@@ -1,0 +1,96 @@
+'\" t
+.\"     Title: sss_obfuscate
+.\"    Author: Основна гілка розробки SSSD \(em https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Сторінки підручника SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_OBFUSCATE" "8" "12/09/2020" "SSSD" "Сторінки підручника SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_obfuscate \- заплутування пароля у форматі звичайного тексту
+.SH "SYNOPSIS"
+.HP \w'\fBsss_obfuscate\fR\ 'u
+\fBsss_obfuscate\fR [\fIпараметри\fR] \fI[ПАРОЛЬ]\fR
+.SH "ОПИС"
+.PP
+\fBsss_obfuscate\fR
+перетворює вказаний пароль на пароль у форматі зручному для читання і розташовує його у розділі відповідного домену файла налаштувань SSSD\&.
+.PP
+Пароль у форматі звичайного тексту буде прочитано зі стандартного джерела вхідних даних або введено інтерактивно\&. Заплутану версію пароля буде збережено у параметрі з назвою \(Foldap_default_authtok\(Fc вказаного домену SSSD, параметру \(Foldap_default_authtok_type\(Fc буде надано значення \(Foobfuscated_password\(Fc\&. Докладніший опис цих параметрів можна знайти на сторінці підручника (man)
+\fBsssd-ldap\fR(5)\&.
+.PP
+Будь ласка, зауважте, що заплутування паролів
+\fIне є справжнім захистом\fR, оскільки зловмисник може визначити алгоритм заплутування за кодом програми\&.
+\fIНаполегливо\fR
+радимо вам скористатися кращими механізмами захисту даних розпізнавання, зокрема клієнтськими сертифікатами або GSSAPI\&.
+.SH "ПАРАМЕТРИ"
+.PP
+\fB\-h\fR,\fB\-\-help\fR
+.RS 4
+Показати довідкове повідомлення і завершити роботу\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-stdin\fR
+.RS 4
+Пароль для заплутування буде прочитано зі стандартного джерела вхідних даних\&.
+.RE
+.PP
+\fB\-d\fR,\fB\-\-domain\fR \fIДОМЕН\fR
+.RS 4
+Домен SSSD, для якого буде використано пароль\&. Типовою назвою є
+\(lqdefault\(rq\&.
+.RE
+.PP
+\fB\-f\fR,\fB\-\-file\fR \fIФАЙЛ\fR
+.RS 4
+Прочитати дані з файла налаштувань, вказаного позиційним параметром\&.
+.sp
+Типове значення:
+/etc/sssd/sssd\&.conf
+.RE
+.SH "ТАКОЖ ПЕРЕГЛЯНЬТЕ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBОсновна гілка розробки SSSD \(em
+https://pagure\&.io/SSSD/sssd/\fR

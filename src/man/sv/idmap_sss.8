@@ -1,0 +1,97 @@
+'\" t
+.\"     Title: idmap_sss
+.\"    Author: SSSD uppströms \(en https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: SSSD manualsidor
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "IDMAP_SSS" "8" "12/09/2020" "SSSD" "SSSD manualsidor"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+idmap_sss \- SSSD:s idmap_sss\-bakände för Winbind
+.SH "BESKRIVNING"
+.PP
+Modulen idmap_sss tillhandahåller ett sätt att anropa SSSD för att översätta UID:er/GID:er och SID:er\&. Ingen databas behöv i detta fall eftersom översättningen görs av SSSD\&.
+.SH "IDMAP\-ALTERNATIV"
+.PP
+range = låg \- hög
+.RS 4
+Definierar de tillgängliga matchnings\-UID\- och GID\-intervallen som bakänden är auktoritativ för\&.
+.RE
+.SH "EXEMPEL"
+.PP
+Detta exempel visar hur man konfigurerar idmap_sss som standardöversättningsmodulen\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[global]
+security = ads
+workgroup = <AD\-DOMÄNKORTNAMN>
+
+idmap config <AD\-DOMÄNKORTNAMN> : backend        = sss
+idmap config <AD\-DOMÄNKORTNAMN> : range          = 200000\-2147483647
+
+idmap config * : backend        = tdb
+idmap config * : range          = 100000\-199999
+        
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Ersätt <AD\-DOMÄNKORTNAMN> med NetBIOS\-domännamnet för AD\-domänen\&. Om flera AD\-domäner skall användas behöver varje domän en
+idmap config\-rad med
+backend = sss
+och en rad med ett lämpligt
+range\&.
+.PP
+Eftersom Winbind kräver en skrivbar standardbakände och idmap_sss endast är läsbar inkluderar exemplet
+backend = tdb
+som standard\&.
+.SH "SE ÄVEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBSSSD uppströms \(en
+https://pagure\&.io/SSSD/sssd/\fR

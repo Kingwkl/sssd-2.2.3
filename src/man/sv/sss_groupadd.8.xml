@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<reference>
+<title>SSSD manualsidor</title>
+<refentry>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/upstream.xml" />
+
+    <refmeta>
+        <refentrytitle>sss_groupadd</refentrytitle>
+        <manvolnum>8</manvolnum>
+    </refmeta>
+
+    <refnamediv id='name'>
+        <refname>sss_groupadd</refname>
+        <refpurpose>skapa en ny grupp</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv id='synopsis'>
+        <cmdsynopsis>
+<command>sss_groupadd</command> <arg choice='opt'>
+<replaceable>flaggor</replaceable> </arg> <arg
+choice='plain'><replaceable>GRUPP</replaceable></arg></cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1 id='description'>
+        <title>BESKRIVNING</title>
+        <para>
+            <command>sss_groupadd</command> skapar en ny grupp.  Dessa grupper är
+kompatibla med POSIX-grupper, med den ytterligare funktionen att de kan
+innehålla andra grupper som medlemmar.
+        </para>
+    </refsect1>
+
+    <refsect1 id='options'>
+        <title>FLAGGOR</title>
+        <variablelist remap='IP'>
+            <varlistentry>
+                <term>
+                    <option>-g</option>,<option>--gid</option> <replaceable>GID</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Sätt GID:n för gruppen till värdet av <replaceable>GID</replaceable>.  Om
+det inte anges väljs det automatiskt.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/param_help.xml" />
+        </variablelist>
+    </refsect1>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/local.xml" />
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/seealso.xml" />
+
+</refentry>
+</reference>

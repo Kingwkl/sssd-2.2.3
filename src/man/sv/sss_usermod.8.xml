@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<reference>
+<title>SSSD manualsidor</title>
+<refentry>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/upstream.xml" />
+
+    <refmeta>
+        <refentrytitle>sss_usermod</refentrytitle>
+        <manvolnum>8</manvolnum>
+    </refmeta>
+
+    <refnamediv id='name'>
+        <refname>sss_usermod</refname>
+        <refpurpose>ändra ett användarkonto</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv id='synopsis'>
+        <cmdsynopsis>
+<command>sss_usermod</command> <arg choice='opt'>
+<replaceable>flaggor</replaceable> </arg> <arg
+choice='plain'><replaceable>INLOGGNINGSNAMN</replaceable></arg></cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1 id='description'>
+        <title>BESKRIVNING</title>
+        <para>
+            <command>sss_usermod</command> ändrar kontot som anges av
+<replaceable>INLOGGNINGSNAMN</replaceable> till att avspegla ändringarna som
+anges på kommandoraden.
+        </para>
+    </refsect1>
+
+    <refsect1 id='options'>
+        <title>FLAGGOR</title>
+        <variablelist remap='IP'>
+            <varlistentry>
+                <term>
+                    <option>-c</option>,<option>--gecos</option>
+<replaceable>KOMMENTAR</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Godtycklig textsträng som beskriver användaren.  Ofta använt som ett fält
+för användarens fullständiga namn.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-h</option>,<option>--home</option>
+<replaceable>HEMKATALOG</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Användarkontots hemkatalog.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-s</option>,<option>--shell</option> <replaceable>SKAL</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Användarens inloggningsskal.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-a</option>,<option>--append-group</option>
+<replaceable>GRUPPER</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Lägg till denna användare till grupperna som anges av parametern
+<replaceable>GRUPPER</replaceable> parameter.  Parametern
+<replaceable>GRUPPER</replaceable> är en kommaseparerad lista av gruppnamn.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-r</option>,<option>--remove-group</option>
+<replaceable>GRUPPER</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Ta bort denna användare från grupperna som anges av parametern
+<replaceable>GRUPPER</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-l</option>,<option>--lock</option>
+                </term>
+                <listitem>
+                    <para>
+                        Lås användarkontot.  Användare kommer inte kunna logga in.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-u</option>,<option>--unlock</option>
+                </term>
+                <listitem>
+                    <para>
+                        Lås upp användarkontot.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-Z</option>,<option>--selinux-user</option>
+<replaceable>SELINUX-ANVÄNDARE</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        SELinux-användaren för användarens inloggning.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--addattr</option> <replaceable>ATTR_NAMN_VÄRDE</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Lägg till ett attribut/värde-par.  Formatet är attrnamn=värde.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--setattr</option> <replaceable>ATTR_NAMN_VÄRDE</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Sätt ett attribut till ett namn/värde-par.  Formatet är attrnamn=värde.  För
+flervärda attribut ersätter kommandot de värden som redan finns
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--delattr</option> <replaceable>ATTR_NAMN_VÄRDE</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Ta bort ett attribut/värde-par.  Formatet är attrnamn=värde.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/param_help.xml" />
+        </variablelist>
+    </refsect1>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/local.xml" />
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/seealso.xml" />
+
+</refentry>
+</reference>

@@ -1,0 +1,126 @@
+'\" t
+.\"     Title: sss_seed
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Páginas de manual de SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_SEED" "8" "12/09/2020" "SSSD" "Páginas de manual de SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_seed \- alimenta el cache SSSD con un usuario
+.SH "SYNOPSIS"
+.HP \w'\fBsss_seed\fR\ 'u
+\fBsss_seed\fR [\fIoptions\fR] \-D\ \fIDOMAIN\fR \-n\ \fIUSER\fR
+.SH "DESCRIPCION"
+.PP
+\fBsss_seed\fR
+alimenta el cache SSSD con una entrada de usuario y una contresañe temporal\&. Si una entrada de usuario está ya presente en el cache SSSD la entrada se actualiza con la contraseña temporal
+.PP
+.SH "OPCIONES"
+.PP
+\fB\-D\fR,\fB\-\-domain\fR \fIDOMAIN\fR
+.RS 4
+Suministra el nombre del dominio del que el usuario es miembro\&. El dominio también se usa para recuperar información del usuario\&. El dominio debe estar configurado en sssd\&.conf\&. La opción
+\fIDOMAIN\fR
+debe ser suministrada\&. La información recuperada del dominio anula la que se ha suministrado en las opciones\&.
+.RE
+.PP
+\fB\-n\fR,\fB\-\-username\fR \fIUSER\fR
+.RS 4
+El nombre de usuario de la entrada a ser creado o modificado en el cache\&. Se debe suministrar la opción
+\fIUSER\fR\&.
+.RE
+.PP
+\fB\-u\fR,\fB\-\-uid\fR \fIUID\fR
+.RS 4
+Fija la UID del usuario a
+\fIUID\fR\&.
+.RE
+.PP
+\fB\-g\fR,\fB\-\-gid\fR \fIGID\fR
+.RS 4
+Fija la GID del usuario a
+\fIGID\fR\&.
+.RE
+.PP
+\fB\-c\fR,\fB\-\-gecos\fR \fICOMENTARIO\fR
+.RS 4
+Cualquier cadena de texto describiendo al usuario\&. Frecuentemente se usa como el campo para el nombre completo del usuario\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-home\fR \fIHOME_DIR\fR
+.RS 4
+Fija el directorio home del usuario a
+\fIHOME_DIR\fR\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-shell\fR \fISHELL\fR
+.RS 4
+Fija la shell de acceso del usuario a
+\fISHELL\fR\&.
+.RE
+.PP
+\fB\-i\fR,\fB\-\-interactive\fR
+.RS 4
+Modo interactivo de introducir información del usuario\&. Esta opción sólo preguntará por la información no suministrada en las opciones o recuperada del dominio\&.
+.RE
+.PP
+\fB\-p\fR,\fB\-\-password\-file\fR \fIPASS_FILE\fR
+.RS 4
+Especifica el fichero desde donde leer la contraseña del usuario (si no se especifica se pregunta por la contraseña)
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Muestra mensaje de ayuda y sale\&.
+.RE
+.SH "NOTAS"
+.PP
+La longitud de la contraseña (o el tamaño especificado con la opción \-p or \-\-password\-file) debe ser menos o igual a PASS_MAX bytes ( 64 bytes en sistemas sin valor PASS_MAX globalmente definido)\&.
+.PP
+.SH "VEA TAMBIEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

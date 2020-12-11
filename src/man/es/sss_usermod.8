@@ -1,0 +1,142 @@
+'\" t
+.\"     Title: sss_usermod
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Páginas de manual de SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_USERMOD" "8" "12/09/2020" "SSSD" "Páginas de manual de SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_usermod \- Modifica una cuenta de usuario
+.SH "SYNOPSIS"
+.HP \w'\fBsss_usermod\fR\ 'u
+\fBsss_usermod\fR [\fIoptions\fR] \fILOGIN\fR
+.SH "DESCRIPCION"
+.PP
+\fBsss_usermod\fR
+modifica la cuenta especificada por
+\fILOGIN\fR
+para reflejar los cambios que se han especificado en la línea de comando\&.
+.SH "OPCIONES"
+.PP
+\fB\-c\fR,\fB\-\-gecos\fR \fICOMENTARIO\fR
+.RS 4
+Cualquier cadena de texto describiendo al usuario\&. Frecuentemente se usa como el campo para el nombre completo del usuario\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-home\fR \fIHOME_DIR\fR
+.RS 4
+El directorio principal de la cuenta de usuario\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-shell\fR \fISHELL\fR
+.RS 4
+Shell de inicio de sesión del usuario\&.
+.RE
+.PP
+\fB\-a\fR,\fB\-\-append\-group\fR \fIGROUPS\fR
+.RS 4
+Añade este usuario a los grupos especificados por el parámetro
+\fIGROUPS\fR\&. El parámetro
+\fIGROUPS\fR
+es una lista separada por comas de nombres de grupo\&.
+.RE
+.PP
+\fB\-r\fR,\fB\-\-remove\-group\fR \fIGROUPS\fR
+.RS 4
+Borrar este usuario de los grupos especificados por el parámetro
+\fIGROUPS\fR\&.
+.RE
+.PP
+\fB\-l\fR,\fB\-\-lock\fR
+.RS 4
+Bloquea la cuenta de usuario\&. El usuario no será capaz de acceder\&.
+.RE
+.PP
+\fB\-u\fR,\fB\-\-unlock\fR
+.RS 4
+Desbloquea la cuenta de usuario\&.
+.RE
+.PP
+\fB\-Z\fR,\fB\-\-selinux\-user\fR \fISELINUX_USER\fR
+.RS 4
+El usuario SELinux para el acceso del usuario\&.
+.RE
+.PP
+\fB\-\-addattr\fR \fIATTR_NAME_VAL\fR
+.RS 4
+Add an attribute/value pair\&. The format is attrname=value\&.
+.RE
+.PP
+\fB\-\-setattr\fR \fIATTR_NAME_VAL\fR
+.RS 4
+Set an attribute to a name/value pair\&. The format is attrname=value\&. For multi\-valued attributes, the command replaces the values already present
+.RE
+.PP
+\fB\-\-delattr\fR \fIATTR_NAME_VAL\fR
+.RS 4
+Delete an attribute/value pair\&. The format is attrname=value\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Muestra mensaje de ayuda y sale\&.
+.RE
+.SH "EL DOMINIO LOCAL"
+.PP
+Con el objetivo de que funcione correctamente, se debe crear un dominio con
+\(lqid_provider=local\(rq
+y el SSSD debe estar corriendo\&.
+.PP
+El administrador puede desear usar los usuarios locales SSSD en lugar de los usuarios tradicionales UNIX en los casos donde los grupos anidados (vea
+\fBsss_groupadd\fR(8)) sean necesarios\&. Los usuarios locales son también útiles para la prueba y el desarrollo del SSSD sin tener que desplegar un servidor remoto completo\&. Las herramientas
+\fBsss_user*\fR
+y
+\fBsss_group*\fR
+usan un almacenamiento LDB local para almacenar usuarios y grupos\&.
+.SH "VEA TAMBIEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

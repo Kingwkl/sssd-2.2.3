@@ -1,0 +1,124 @@
+'\" t
+.\"     Title: sss_seed
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Pàgines del manual de l'SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_SEED" "8" "12/09/2020" "SSSD" "Pàgines del manual de l'SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_seed \- implanta la memòria cau de l\*(AqSSSD amb un usuari
+.SH "SYNOPSIS"
+.HP \w'\fBsss_seed\fR\ 'u
+\fBsss_seed\fR [\fIopcions\fR] \-D\ \fIDOMINI\fR \-n\ \fIUSUARI\fR
+.SH "DESCRIPCIÓ"
+.PP
+\fBsss_seed\fR
+implanta la memòria cau de l\*(AqSSSD amb una entrada d\*(Aqun usuari i la contrasenya temporal\&. Si l\*(Aqentrada d\*(Aqun usuari ja està present a la memòria cau de l\*(AqSSSD aleshores s\*(Aqactualitza l\*(Aqentrada amb la contrasenya temporal\&.
+.PP
+.SH "OPCIONS"
+.PP
+\fB\-D\fR,\fB\-\-domain\fR \fIDOMINI\fR
+.RS 4
+Proporciona el nom del domini en el qual l\*(Aqusuari n\*(Aqés membre\&. El domini també s\*(Aqutilitza per recuperar la informació de l\*(Aqusuari\&. El domini ha d\*(Aqestar configurat a l\*(Aqsssd\&.conf\&. S\*(Aqha de proporcionar l\*(Aqopció del
+\fIDOMINI\fR\&. La informació recuperada del domini anul\(mdla aquella que es proporcioni a les opcions\&.
+.RE
+.PP
+\fB\-n\fR,\fB\-\-username\fR \fIUSER\fR
+.RS 4
+L\*(Aqentrada del nom d\*(Aqusuari a crear o modificar a la memòria cau\&. S\*(Aqha de proporcionar l\*(Aqopció de l\*(Aq\fIUSUARI\fR\&.
+.RE
+.PP
+\fB\-u\fR,\fB\-\-uid\fR \fIUID\fR
+.RS 4
+Estableix l\*(AqUID de l\*(Aqusuari a
+\fIUID\fR\&.
+.RE
+.PP
+\fB\-g\fR,\fB\-\-gid\fR \fIGID\fR
+.RS 4
+Estableix el GID de l\*(Aqusuari a
+\fIGID\fR\&.
+.RE
+.PP
+\fB\-c\fR,\fB\-\-gecos\fR \fICOMMENTARI\fR
+.RS 4
+Qualsevol cadena de text amb la descripció de l\*(Aqusuari\&. Sovint s\*(Aqutilitza com a camp per al nom complet de l\*(Aqusuari\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-home\fR \fIDIRECTORI_INICIAL\fR
+.RS 4
+Establix el directori inicial de l\*(Aqusuari a
+\fIDIRECTORI_INICIAL\fR\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-shell\fR \fISHELL\fR
+.RS 4
+Estableix el shell d\*(Aqinici de sessió de l\*(Aqusuari a
+\fISHELL\fR\&.
+.RE
+.PP
+\fB\-i\fR,\fB\-\-interactive\fR
+.RS 4
+Mode interactiu per a la introducció de la informació de l\*(Aqusuari\&. Aquesta opció només demanà la informació no proporcionada a les opcions o que no es recuperi del domini\&.
+.RE
+.PP
+\fB\-p\fR,\fB\-\-password\-file\fR \fIFITXER_CONTRASENYA\fR
+.RS 4
+Especifica el fitxer des d\*(Aqon llegir la contrasenya de l\*(Aqusuari\&. (si no s\*(Aqespecifica, es demana per la contrasenya)
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Mostra el missatge d\*(Aqajuda i surt\&.
+.RE
+.SH "NOTES"
+.PP
+La longitud de la contrasenya (o la mida del fitxer que s\*(Aqespecifica amb l\*(Aqopció \-p o \-\-password\-file) ha de ser més petita o igual que PASS_MAX bytes (64 bytes en els sistemes que no defineixen globalment el valor de PASS_MAX)\&.
+.PP
+.SH "VEGEU TAMBÉ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

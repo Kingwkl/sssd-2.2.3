@@ -1,0 +1,11 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: sss_nss_idmap
+Description: NSS Responder ID-SID mapping interface
+Version: 2.2.3
+Libs: -L${libdir} -lsss_nss_idmap
+Cflags:
+URL: https://pagure.io/SSSD/sssd/

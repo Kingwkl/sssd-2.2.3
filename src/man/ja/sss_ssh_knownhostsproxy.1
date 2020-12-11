@@ -1,0 +1,121 @@
+'\" t
+.\"     Title: sss_ssh_knownhostsproxy
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: SSSD マニュアル ページ
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_SSH_KNOWNHOSTSPR" "1" "12/09/2020" "SSSD" "SSSD マニュアル ページ"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_ssh_knownhostsproxy \- OpenSSH ホストキーを取得します
+.SH "SYNOPSIS"
+.HP \w'\fBsss_ssh_knownhostsproxy\fR\ 'u
+\fBsss_ssh_knownhostsproxy\fR [\fIoptions\fR] \fIHOST\fR [\fIPROXY_COMMAND\fR]
+.SH "概要"
+.PP
+\fBsss_ssh_knownhostsproxy\fR
+acquires SSH host public keys for host
+\fIHOST\fR, stores them in a custom OpenSSH known_hosts file (see the
+\(lqSSH_KNOWN_HOSTS FILE FORMAT\(rq
+section of
+\fBsshd\fR(8)
+for more information)
+/var/lib/sss/pubconf/known_hosts
+and establishes the connection to the host\&.
+.PP
+\fIPROXY_COMMAND\fR
+が指定されていると、ソケットを開く代わりにホストへの接続を作成するために使用されます。
+.PP
+\fBssh\fR(1)
+は
+\fBssh\fR(1)
+設定に対して以下のディレクティブを使用することにより、ホストキー認証に
+\fBsss_ssh_knownhostsproxy\fR
+を使用するために設定できます:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ProxyCommand /usr/bin/sss_ssh_knownhostsproxy \-p %p %h
+GlobalKnownHostsFile /var/lib/sss/pubconf/known_hosts
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "オプション"
+.PP
+\fB\-p\fR,\fB\-\-port\fR \fIPORT\fR
+.RS 4
+ホストに接続するためにポート
+\fIPORT\fR
+を使用します。初期値ではポート 22 が使用されます。
+.RE
+.PP
+\fB\-d\fR,\fB\-\-domain\fR \fIDOMAIN\fR
+.RS 4
+SSSD ドメイン
+\fIDOMAIN\fR
+においてホスト公開鍵を検索します。
+.RE
+.PP
+\fB\-k\fR,\fB\-\-pubkey\fR
+.RS 4
+Print the host ssh public keys for host
+\fIHOST\fR\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+ヘルプメッセージを表示して終了します。
+.RE
+.SH "終了コード"
+.PP
+In case of success, an exit value of 0 is returned\&. Otherwise, 1 is returned\&.
+.SH "関連項目"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

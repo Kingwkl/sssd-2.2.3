@@ -1,0 +1,1471 @@
+'\" t
+.\"     Title: sssd-ldap
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Dateiformate und Konventionen
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-LDAP" "5" "12/09/2020" "SSSD" "Dateiformate und Konventionen"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-ldap \- SSSD LDAP\-Anbieter
+.SH "BESCHREIBUNG"
+.PP
+Diese Handbuchseite beschreibt die Konfiguration von LDAP\-Domains für
+\fBsssd\fR(8)\&. Detaillierte Syntax\-Informationen finden Sie im Abschnitt \(FcDATEIFORMAT\(Fo der Handbuchseite
+\fBsssd.conf\fR(5)\&.
+.PP
+Sie können SSSD so konfigurieren, dass es mehr als eine LDAP\-Domain benutzt\&.
+.PP
+Das LDAP\-Backend unterstützt ID\-, Authentifizierungs\-, Zugriffs\- und Chpass\-Anbieter\&. Falls Sie sich bei einem LDAP\-Server authentifizieren möchten, wird entweder TLS/SSL oder LDAPS benötigt\&.
+\fBsssd\fR
+unterstützt
+\fIkeine\fR
+Authentifizierung über einen unverschlüsselten Kanal\&. Falls der LDAP\-Server nur als Identitätsanbieter benutzt wird, wird kein verschlüsselter Kanal benötigt\&. Weitere Informationen über die Verwendung von LDAP als Zugriffsanbieter finden Sie unter \(Fcldap_access_filter\(Fo\&.
+.SH "KONFIGURATIONSOPTIONEN"
+.PP
+All of the common configuration options that apply to SSSD domains also apply to LDAP domains\&. Refer to the
+\(lqDOMAIN SECTIONS\(rq
+section of the
+\fBsssd.conf\fR(5)
+manual page for full details\&. Note that SSSD LDAP mapping attributes are described in the
+\fBsssd-ldap-attributes\fR(5)
+manual page\&.
+.PP
+ldap_uri, ldap_backup_uri (Zeichenkette)
+.RS 4
+gibt eine durch Kommata getrennte Liste der LDAP\-Server\-URIs in der Reihenfolge an, in der sich SSSD mit ihnen verbinden soll\&. Weitere Informationen über Ausfallsicherung und Redundanz finden Sie im Abschnitt \(FcAUSFALLSICHERUNG\(Fo\&. Falls keine Option angegeben wurde, wird die Dienstsuche aktiviert\&. Weitere Informationen finden Sie im Abschnitt \(FcDIENSTSUCHE\(Fo\&.
+.sp
+Das Format der URI muss dem in RFC 2732 definierten Format entsprechen:
+.sp
+ldap[s]://<Rechner>[:Port]
+.sp
+Wenn Sie explizit IPv6\-Adressen verwenden möchten, muss <Rechner> in eckigen Klammern [] stehen\&.
+.sp
+Beispiel: ldap://[fc00::126:25]:389
+.RE
+.PP
+ldap_chpass_uri, ldap_chpass_backup_uri (Zeichenkette)
+.RS 4
+gibt eine durch Kommata getrennte Liste von URIs der LDAP\-Server an, mit denen SSSD sich in dieser Reihenfolge verbinden soll, um das Passwort eines Benutzers zu ändern\&. Weitere Informationen über Ausfallsicherung und Redundanz finden Sie im Abschnitt \(FcAUSFALLSICHERUNG\(Fo\&.
+.sp
+Um die Dienstsuche zu aktivieren, muss \(Fcldap_chpass_dns_service_name\(Fo gesetzt sein\&.
+.sp
+Voreinstellung: leer, d\&.h\&., dass \(Fcldap_uri\(Fo benutzt wird
+.RE
+.PP
+ldap_search_base (Zeichenkette)
+.RS 4
+der Standardbasis\-Domain\-Name, der zur Durchführung von LDAP\-Benutzeraktionen benutzt wird
+.sp
+Beginnend mit SSSD 1\&.7\&.0 unterstützt SSSD mehrere Suchgrundlagen mittels der Syntax:
+.sp
+search_base[?Gültigkeitsbereich?[Filter][?search_base?Gültigkeitsbereich?[Filter]]*]
+.sp
+Der Gültigkeitsbereich kann entweder \(Fcbase\(Fo, \(Fconelevel\(Fo oder \(Fcsubtree\(Fo sein\&.
+.sp
+Der Filter muss ein gültiger LDAP\-Suchfilter, wie durch http://www\&.ietf\&.org/rfc/rfc2254\&.txt spezifiziert, sein\&.
+.sp
+Beispiele:
+.sp
+ldap_search_base = dc=example,dc=com (dies entspricht) ldap_search_base = dc=example,dc=com?subtree?
+.sp
+ldap_search_base = cn=host_specific,dc=Beispiel,dc=com?Unterverzeichnis?(host=Dieser_Rechner)?dc=example\&.com?Unterverzeichnis?
+.sp
+Hinweis: Mehrere Suchgrundlagen, die sich auf Objekte mit gleichem Namen beziehen, werden nicht unterstützt (zum Beispiel Gruppen mit demselben Namen in zwei unterschiedlichen Suchgrundlagen)\&. Dies wird zu unvorhersehbarem Verhalten auf Client\-Rechnern führen\&.
+.sp
+Voreinstellung: Falls nicht gesetzt, wird der Wert der Attribute \(FcdefaultNamingContext\(Fo oder \(FcnamingContexts\(Fo vom RootDSE des LDAP\-Servers benutzt\&. Falls \(FcdefaultNamingContext\(Fo nicht existiert oder ihr Wert leer ist, wird \(FcnamingContexts\(Fo verwendet\&. Das Attribut \(FcnamingContexts\(Fo muss einen einzelnen Wert mit dem Domain\-Namen der Suchgrundlage des LDAP\-Servers haben, damit dies funktioniert\&. Mehrere Werte werden nicht unterstützt\&.
+.RE
+.PP
+ldap_schema (Zeichenkette)
+.RS 4
+gibt den Schematyp an, der gerade auf dem Ziel\-LDAP\-Server benutzt wird\&. Abhängig vom ausgewählten Schema können sich die von den Servern geholten Standardattributnamen stark unterscheiden\&. Die Art, wie einige Attribute gehandhabt werden, kann sich ebenfalls unterscheiden\&.
+.sp
+Derzeit werden vier Schematypen unterstützt:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+rfc2307
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+rfc2307bis
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+IPA
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+AD
+.RE
+.sp
+Der Hauptunterschied zwischen diesen Schematypen besteht darin, wie Gruppenmitgliedschaften auf dem Server aufgezeichnet werden\&. Mit \(Fcrfc2307\(Fo werden Gruppenmitglieder nach Namen im Attribut
+\fImemberUid\fR
+aufgeführt\&. Mit \(Fcrfc2307bis\(Fo bis \(FcIPA\(Fo werden die Gruppenmitglieder nach Domain\-Namen aufgeführt und im Attribut
+\fImember\fR
+gespeichert\&. Der Schematyp \(FcAD\(Fo setzt die Attribute passend zu den Werten von Active Directory 2008r2\&.
+.sp
+Voreinstellung: rfc2307
+.RE
+.PP
+ldap_pwmodify_mode (string)
+.RS 4
+Specify the operation that is used to modify user password\&.
+.sp
+Two modes are currently supported:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+exop \- Password Modify Extended Operation (RFC 3062)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ldap_modify \- Direct modification of userPassword (not recommended)\&.
+.RE
+.sp
+Note: First, a new connection is established to verify current password by binding as the user that requested password change\&. If successful, this connection is used to change the password therefore the user must have write access to userPassword attribute\&.
+.sp
+Default: exop
+.RE
+.PP
+ldap_default_bind_dn (Zeichenkette)
+.RS 4
+der Standard\-Bind\-Domain\-Name, der zum Durchführen von LDAP\-Aktionen benutzt wird
+.RE
+.PP
+ldap_default_authtok_type (Zeichenkette)
+.RS 4
+der Typ des Authentifizierungs\-Tokens des Standard\-Bind\-Domain\-Namens
+.sp
+Die beiden derzeit unterstützten Mechanismen sind:
+.sp
+password
+.sp
+obfuscated_password
+.sp
+Voreinstellung: password
+.RE
+.PP
+ldap_default_authtok (Zeichenkette)
+.RS 4
+das Authentifizierungs\-Token des Standard\-Bind\-Domain\-Namens\&. Derzeit werden nur Klartextpasswörter unterstützt\&.
+.RE
+.PP
+ldap_force_upper_case_realm (Boolesch)
+.RS 4
+Einige Verzeichnisserver, zum Beispiel Active Directory, könnten den Realm\-Teil der UPN in Kleinbuchstaben liefern, was zum Scheitern der Authentifizierung führen kann\&. Setzen Sie diese Option auf einen Wert ungleich Null, falls Sie einen Realm in Großbuchstaben wünschen\&.
+.sp
+Voreinstellung: \(Fcfalse\(Fo
+.RE
+.PP
+ldap_enumeration_refresh_timeout (Ganzzahl)
+.RS 4
+gibt an, wie viele Sekunden lang SSSD warten soll, bevor es seinen Zwischenspeicher aufgezählter Datensätze aktualisiert\&.
+.sp
+Voreinstellung: 300
+.RE
+.PP
+ldap_purge_cache_timeout (Ganzzahl)
+.RS 4
+bestimmt, wie oft der Zwischenspeicher auf inaktive Einträge überprüft wird (wie Gruppen ohne Mitglieder und Benutzer, die sich noch nie angemeldet haben) und diese entfernt werden, um Platz zu sparen\&.
+.sp
+Setting this option to zero will disable the cache cleanup operation\&. Please note that if enumeration is enabled, the cleanup task is required in order to detect entries removed from the server and can\*(Aqt be disabled\&. By default, the cleanup task will run every 3 hours with enumeration enabled\&.
+.sp
+Voreinstellung: 0 (deaktiviert)
+.RE
+.PP
+ldap_group_nesting_level (Ganzzahl)
+.RS 4
+Falls \(Fcldap_schema\(Fo auf ein Format gesetzt ist, das verschachtelte Gruppen (z\&.B\&. RFC2307bis) unterstützt, dann steuert diese Option, wie viele Stufen tief SSSD der Verschachtelung folgt\&. Diese Option hat keine Auswirkungen auf das Schema RFC2307\&.
+.sp
+Hinweis: Diese Option gibt die garantierte Tiefe verschachtelter Gruppen an, die bei Suchvorgängen verarbeitet werden soll\&. Dennoch
+\fIkönnen\fR
+auch tiefer verschachtelte Gruppen einbezogen werden, falls bei früheren Suchvorgängen die tieferen Ebenen bereits einmal berücksichtigt wurden\&. Außerdem können folgende Suchvorgänge für andere Gruppen die Ergebnisse des ursprünglichen Suchvorgangs vergrößern, wenn die Suche erneut erfolgt\&.
+.sp
+If ldap_group_nesting_level is set to 0 then no nested groups are processed at all\&. However, when connected to Active\-Directory Server 2008 and later using
+\(lqid_provider=ad\(rq
+it is furthermore required to disable usage of Token\-Groups by setting ldap_use_tokengroups to false in order to restrict group nesting\&.
+.sp
+Voreinstellung: 2
+.RE
+.PP
+ldap_use_tokengroups
+.RS 4
+Diese Optionen aktivieren oder deaktivieren die Verwendung des Token\-Gruppen\-Attributs, wenn \(Fcinitgroup\(Fo für Benutzers des Active Directory Servers 2008 und neuere Versionen ausgeführt wird\&.
+.sp
+Default: True for AD and IPA otherwise False\&.
+.RE
+.PP
+ldap_host_search_base (string)
+.RS 4
+optional, verwendet die angegebene Zeichenkette als Suchgrundlage für Rechnerobjekte
+.sp
+Informationen über das Konfigurieren mehrerer Suchgrundlagen finden Sie unter \(Fcldap_search_base\(Fo\&.
+.sp
+Voreinstellung: der Wert von
+\fIldap_search_base\fR
+.RE
+.PP
+ldap_service_search_base (Zeichenkette)
+.RS 4
+ein optionaler Basis\-DN, Gültigkeitsbereich für die Suche und LDAP\-Filter, um die LDAP\-Suchen für diesen Attributtyp einzuschränken\&.
+.sp
+Syntax:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?Gültigkeitsbereich?[Filter][?Suchbasis?Gültigkeitsbereich?[Filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Der Bereich kann entweder \(Fcbase\(Fo, \(Fconlevel\(Fo oder \(Fcsubtree\(Fo sein\&. Die Bereiche funktionieren wie im Abschnitt 4\&.5\&.1\&.2 auf http://tools\&.ietf\&.org/html/rfc4511 angegeben\&.
+.sp
+Der Filter muss ein gültiger LDAP\-Suchfilter, wie durch http://www\&.ietf\&.org/rfc/rfc2254\&.txt spezifiziert, sein\&.
+.sp
+Beispiele für diese Syntax finden Sie im Beispielabschnitt von \(Fcldap_search_base\(Fo\&.
+.sp
+Voreinstellung: der Wert von
+\fIldap_search_base\fR
+.sp
+Bitte beachten Sie, dass die Angabe von Gültigkeitsbereich oder Filter nicht beim Suchen auf einem Active\-Directory\-Server unterstützt wird, der möglicherweise eine große Anzahl an Ergebnissen zurückliefern und in der Antwort die Erweiterung \(FcRange Retrieval\(Fo auslösen könnte\&.
+.RE
+.PP
+ldap_search_timeout (Ganzzahl)
+.RS 4
+gibt den Zeitpunkt der Zeitüberschreitung (in Sekunden) an, bis zu dem LDAP\-Suchen laufen dürfen, bevor sie abgebrochen und die zwischengespeicherten Ergebnisse zurückgegeben werden (und in den Offline\-Modus gegangen wird)\&.
+.sp
+Hinweis: Diese Option ist in zukünftigen Versionen von SSSD Gegenstand von Änderungen\&. Sie wird wahrscheinlich an einigen Stellen durch Serien von Zeitüberschreitungspunkten für spezielle Nachschlagetypen ersetzt\&.
+.sp
+Voreinstellung: 6
+.RE
+.PP
+ldap_enumeration_search_timeout (Ganzzahl)
+.RS 4
+gibt den Zeitpunkt der Zeitüberschreitung (in Sekunden) an, bis zu dem LDAP\-Suchen nach Benutzer\- und Gruppenaufzählungen laufen dürfen, bevor sie abgebrochen und die zwischengespeicherten Ergebnisse zurückgegeben werden (und in den Offline\-Modus gegangen wird)\&.
+.sp
+Voreinstellung: 60
+.RE
+.PP
+ldap_network_timeout (Ganzzahl)
+.RS 4
+gibt den Zeitpunkt der Zeitüberschreitung (in Sekunden) an, nach dem
+\fBpoll\fR(2)/\fBselect\fR(2)
+gefolgt von einem
+\fBconnect\fR(2)
+zurückkehrt, falls keine Aktivität stattfindet\&.
+.sp
+Voreinstellung: 6
+.RE
+.PP
+ldap_opt_timeout (Ganzzahl)
+.RS 4
+Specifies a timeout (in seconds) after which calls to synchronous LDAP APIs will abort if no response is received\&. Also controls the timeout when communicating with the KDC in case of SASL bind, the timeout of an LDAP bind operation, password change extended operation and the StartTLS operation\&.
+.sp
+Default: 8
+.RE
+.PP
+ldap_connection_expire_timeout (Ganzzahl)
+.RS 4
+gibt den Zeitpunkt der Zeitüberschreitung (in Sekunden) an, bis zu dem eine Verbindung zu einem LDAP\-Server aufrechterhalten wird\&. Nach dieser Zeit wird die Verbindung erneut aufgebaut\&. Wird dies parallel zu SASL/GSSAPI benutzt, wird der frühere der beiden Werte (dieser Wert gegenüber der TGT\-Lebensdauer) verwendet\&.
+.sp
+Voreinstellung: 900 (15 Minuten)
+.RE
+.PP
+ldap_page_size (Ganzzahl)
+.RS 4
+gibt die Anzahl der Datensätze an, die in einer einzelnen Anfrage von LDAP empfangen werden\&. Einige LDAP\-Server erzwingen eine Begrenzung des Maximums pro Anfrage\&.
+.sp
+Voreinstellung: 1000
+.RE
+.PP
+ldap_disable_paging (Boolesch)
+.RS 4
+deaktiviert die Seitenadressierungssteuerung von LDAP\&. Diese Option sollte benutzt werden, falls der LDAP\-Server meldet, dass er die LDAP\-Seitenadressierungssteuerung in seinem RootDSE unterstützt, sie jedoch deaktiviert ist oder sich nicht ordnungsgemäß verhält\&.
+.sp
+Beispiel: OpenLDAP\-Server, bei denen das Seitenadressierungssteuerungsmodul installiert, aber nicht aktiviert ist, werden es im RootDSE melden, sind aber nicht in der Lage, es zu benutzen\&.
+.sp
+Beispiel: 389 DS hat einen Fehler, durch den es gleichzeitig nur eine einzige Seitenadressierungssteuerung für eine einzelne Verbindung benutzen kann\&. Bei ausgelasteten Clients kann dies dazu führen, dass manche Anfragen abgelehnt werden\&.
+.sp
+Voreinstellung: False
+.RE
+.PP
+ldap_disable_range_retrieval (Boolesch)
+.RS 4
+deaktiviert die Bereichsabfrage von Active Directory
+.sp
+Active Directory begrenzt die Anzahl der Mitglieder, die in einem einzigen Nachschlagen mittels der MaxValRange\-Richtlinie empfangen werden können (die Voreinstellung sind 1\&.500 Mitglieder)\&. Falls eine Gruppe mehr Mitglieder enthält, wird die Antwort eine AD\-spezifische Bereichserweiterung enthalten\&. Diese Option deaktiviert das Auswerten der Bereichserweiterung, daher wird es so aussehen, als ob große Gruppen keine Mitglieder hätten\&.
+.sp
+Voreinstellung: False
+.RE
+.PP
+ldap_sasl_minssf (Ganzzahl)
+.RS 4
+Wenn mittels SASL mit einem LDAP\-Server kommuniziert wird, gibt dies die mindestens nötige Sicherheitsstufe zum Herstellen der Verbindung an\&. Die Werte dieser Option werden durch OpenLDAP definiert\&.
+.sp
+Voreinstellung: verwendet die Voreinstellungen des System (normalerweise in \(Fcldap\&.conf\(Fo angegeben)
+.RE
+.PP
+ldap_deref_threshold (Ganzzahl)
+.RS 4
+gibt die Anzahl der Gruppenmitglieder an, die aus dem internen Zwischenspeicher fehlen muss, um ein dereferenzierendes Nachschlagen auszulösen\&. Falls weniger Mitglieder fehlen, werden sie individuell nachgeschlagen\&.
+.sp
+You can turn off dereference lookups completely by setting the value to 0\&. Please note that there are some codepaths in SSSD, like the IPA HBAC provider, that are only implemented using the dereference call, so even with dereference explicitly disabled, those parts will still use dereference if the server supports it and advertises the dereference control in the rootDSE object\&.
+.sp
+Dereferenzierendes Nachschlagen ist ein Mittel, um alle Gruppenmitglieder in einem einzigen LDAP\-Aufruf abzuholen\&. Verschiedene LDAP\-Server können unterschiedliche Methoden zum Dereferenzieren implementieren\&. Die derzeit unterstützten Server sind 389/RHDS, OpenLDAP und Active Directory\&.
+.sp
+\fIHinweis:\fR
+Falls eine der Suchgrundlagen einen Suchfilter angibt, wird die Verbesserung der Leistung beim dereferenzierenden Nachschlagen ohne Rücksicht auf die Einstellung deaktiviert\&.
+.sp
+Voreinstellung: 10
+.RE
+.PP
+ldap_tls_reqcert (Zeichenkette)
+.RS 4
+gibt an, welche Prüfungen von Server\-Zertifikaten in einer TLS\-Sitzung durchgeführt werden, falls vorhanden\&. Dies kann in Form einer der folgenden Werte angegeben werden:
+.sp
+\fInever\fR
+= Der Client wird kein Server\-Zertifikat prüfen oder anfordern\&.
+.sp
+\fIallow\fR
+= Das Server\-Zertifikat wird angefordert\&. Falls kein Zertifikat bereitgestellt wird, fährt die Sitzung normal fort\&. Falls ein ungültiges Zertifikat bereitgestellt wird, wird es ignoriert und die Sitzung fährt normal fort\&.
+.sp
+\fItry\fR
+= Das Server\-Zertifikat wird angefordert\&. Falls das Zertifikat bereitgestellt wird, fährt die Sitzung normal fort\&. Falls ein ungültiges Zertifikat bereitgestellt wird, wird die Sitzung sofort beendet\&.
+.sp
+\fIdemand\fR
+= Das Server\-Zertifikat wird angefordert\&. Falls kein oder ein ungültiges Zertifikat bereitgestellt wird, wird die Sitzung sofort beendet\&.
+.sp
+\fIhard\fR
+= entspricht \(Fcdemand\(Fo
+.sp
+Voreinstellung: hard
+.RE
+.PP
+ldap_tls_cacert (Zeichenkette)
+.RS 4
+gibt die Datei an, die Zertifikate für alle Zertifizierungstellen enthält, die
+\fBsssd\fR
+erkennen wird\&.
+.sp
+Voreinstellung: verwendet OpenLDAP\-Voreinstellungen, normalerweise aus
+/etc/openldap/ldap\&.conf
+.RE
+.PP
+ldap_tls_cacertdir (Zeichenkette)
+.RS 4
+gibt den Pfad eines Verzeichnisses an, das Zertifikate von Zertifizierungstellen in separaten individuellen Dateien enthält\&. Die Dateinamen sollen normalerweise ein Hash\-Wert des Zertifikats gefolgt von \(Fc\&.0\(Fo sein\&. Falls verfügbar, kann
+\fBcacertdir_rehash\fR
+zum Erstellen der korrekten Namen verwendet werden\&.
+.sp
+Voreinstellung: verwendet OpenLDAP\-Voreinstellungen, normalerweise aus
+/etc/openldap/ldap\&.conf
+.RE
+.PP
+ldap_tls_cert (Zeichenkette)
+.RS 4
+gibt die Datei an, die das Zertifikat für den Schlüssel des Clients enthält\&.
+.sp
+Voreinstellung: nicht gesetzt
+.RE
+.PP
+ldap_tls_key (Zeichenkette)
+.RS 4
+gibt die Datei an, die den Schlüssel des Clients enthält\&.
+.sp
+Voreinstellung: nicht gesetzt
+.RE
+.PP
+ldap_tls_cipher_suite (Zeichenkette)
+.RS 4
+Specifies acceptable cipher suites\&. Typically this is a colon separated list\&. See
+\fBldap.conf\fR(5)
+for format\&.
+.sp
+Voreinstellung: verwendet OpenLDAP\-Voreinstellungen, normalerweise aus
+/etc/openldap/ldap\&.conf
+.RE
+.PP
+ldap_id_use_start_tls (Boolesch)
+.RS 4
+gibt an, dass die Verbindung \(Fcid_provider\(Fo auch
+tls
+benutzen muss, um den Kanal abzusichern\&.
+.sp
+Voreinstellung: \(Fcfalse\(Fo
+.RE
+.PP
+ldap_id_mapping (Boolesch)
+.RS 4
+gibt an, dass SSSD versuchen soll, die Benutzer\- und Gruppen\-ID von den Attributen \(Fcldap_user_objectsid\(Fo und \(Fcldap_group_objectsid\(Fo abzubilden, statt sich auf \(Fcldap_user_uid_number\(Fo und \(Fcldap_group_gid_number\(Fo zu verlassen\&.
+.sp
+Derzeit unterstützt diese Funktionalität nur das Abbilden von Active\-Directory\-ObjectSIDs\&.
+.sp
+Voreinstellung: \(Fcfalse\(Fo
+.RE
+.PP
+ldap_min_id, ldap_max_id (integer)
+.RS 4
+Im Gegensatz zum SID\-basierten ID\-Abbilden, das benutzt wird, falls \(Fcldap_id_mapping\(Fo auf \(Fctrue\(Fo gesetzt ist, ist der erlaubte ID\-Bereich für \(Fcldap_user_uid_number\(Fo und \(Fcldap_group_gid_number\(Fo offen\&. In einer Konfiguration mit Unter\-Domains und vertrauenswürdigen Domains könnte dies zu ID\-Kollisionen führen\&. Um Kollisionen zu vermeiden, können \(Fcldap_min_id\(Fo und \(Fcldap_max_id\(Fo zum Begrenzen des erlaubten Bereichs für direkt vom Server gelesene IDs verwendet werden\&. Unter\-Domains können dann andere Bereiche zur Abbildung von IDs wählen\&.
+.sp
+Voreinstellung: nicht gesetzt (beide Optionen sind auf 0 gesetzt)
+.RE
+.PP
+ldap_sasl_mech (Zeichenkette)
+.RS 4
+Specify the SASL mechanism to use\&. Currently only GSSAPI and GSS\-SPNEGO are tested and supported\&.
+.sp
+If the backend supports sub\-domains the value of ldap_sasl_mech is automatically inherited to the sub\-domains\&. If a different value is needed for a sub\-domain it can be overwritten by setting ldap_sasl_mech for this sub\-domain explicitly\&. Please see TRUSTED DOMAIN SECTION in
+\fBsssd.conf\fR(5)
+for details\&.
+.sp
+Voreinstellung: nicht gesetzt
+.RE
+.PP
+ldap_sasl_authid (Zeichenkette)
+.RS 4
+Specify the SASL authorization id to use\&. When GSSAPI/GSS\-SPNEGO are used, this represents the Kerberos principal used for authentication to the directory\&. This option can either contain the full principal (for example host/myhost@EXAMPLE\&.COM) or just the principal name (for example host/myhost)\&. By default, the value is not set and the following principals are used:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+hostname@REALM
+netbiosname$@REALM
+host/hostname@REALM
+*$@REALM
+host/*@REALM
+host/*
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+If none of them are found, the first principal in keytab is returned\&.
+.sp
+Voreinstellung Rechner/MeinRechner@BEREICH
+.RE
+.PP
+ldap_sasl_realm (Zeichenkette)
+.RS 4
+gibt den SASL\-Realm an, der benutzt werden soll\&. Wurde diese Option nicht angegeben, ist die Voreinstellung der Wert von \(Fckrb5_realm\(Fo\&. Falls \(Fcldap_sasl_authid\(Fo ebenfalls den Realm enthält, wird diese Option ignoriert\&.
+.sp
+Voreinstellung: der Wert von \(Fckrb5_realm\(Fo
+.RE
+.PP
+ldap_sasl_canonicalize (Boolesch)
+.RS 4
+Falls dies auf \(Fctrue\(Fo gesetzt wäre, würde die LDAP\-Bibliothek ein umgekehrtes Nachschlagen durchführen, um den Rechnernamen während eines SASL\-Bind in eine kanonische Form zu bringen\&.
+.sp
+Voreinstellung: false;
+.RE
+.PP
+ldap_krb5_keytab (Zeichenkette)
+.RS 4
+Specify the keytab to use when using SASL/GSSAPI/GSS\-SPNEGO\&.
+.sp
+Voreinstellung: Keytab des Systems, normalerweise
+/etc/krb5\&.keytab
+.RE
+.PP
+ldap_krb5_init_creds (Boolesch)
+.RS 4
+Specifies that the id_provider should init Kerberos credentials (TGT)\&. This action is performed only if SASL is used and the mechanism selected is GSSAPI or GSS\-SPNEGO\&.
+.sp
+Voreinstellung: \(Fctrue\(Fo
+.RE
+.PP
+ldap_krb5_ticket_lifetime (Ganzzahl)
+.RS 4
+Specifies the lifetime in seconds of the TGT if GSSAPI or GSS\-SPNEGO is used\&.
+.sp
+Voreinstellung: 86400 (24 Stunden)
+.RE
+.PP
+krb5_server, krb5_backup_server (Zeichenkette)
+.RS 4
+gibt die durch Kommata getrennte Liste von IP\-Adressen bzw\&. Rechnernamen von Kerberos\-Servern in der Reihenfolge an, in der sich SSSD mit ihnen verbinden soll\&. Weitere Informationen über Ausfallsicherung und Redundanz finden Sie im Abschnitt \(FcAUSFALLSICHERUNG\(Fo\&. An die Adressen oder Rechnernamen kann eine optionale Portnummer (der ein Doppelpunkt vorangestellt ist) angehängt werden\&. Falls dies leer gelassen wurde, wird die Dienstsuche aktiviert\&. Weitere Informationen finden Sie im Abschnitt \(FcDIENSTSUCHE\(Fo\&.
+.sp
+Wenn die Dienstsuche für Schlüsselverwaltungszentralen\- (KDC) oder Kpasswd\-Server benutzt wird, durchsucht SSSD zuerst die DNS\-Einträge, die_udp als Protokoll angeben\&. Falls keine gefunden werden, weicht es auf _tcp aus\&.
+.sp
+Diese Option hieß in früheren Veröffentlichungen von SSSD \(Fckrb5_kdcip\(Fo\&. Obwohl der alte Name einstweilen noch in Erinnerung ist, wird Anwendern geraten, ihre Konfigurationsdateien auf die Verwendung von \(Fckrb5_server\(Fo zu migrieren\&.
+.RE
+.PP
+krb5_realm (Zeichenkette)
+.RS 4
+Specify the Kerberos REALM (for SASL/GSSAPI/GSS\-SPNEGO auth)\&.
+.sp
+Voreinstellung: Systemvoreinstellungen, siehe
+/etc/krb5\&.conf
+.RE
+.PP
+krb5_canonicalize (Boolesch)
+.RS 4
+gibt an, ob der Host Principal beim Verbinden mit einem LDAP\-Server in eine kanonische Form gebracht werden soll\&. Diese Funktionalität ist mit MIT Kerberos >= 1\&.7 verfügbar\&.
+.sp
+Voreinstellung: \(Fcfalse\(Fo
+.RE
+.PP
+krb5_use_kdcinfo (Boolesch)
+.RS 4
+gibt an, ob SSSD die Kerberos\-Bibliotheken anweisen soll, welcher Realm und welche Schlüsselverwaltungszentralen (KDCs) benutzt werden sollen\&. Diese Option ist standardmäßig eingeschaltet\&. Falls Sie sie ausschalten, müssen Sie die Kerberos\-Bibliothek mittels der Konfigurationsdatei
+\fBkrb5.conf\fR(5)
+einrichten\&.
+.sp
+Weitere Informationen über die Locator\-Erweiterung finden Sie auf der Handbuchseite
+\fBsssd_krb5_locator_plugin\fR(8)\&.
+.sp
+Voreinstellung: \(Fctrue\(Fo
+.RE
+.PP
+ldap_pwd_policy (Zeichenkette)
+.RS 4
+wählt das Regelwerk, anhand dessen das Client\-seitige Erlöschen des Passworts abgeschätzt werden soll\&. Die folgenden Werte sind erlaubt:
+.sp
+\fInone\fR
+\(en keine Client\-seitige Abschätzung\&. Diese Option kann keine Server\-seitigen Passwortregelwerke deaktivieren\&.
+.sp
+\fIshadow\fR
+\(en benutzt Attribute im Stil von
+\fBshadow\fR(5), um abzuschätzen, ob das Passwort erloschen ist\&.
+.sp
+\fImit_kerberos\fR
+\(en verwendet die von MIT Kerberos benutzten Attribute, um zu bestimmen, ob das Passwort erloschen ist\&. Verwenden Sie \(Fcchpass_provider=krb5\(Fo, um diese Attribute zu aktualisieren, wenn das Passwort geändert wurde\&.
+.sp
+Voreinstellung: none
+.sp
+\fIHinweis\fR: Falls serverseitig eine Passwortregel konfiguriert ist, hat diese stets Vorrang vor der mit dieser Option festgelegten Regel\&.
+.RE
+.PP
+ldap_referrals (Boolesch)
+.RS 4
+gibt an, ob automatische Verweisverfolgung aktiviert werden soll\&.
+.sp
+Bitte beachten Sie, dass SSSD nur Verweisverfolgung unterstützt, falls es mit OpenLDAP Version 2\&.4\&.13 oder höher kompiliert wurde\&.
+.sp
+Verweisverfolgungen können in Umgebungen, die ausgiebig von ihnen Gebrauch machen, einen Leistungsnachteil erleiden, ein beachtenswertes Beispiel ist Microsoft Active Directory\&. Falls ihre Installation Verweisverfolgungen nicht tatsächlich benötigt, könnte diese Option auf \(Fcfalse\(Fo zu setzen eine merkliche Leistungsverbesserung bringen\&.
+.sp
+Voreinstellung: \(Fctrue\(Fo
+.RE
+.PP
+ldap_dns_service_name (Zeichenkette)
+.RS 4
+gibt an, welcher Dienstname bei aktivierter Dienstsuche benutzt werden soll\&.
+.sp
+Voreinstellung: ldap
+.RE
+.PP
+ldap_chpass_dns_service_name (Zeichenkette)
+.RS 4
+gibt den Dienstnamen an, der zum Finden eines LDAP\-Servers benutzt werden soll, der Passwortänderungen bei aktivierter Dienstsuche ermöglicht\&.
+.sp
+Voreinstellung: nicht gesetzt, d\&.h\&. Dienstsuche ist deaktiviert
+.RE
+.PP
+ldap_chpass_update_last_change (Boolesch)
+.RS 4
+gibt an, ob das Attribut \(Fcldap_user_shadow_last_change\(Fo nach einer Passwortänderung mit Unix\-Zeit geändert wird\&.
+.sp
+Voreinstellung: False
+.RE
+.PP
+ldap_access_filter (Zeichenkette)
+.RS 4
+Falls access_provider = ldap und ldap_access_order = filter ist (Voreinstellung), dann ist diese Option obligatorisch\&. Sie gibt ein Suchfilterkriterium für LDAP an, dass auf den Benutzer passen muss, damit diesem Zugriff auf den Host gewährt wird\&. Falls access_provider = ldap und ldap_access_order = filter ist und diese Option nicht gesetzt ist, wird allen Benutzern der Zugriff verweigert\&. Verwenden Sie access_provider = permit, um dieses Standardverhalten zu ändern\&. Bitte beachten Sie, dass dieser Filter nur auf den LDAP\-Benutzereintrag angewendet wird und daher die auf verschachtelten Gruppen basierende Filterung nicht funktioniert\&. Beispielsweise zeigt das Active\-Directory\-Attribut \(FcmemberOf\(Fo nur auf die unmittelbaren Eltern\&. Falls die Filterung basierend auf verschachtelten Gruppen erforderlich sein sollte, finden Sie genauere Anweisungen in der Handbuchseite zu
+\fBsssd-simple\fR(5)\&.
+.sp
+Beispiel:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+access_provider = ldap
+ldap_access_filter = (employeeType=admin)
+                        
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In diesem Beispiel wird der Zugriff auf diesen Host auf jene Benutzer beschränkt, deren employeeType\-Attribut auf \(Fcadmin\(Fo gesetzt ist\&.
+.sp
+Offline caching for this feature is limited to determining whether the user\*(Aqs last online login was granted access permission\&. If they were granted access during their last login, they will continue to be granted access while offline and vice versa\&.
+.sp
+Voreinstellung: leer
+.RE
+.PP
+ldap_account_expire_policy (Zeichenkette)
+.RS 4
+Mit dieser Option kann eine Client\-seitige Abschätzung der Zugriffssteuerungsattribute aktiviert werden\&.
+.sp
+Bitte beachten Sie, dass die Server\-seitige Zugriffssteuerung generell empfohlen wird, d\&.h\&. der LDAP\-Server sollte die Bind\-Abfrage sogar dann mit einem geeigneten Fehlercode zurückweisen, wenn das Passwort korrekt ist\&.
+.sp
+Die folgenden Werte sind erlaubt:
+.sp
+\fIshadow\fR: verwendet den Wert von \(Fcldap_user_shadow_expire\(Fo, um zu bestimmen, ob das Konto abgelaufen ist\&.
+.sp
+\fIad\fR: verwendet den Wert des 32\-Bit\-Felds \(Fcldap_user_ad_user_account_control\(Fo und ermöglicht den Zugriff, falls das zweite Bit nicht gesetzt ist\&. Falls das Attribut fehlt, wird Zugriff gewährt\&. Außerdem wird die Ablaufzeit des Kontos geprüft\&.
+.sp
+\fIrhds\fR,
+\fIipa\fR,
+\fI389ds\fR: verwenden den Wert von \(Fcldap_ns_account_lock\(Fo, um zu prüfen, ob Zugriff erlaubt wird oder nicht\&.
+.sp
+\fInds\fR: Die Werte von \(Fcldap_user_nds_login_allowed_time_map\(Fo, \(Fcldap_user_nds_login_disabled\(Fo und \(Fcldap_user_nds_login_expiration_time\(Fo werden benutzt, um zu überprüfen, ob Zugriff gewährt wird\&. Falls diese Attribute fehlen, wird Zugriff erteilt\&.
+\fI This is an experimental feature, please use https://pagure\&.io/SSSD/sssd/ to report any issues\&. \fR
+.sp
+Bitte beachten Sie, dass die Konfigurationsoption \(Fcldap_access_order\(Fo \(Fcexpire\(Fo enthalten
+\fImuss\fR, damit die Option \(Fcldap_account_expire_policy\(Fo funktioniert\&.
+.sp
+Voreinstellung: leer
+.RE
+.PP
+ldap_access_order (Zeichenkette)
+.RS 4
+durch Kommata getrennte Liste von Zugriffssteuerungsoptionen\&. Folgende Werte sind erlaubt:
+.sp
+\fIfilter\fR: verwendet \(Fcldap_access_filter\(Fo\&.
+.sp
+\fIlockout\fR: use account locking\&. If set, this option denies access in case that ldap attribute \*(AqpwdAccountLockedTime\*(Aq is present and has value of \*(Aq000001010000Z\*(Aq\&. Please see the option ldap_pwdlockout_dn\&. Please note that \*(Aqaccess_provider = ldap\*(Aq must be set for this feature to work\&.
+.sp
+\fI Please note that this option is superseded by the \fR\fI\(lqppolicy\(rq\fR\fI option and might be removed in a future release\&. \fR
+.sp
+\fIppolicy\fR: use account locking\&. If set, this option denies access in case that ldap attribute \*(AqpwdAccountLockedTime\*(Aq is present and has value of \*(Aq000001010000Z\*(Aq or represents any time in the past\&. The value of the \*(AqpwdAccountLockedTime\*(Aq attribute must end with \*(AqZ\*(Aq, which denotes the UTC time zone\&. Other time zones are not currently supported and will result in "access\-denied" when users attempt to log in\&. Please see the option ldap_pwdlockout_dn\&. Please note that \*(Aqaccess_provider = ldap\*(Aq must be set for this feature to work\&.
+.sp
+\fIexpire\fR: verwendet \(Fcldap_account_expire_policy\(Fo\&.
+.sp
+\fIpwd_expire_policy_reject, pwd_expire_policy_warn, pwd_expire_policy_renew: \fR
+These options are useful if users are interested in being warned that password is about to expire and authentication is based on using a different method than passwords \- for example SSH keys\&.
+.sp
+The difference between these options is the action taken if user password is expired: pwd_expire_policy_reject \- user is denied to log in, pwd_expire_policy_warn \- user is still able to log in, pwd_expire_policy_renew \- user is prompted to change his password immediately\&.
+.sp
+Note If user password is expired no explicit message is prompted by SSSD\&.
+.sp
+Please note that \*(Aqaccess_provider = ldap\*(Aq must be set for this feature to work\&. Also \*(Aqldap_pwd_policy\*(Aq must be set to an appropriate password policy\&.
+.sp
+\fIauthorized_service\fR: verwendet das Attribut \(FcauthorizedService\(Fo, um zu bestimmen, ob Zugriff gewährt wird\&.
+.sp
+\fIhost\fR: verwendet das Attribut \(Fchost\(Fo, um zu bestimmen, ob Zugriff gewährt wird\&.
+.sp
+\fIrhost\fR: use the rhost attribute to determine whether remote host can access
+.sp
+Please note, rhost field in pam is set by application, it is better to check what the application sends to pam, before enabling this access control option
+.sp
+Voreinstellung: filter
+.sp
+Bitte beachten Sie, dass es ein Konfigurationsfehler ist, falls ein Wert mehr als einmal benutzt wird\&.
+.RE
+.PP
+ldap_pwdlockout_dn (string)
+.RS 4
+This option specifies the DN of password policy entry on LDAP server\&. Please note that absence of this option in sssd\&.conf in case of enabled account lockout checking will yield access denied as ppolicy attributes on LDAP server cannot be checked properly\&.
+.sp
+Example: cn=ppolicy,ou=policies,dc=example,dc=com
+.sp
+Default: cn=ppolicy,ou=policies,$ldap_search_base
+.RE
+.PP
+ldap_deref (Zeichenkette)
+.RS 4
+gibt an, wie Alias\-Dereferenzierung bei einer Suche erledigt wird\&. Die folgenden Optionen sind erlaubt:
+.sp
+\fInever\fR: Alias werden nie dereferenziert\&.
+.sp
+\fIsearching\fR: Alias werden auf Unterebenen des Basisobjekts dereferenziert, nicht jedoch beim Orten des Basisobjekts der Suche\&.
+.sp
+\fIfinding\fR: Alias werden nur beim Orten des Basisobjekts der Suche dereferenziert\&.
+.sp
+\fIalways\fR: Alias werden sowohl bei der Suche als auch beim Orten des Basisobjekts der Suche dereferenziert\&.
+.sp
+Voreinstellung: leer (Dies wird durch LDAP\-Client\-Bibliotheken wie
+\fInever\fR
+gehandhabt\&.)
+.RE
+.PP
+ldap_rfc2307_fallback_to_local_users (Boolesch)
+.RS 4
+ermöglich, lokale Anwender als Mitglieder einer LDAP\-Gruppe für Server beizubehalten, die das Schema RFC2307 benutzen\&.
+.sp
+In einigen Umgebungen, in denen das Schema RFC2307 verwendet wird, werden lokale Benutzer zu Mitgliedern einer LDAP\-Gruppe gemacht, indem ihre Namen dem Attribut \(FcmemberUid\(Fo hinzugefügt werden\&. Die eigene Stimmigkeit der Domain wird dabei kompromittiert, daher würde SSSD normalerweise \(Fcfehlende\(Fo Anwender aus den zwischengespeicherten Gruppenmitgliedschaften entfernen, sobald Nsswitch versucht, Informationen über den Anwender durch Aufrufen von getpw*() oder initgroups() abzurufen\&.
+.sp
+Diese Option greift auf das Prüfen zurück, ob auf lokale Benutzer Bezug genommen wird und speichert sie, so dass spätere Aufrufe von \(Fcinitgroups() die lokalen Benutzer um zusätzliche LDAP\-Gruppen erweitert werden\&.
+.sp
+Voreinstellung: \(Fcfalse\(Fo
+.RE
+.PP
+wildcard_limit (integer)
+.RS 4
+Specifies an upper limit on the number of entries that are downloaded during a wildcard lookup\&.
+.sp
+At the moment, only the InfoPipe responder supports wildcard lookups\&.
+.sp
+Default: 1000 (often the size of one page)
+.RE
+.SH "SUDO\-OPTIONEN"
+.PP
+Detaillierte Anweisungen zur Konfiguration von sudo_provider finden Sie in der Handbuchseite zu
+\fBsssd-sudo\fR(5)\&.
+.PP
+.PP
+ldap_sudo_full_refresh_interval (Ganzzahl)
+.RS 4
+wie viele Sekunden SSSD zwischen einer vollständigen Aktualisierung von Sudo\-Regeln warten wird (wodurch alle auf dem Server gespeicherten Regeln heruntergeladen werden)
+.sp
+Der Wert muss größer als
+\fIldap_sudo_smart_refresh_interval\fR
+sein\&.
+.sp
+Voreinstellung: 21600 (6 Stunden)
+.RE
+.PP
+ldap_sudo_smart_refresh_interval (Ganzzahl)
+.RS 4
+How many seconds SSSD has to wait before executing a smart refresh of sudo rules (which downloads all rules that have USN higher than the highest server USN value that is currently known by SSSD)\&.
+.sp
+Falls vom Server keine USN\-Attribute unterstützt werden, wird stattdessen das Attribut \(FcmodifyTimestamp\(Fo benutzt\&.
+.sp
+\fINote:\fR
+the highest USN value can be updated by three tasks: 1) By sudo full and smart refresh (if updated rules are found), 2) by enumeration of users and groups (if enabled and updated users or groups are found) and 3) by reconnecting to the server (by default every 15 minutes, see
+\fIldap_connection_expire_timeout\fR)\&.
+.sp
+Voreinstellung: 900 (15 Minuten)
+.RE
+.PP
+ldap_sudo_use_host_filter (Boolesch)
+.RS 4
+Falls dies auf \(Fctrue\(Fo gesetzt ist, wird SSSD nur die Regeln herunterladen, die auf diese Maschine angewandt werden können (mittels der IPv4\- oder IPv6\-Netzwerkadressen und Rechnernamen)\&.
+.sp
+Voreinstellung: \(Fctrue\(Fo
+.RE
+.PP
+ldap_sudo_hostnames (Zeichenkette)
+.RS 4
+durch Leerzeichen getrennte Listen von Rechnernamen oder voll qualifizierten Domain\-Namen, die zum Filtern der Regeln benutzt werden sollen
+.sp
+Falls diese Option leer ist, wird SSSD versuchen, den Rechnernamen und den voll qualifizierten Domain\-Namen automatisch herauszufinden\&.
+.sp
+Falls
+\fIldap_sudo_use_host_filter\fR
+\fIfalse\fR
+ist, hat diese Option keine Auswirkungen\&.
+.sp
+Voreinstellung: nicht angegeben
+.RE
+.PP
+ldap_sudo_ip (Zeichenkette)
+.RS 4
+durch Kommata getrennte Liste von IPv4\- oder IPv6\-Rechner\- beziehungsweise Netzwerkadressen, die zum Filtern der Regeln benutzt werden sollen
+.sp
+Falls diese Option leer ist, wird SSSD versuchen, die Adressen automatisch herauszufinden\&.
+.sp
+Falls
+\fIldap_sudo_use_host_filter\fR
+\fIfalse\fR
+ist, hat diese Option keine Auswirkungen\&.
+.sp
+Voreinstellung: nicht angegeben
+.RE
+.PP
+ldap_sudo_include_netgroups (Boolesch)
+.RS 4
+Falls dies auf \(Fctrue\(Fo gesetzt ist, wird SSSD jede Regel herunterladen, die eine Netzgruppe im Attribut \(FcsudoHost\(Fo enthält\&.
+.sp
+Falls
+\fIldap_sudo_use_host_filter\fR
+\fIfalse\fR
+ist, hat diese Option keine Auswirkungen\&.
+.sp
+Voreinstellung: \(Fctrue\(Fo
+.RE
+.PP
+ldap_sudo_include_regexp (Boolesch)
+.RS 4
+Falls dies auf \(Fctrue\(Fo gesetzt ist, wird SSSD jede Regel herunterladen, die einen Platzhalter im Attribut \(FcsudoHost\(Fo enthält\&.
+.sp
+Falls
+\fIldap_sudo_use_host_filter\fR
+\fIfalse\fR
+ist, hat diese Option keine Auswirkungen\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+Using wildcard is an operation that is very costly to evaluate on the LDAP server side!
+.sp .5v
+.RE
+Voreinstellung: \(Fcfalse\(Fo
+.RE
+.PP
+Diese Handbuchseite beschreibt nur das Abbilden von Attributnamen\&. Eine umfassende Erklärung der Sudo\-bezogenen Attributsemantik finden Sie unter
+\fBsudoers.ldap\fR(5)\&.
+.SH "AUTOFS\-OPTIONEN"
+.PP
+Some of the defaults for the parameters below are dependent on the LDAP schema\&.
+.PP
+.PP
+ldap_autofs_map_master_name (Zeichenkette)
+.RS 4
+Der Name der Automount\-Master\-Abbildung in LDAP\&.
+.sp
+Voreinstellung: auto\&.master
+.RE
+.PP
+ldap_autofs_map_object_class (Zeichenkette)
+.RS 4
+die Objektklasse eines Automount\-Abbildungseintrags in LDAP
+.sp
+Default: nisMap (rfc2307, autofs_provider=ad), otherwise automountMap
+.RE
+.PP
+ldap_autofs_map_name (Zeichenkette)
+.RS 4
+der Name eines Automount\-Abbildungseintrags in LDAP
+.sp
+Default: nisMapName (rfc2307, autofs_provider=ad), otherwise automountMapName
+.RE
+.PP
+ldap_autofs_entry_object_class (Zeichenkette)
+.RS 4
+The object class of an automount entry in LDAP\&. The entry usually corresponds to a mount point\&.
+.sp
+Default: nisObject (rfc2307, autofs_provider=ad), otherwise automount
+.RE
+.PP
+ldap_autofs_entry_key (Zeichenkette)
+.RS 4
+der Schlüssel eines Automount\-Eintrags in LDAP\&. Normalerweise entspricht der Eintrag einem Einhängepunkt\&.
+.sp
+Default: cn (rfc2307, autofs_provider=ad), otherwise automountKey
+.RE
+.PP
+ldap_autofs_entry_value (Zeichenkette)
+.RS 4
+der Schlüssel eines Automount\-Eintrags in LDAP\&. Normalerweise entspricht der Eintrag einem Einhängepunkt\&.
+.sp
+Default: nisMapEntry (rfc2307, autofs_provider=ad), otherwise automountInformation
+.RE
+.PP
+Bitte beachten Sie, dass der Automounter beim Start nur die Master\-Abbildung liest\&. Daher müssen Sie normalerweise, falls irgendwelche zu Autofs gehörigen Änderungen in der \(Fcsssd\&.conf\(Fo vorgenommen wurden, den Automounter\-Daemon nach dem SSSD\-Neustart ebenfalls neu starten\&.
+.SH "ERWEITERTE OPTIONEN"
+.PP
+These options are supported by LDAP domains, but they should be used with caution\&. Please include them in your configuration only if you know what you are doing\&.
+.PP
+ldap_netgroup_search_base (Zeichenkette)
+.RS 4
+ein optionaler Basis\-DN, Gültigkeitsbereich für die Suche und LDAP\-Filter, um die LDAP\-Suchen für diesen Attributtyp einzuschränken\&.
+.sp
+Syntax:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?Gültigkeitsbereich?[Filter][?Suchbasis?Gültigkeitsbereich?[Filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Der Bereich kann entweder \(Fcbase\(Fo, \(Fconlevel\(Fo oder \(Fcsubtree\(Fo sein\&. Die Bereiche funktionieren wie im Abschnitt 4\&.5\&.1\&.2 auf http://tools\&.ietf\&.org/html/rfc4511 angegeben\&.
+.sp
+Der Filter muss ein gültiger LDAP\-Suchfilter, wie durch http://www\&.ietf\&.org/rfc/rfc2254\&.txt spezifiziert, sein\&.
+.sp
+Beispiele für diese Syntax finden Sie im Beispielabschnitt von \(Fcldap_search_base\(Fo\&.
+.sp
+Voreinstellung: der Wert von
+\fIldap_search_base\fR
+.sp
+Bitte beachten Sie, dass die Angabe von Gültigkeitsbereich oder Filter nicht beim Suchen auf einem Active\-Directory\-Server unterstützt wird, der möglicherweise eine große Anzahl an Ergebnissen zurückliefern und in der Antwort die Erweiterung \(FcRange Retrieval\(Fo auslösen könnte\&.
+.RE
+.PP
+ldap_user_search_base (Zeichenkette)
+.RS 4
+ein optionaler Basis\-DN, Gültigkeitsbereich für die Suche und LDAP\-Filter, um die LDAP\-Suchen für diesen Attributtyp einzuschränken\&.
+.sp
+Syntax:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?Gültigkeitsbereich?[Filter][?Suchbasis?Gültigkeitsbereich?[Filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Der Bereich kann entweder \(Fcbase\(Fo, \(Fconlevel\(Fo oder \(Fcsubtree\(Fo sein\&. Die Bereiche funktionieren wie im Abschnitt 4\&.5\&.1\&.2 auf http://tools\&.ietf\&.org/html/rfc4511 angegeben\&.
+.sp
+Der Filter muss ein gültiger LDAP\-Suchfilter, wie durch http://www\&.ietf\&.org/rfc/rfc2254\&.txt spezifiziert, sein\&.
+.sp
+Beispiele für diese Syntax finden Sie im Beispielabschnitt von \(Fcldap_search_base\(Fo\&.
+.sp
+Voreinstellung: der Wert von
+\fIldap_search_base\fR
+.sp
+Bitte beachten Sie, dass die Angabe von Gültigkeitsbereich oder Filter nicht beim Suchen auf einem Active\-Directory\-Server unterstützt wird, der möglicherweise eine große Anzahl an Ergebnissen zurückliefern und in der Antwort die Erweiterung \(FcRange Retrieval\(Fo auslösen könnte\&.
+.RE
+.PP
+ldap_group_search_base (Zeichenkette)
+.RS 4
+ein optionaler Basis\-DN, Gültigkeitsbereich für die Suche und LDAP\-Filter, um die LDAP\-Suchen für diesen Attributtyp einzuschränken\&.
+.sp
+Syntax:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?Gültigkeitsbereich?[Filter][?Suchbasis?Gültigkeitsbereich?[Filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Der Bereich kann entweder \(Fcbase\(Fo, \(Fconlevel\(Fo oder \(Fcsubtree\(Fo sein\&. Die Bereiche funktionieren wie im Abschnitt 4\&.5\&.1\&.2 auf http://tools\&.ietf\&.org/html/rfc4511 angegeben\&.
+.sp
+Der Filter muss ein gültiger LDAP\-Suchfilter, wie durch http://www\&.ietf\&.org/rfc/rfc2254\&.txt spezifiziert, sein\&.
+.sp
+Beispiele für diese Syntax finden Sie im Beispielabschnitt von \(Fcldap_search_base\(Fo\&.
+.sp
+Voreinstellung: der Wert von
+\fIldap_search_base\fR
+.sp
+Bitte beachten Sie, dass die Angabe von Gültigkeitsbereich oder Filter nicht beim Suchen auf einem Active\-Directory\-Server unterstützt wird, der möglicherweise eine große Anzahl an Ergebnissen zurückliefern und in der Antwort die Erweiterung \(FcRange Retrieval\(Fo auslösen könnte\&.
+.RE
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+If the option
+\(lqldap_use_tokengroups\(rq
+is enabled, the searches against Active Directory will not be restricted and return all groups memberships, even with no GID mapping\&. It is recommended to disable this feature, if group names are not being displayed correctly\&.
+.sp .5v
+.RE
+.PP
+ldap_sudo_search_base (Zeichenkette)
+.RS 4
+ein optionaler Basis\-DN, Gültigkeitsbereich für die Suche und LDAP\-Filter, um die LDAP\-Suchen für diesen Attributtyp einzuschränken\&.
+.sp
+Syntax:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?Gültigkeitsbereich?[Filter][?Suchbasis?Gültigkeitsbereich?[Filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Der Bereich kann entweder \(Fcbase\(Fo, \(Fconlevel\(Fo oder \(Fcsubtree\(Fo sein\&. Die Bereiche funktionieren wie im Abschnitt 4\&.5\&.1\&.2 auf http://tools\&.ietf\&.org/html/rfc4511 angegeben\&.
+.sp
+Der Filter muss ein gültiger LDAP\-Suchfilter, wie durch http://www\&.ietf\&.org/rfc/rfc2254\&.txt spezifiziert, sein\&.
+.sp
+Beispiele für diese Syntax finden Sie im Beispielabschnitt von \(Fcldap_search_base\(Fo\&.
+.sp
+Voreinstellung: der Wert von
+\fIldap_search_base\fR
+.sp
+Bitte beachten Sie, dass die Angabe von Gültigkeitsbereich oder Filter nicht beim Suchen auf einem Active\-Directory\-Server unterstützt wird, der möglicherweise eine große Anzahl an Ergebnissen zurückliefern und in der Antwort die Erweiterung \(FcRange Retrieval\(Fo auslösen könnte\&.
+.RE
+.PP
+ldap_autofs_search_base (Zeichenkette)
+.RS 4
+ein optionaler Basis\-DN, Gültigkeitsbereich für die Suche und LDAP\-Filter, um die LDAP\-Suchen für diesen Attributtyp einzuschränken\&.
+.sp
+Syntax:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+search_base[?Gültigkeitsbereich?[Filter][?Suchbasis?Gültigkeitsbereich?[Filter]]*]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Der Bereich kann entweder \(Fcbase\(Fo, \(Fconlevel\(Fo oder \(Fcsubtree\(Fo sein\&. Die Bereiche funktionieren wie im Abschnitt 4\&.5\&.1\&.2 auf http://tools\&.ietf\&.org/html/rfc4511 angegeben\&.
+.sp
+Der Filter muss ein gültiger LDAP\-Suchfilter, wie durch http://www\&.ietf\&.org/rfc/rfc2254\&.txt spezifiziert, sein\&.
+.sp
+Beispiele für diese Syntax finden Sie im Beispielabschnitt von \(Fcldap_search_base\(Fo\&.
+.sp
+Voreinstellung: der Wert von
+\fIldap_search_base\fR
+.sp
+Bitte beachten Sie, dass die Angabe von Gültigkeitsbereich oder Filter nicht beim Suchen auf einem Active\-Directory\-Server unterstützt wird, der möglicherweise eine große Anzahl an Ergebnissen zurückliefern und in der Antwort die Erweiterung \(FcRange Retrieval\(Fo auslösen könnte\&.
+.RE
+.SH "AUSFALLSICHERUNG"
+.PP
+Die Ausfallsicherungsfunktionalität ermöglicht es, dass Backends automatisch auf einen anderen Server wechseln, falls der aktuelle versagt\&.
+.SS "AUSFALLSICHERUNGSSYNTAX"
+.PP
+Die Server werden als durch Kommata getrennte Liste angegeben\&. Um das Komma herum ist eine beliebige Anzahl von Leerzeichen erlaubt\&. Die Server werden in Reihenfolge der Bevorzugung aufgeführt\&. Die Liste kann eine beliebige Anzahl von Servern enthalten\&.
+.PP
+Von jeder Konfigurationsoption mit aktivierter Ausfallsicherung existieren zwei Varianten:
+\fIprimary\fR
+und
+\fIbackup\fR\&. Die Idee dahinter ist, dass Server in der Liste \(Fcprimary\(Fo bevorzugt werden und nur nach \(Fcbackup\(Fo\-Servern gesucht wird, falls kein \(Fcprimary\(Fo\-Server erreichbar ist\&. Falls ein \(Fcbackup\(Fo\-Server ausgewählt wird, wird eine Dauer von 31 Sekunden bis zur Zeitüberschreitung festgelegt\&. Nach dieser Zeit wird SSSD periodisch versuchen, sich mit einem der primären Server zu verbinden\&. Ist dies erfolgreich, wird es den derzeit aktiven (\(Fcbackup\(Fo\-)Server ersetzen\&.
+.SS "Der Ausfallsicherungsmechanismus"
+.PP
+Der Ausfallsicherungsmechanismus unterscheidet zwischen einer Maschine und einem Dienst\&. Das Backend versucht zuerst, den Rechnernamen der angegebenen Maschine aufzulösen\&. Falls dieser Versuch scheitert, wird davon ausgegangen, dass die Maschine offline ist und sie auch für keinen anderen Dienst zur Verfügung steht\&. Kann der den Namen erfolgreich aufgelöst werden, versucht das Backend, sich mit einem Dienst auf dieser Maschine zu verbinden\&. Ist das nicht möglich, dann wird nur dieser bestimmte Dienst als offline angesehen und das Backend wechselt automatisch weiter zum nächsten\&. Die Maschine wird weiterhin als online betrachtet und kann immer noch für andere Dienste herangezogen werden\&.
+.PP
+Weitere Verbindungsversuche zu Maschinen oder Diensten, die als offline gekennzeichnet sind, werden erst nach einer angegebenen Zeitspanne unternommen\&. Diese ist derzeit hart auf 30 Sekunden codiert\&.
+.PP
+Falls es weitere Maschinen durchzuprobieren gibt, wechselt das Backend als Ganzes in den Offline\-Modus und versucht dann alle 30 Sekunden, sich erneut zu verbinden\&.
+.SS "Failover time outs and tuning"
+.PP
+Resolving a server to connect to can be as simple as running a single DNS query or can involve several steps, such as finding the correct site or trying out multiple host names in case some of the configured servers are not reachable\&. The more complex scenarios can take some time and SSSD needs to balance between providing enough time to finish the resolution process but on the other hand, not trying for too long before falling back to offline mode\&. If the SSSD debug logs show that the server resolution is timing out before a live server is contacted, you can consider changing the time outs\&.
+.PP
+This section lists the available tunables\&. Please refer to their description in the
+\fBsssd.conf\fR(5), manual page\&.
+.PP
+dns_resolver_server_timeout
+.RS 4
+Time in milliseconds that sets how long would SSSD talk to a single DNS server before trying next one\&.
+.sp
+Voreinstellung: 1000
+.RE
+.PP
+dns_resolver_op_timeout
+.RS 4
+Time in seconds to tell how long would SSSD try to resolve single DNS query (e\&.g\&. resolution of a hostname or an SRV record) before trying the next hostname or discovery domain\&.
+.sp
+Voreinstellung: 2
+.RE
+.PP
+dns_resolver_timeout
+.RS 4
+How long would SSSD try to resolve a failover service\&. This service resolution internally might include several steps, such as resolving DNS SRV queries or locating the site\&.
+.sp
+Default: 4
+.RE
+.PP
+For LDAP\-based providers, the resolve operation is performed as part of an LDAP connection operation\&. Therefore, also the
+\(lqldap_opt_timeout>\(rq
+timeout should be set to a larger value than
+\(lqdns_resolver_timeout\(rq
+which in turn should be set to a larger value than
+\(lqdns_resolver_op_timeout\(rq
+which should be larger than
+\(lqdns_resolver_server_timeout\(rq\&.
+.SH "DIENSTSUCHE"
+.PP
+Die Dienstsuchfunktionalität ermöglicht es Backends, automatisch mit Hilfe einer speziellen DNS\-Abfrage geeignete Server zu suchen, mit denen sie sich verbinden können\&. Diese Funktionalität wird nicht für Datensicherungs\-Server unterstützt\&.
+.SS "Konfiguration"
+.PP
+Falls keine Server angegeben wurden, benutzt das Backend die Dienstsuche, um einen Server zu finden\&. Wahlweise kann der Benutzer sowohl feste Server\-Adressen als auch die Dienstsuche durch Eingabe des speziellen Schlüsselworts \(Fc_srv_\(Fo in der Server\-Liste auswählen\&. Die bevorzugte Reihenfolge wird verwaltet\&. Diese Funktionalität ist zum Beispiel nützlich, falls der Anwender es vorzieht, die Dienstsuche zu verwenden, wann immer dies möglich ist, und auf einen bestimmten Server zurückzugreifen, wenn mittels DNS keine Server gefunden werden\&.
+.SS "Der Domain\-Name"
+.PP
+Weitere Einzelheiten finden Sie in der Handbuchseite
+\fBsssd.conf\fR(5)
+beim Parameter \(Fcdns_discovery_domain\(Fo\&.
+.SS "Das Protokoll"
+.PP
+Die Abfragen geben als Protokoll üblicherweise \(Fc_tcp\(Fo an\&. Ausnahmen sind in der Beschreibung der entsprechenden Option dokumentiert\&.
+.SS "Siehe auch"
+.PP
+Weitere Informationen über den Dienstsuchmechanismus finden Sie in RFC 2782\&.
+.SH "ID\-ABBILDUNG"
+.PP
+Die ID\-Abbildungsfunktionalität ermöglicht es SSSD, als Client eines Active Directorys zu agieren, ohne dass Administratoren Benutzerattribute erweitern müssen, damit POSIX\-Attribute für Benutzer\- und Gruppenkennzeichner unterstützt werden\&.
+.PP
+HINWEIS: Wenn ID\-Abbildung aktiviert ist, werden die Attribute \(FcuidNumber\(Fo und \(FcgidNumber\(Fo ignoriert\&. Dies geschieht, um mögliche Konflikte zwischen automatisch und manuell zugewiesenen Werten zu vermeiden\&. Falls Sie manuell zugewiesene Werte benutzen müssen, müssen Sie ALLE Werte manuell zuweisen\&.
+.PP
+Bitte beachten Sie, dass die Änderung der die ID\-Abbildung betreffenden Konfigurationsoptionen auch die Änderung der Benutzer\- und Gruppen\-IDs nach sich zieht\&. Momentan unterstützt SSSD die Änderung der IDs nicht, daher muss die Datenbank entfernt werden\&. Da auch zwischengespeicherte Passwörter in der Datenbank enthalten sind, sollte diese nur entfernt werden, während die Authentifizierungsserver erreichbar sind, anderenfalls könnten Benutzer ausgesperrt werden\&. Um das Passwort zwischenzuspeichern, muss eine Authentifizierung ausgeführt werden\&. Es reicht nicht aus,
+\fBsss_cache\fR(8)
+zum Löschen der Datenbank auszuführen, vielmehr sind folgende Schritte erforderlich:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Stellen Sie sicher, dass entfernte Server erreichbar sind\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Stoppen Sie den SSSD\-Dienst\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Entfernen Sie die Datenbank\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Starten Sie den SSSD\-Dienst\&.
+.RE
+.sp
+Außerdem ist es ratsam, vorauszuplanen und die ID\-Abbildung gründlich zu testen, da die Änderung der IDs Änderungen anderer Systemeigenschaften nach sich ziehen könnte, wie die Besitzverhältnisse von Dateien und Verzeichnissen\&.
+.SS "Abbildungsalgorithmus"
+.PP
+Active Directory stellt für jedes Benutzer\- und Gruppenobjekt im Verzeichnis eine \(FcobjectSID\(Fo bereit\&. Diese \(FcobjectSID\(Fo kann in Bestandteile zerlegt werden, die die Active\-Directory\-Domain\-Identität und den relativen Bezeichner (RID) des Benutzer\- oder Gruppenobjekts darstellen\&.
+.PP
+Der ID\-Abbildungsalgorithmus von SSSD nimmt einen Bereich verfügbarer UIDs und teilt sie in gleich große Bestandteile, \(FcSlices\(Fo genannt\&. Jeder Slice steht für den verfügbaren Speicher einer Active\-Directory\-Domain\&.
+.PP
+Wenn ein Benutzer\- oder Gruppeneintrag für eine bestimmt Domain zum ersten Mal vorgefunden wird, reserviert der SSSD einen der verfügbaren Slices für diese Domain\&. Um eine Slice\-Zuteilung auf verschiedenen Client\-Maschinen wiederholbar zu machen, wählen wir den Slice, der auf dem folgenden Algorithmus basiert:
+.PP
+Die Zeichenkette durchläuft den Algorithmus Murmurhash3, um sie in einen 32\-Bit\-Hash\-Wert umzuwandeln\&. Dann wird der Betrag dieses Werts mit der Gesamtzahl verfügbarer Slices genommen, um den Slice auszusuchen\&.
+.PP
+HINWEIS: Es ist möglich, dass Kollisionen zwischen dem Hash und nachfolgenden Beträgen auftreten\&. In diesen Situationen werden wir den nächsten verfügbaren Slice auswählen, aber es ist wahrscheinlich nicht möglich, den genau gleichen Satz von Slices auf anderen Maschinen zu reproduzieren (da die Reihenfolge, in der sie vorgefunden werden, ihren Slice bestimmt)\&. In dieser Situtation wird empfohlen, entweder auf die Verwendung expliziter POSIX\-Attribute in Active Directory zu wechseln (ID\-Abbildung deaktivieren) oder eine Standard\-Domain zu konfigurieren, um sicherzustellen, dass wenigstens eine immer beständig ist\&. Einzelheiten finden Sie unter \(FcKonfiguration\(Fo\&.
+.SS "Konfiguration"
+.PP
+Minimalkonfiguration (im Abschnitt \(Fc[domain/DOMAINNAME]\(Fo):
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+ldap_id_mapping = True
+ldap_schema = ad
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The default configuration results in configuring 10,000 slices, each capable of holding up to 200,000 IDs, starting from 200,000 and going up to 2,000,200,000\&. This should be sufficient for most deployments\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBFortgeschrittene Konfiguration\fR
+.RS 4
+.PP
+ldap_idmap_range_min (Ganzzahl)
+.RS 4
+gibt die Untergrenze des Bereichs von POSIX\-IDs an, der zum Abbilden von Active\-Directory\-Benutzern und Gruppen\-SIDs benutzt wird\&.
+.sp
+HINWEIS: Diese Option unterscheidet sich von \(Fcmin_id\(Fo, wobei \(Fcmin_id\(Fo als Filter für die Ausgabe von Anfragen an diese Domain agiert, wohingegen diese Option den Bereich der ID\-Zuweisung steuert\&. Dies ist ein feiner Unterschied, aber es wäre ein allgemein guter Ratschlag, dass \(Fcmin_id\(Fo kleiner oder gleich \(Fcldap_idmap_range_min\(Fo sein sollte\&.
+.sp
+Voreinstellung: 200000
+.RE
+.PP
+ldap_idmap_range_max (Ganzzahl)
+.RS 4
+gibt die Obergrenze des Bereichs von POSIX\-IDs an, der zum Abbilden von Active\-Directory\-Benutzern und Gruppen\-SIDs benutzt wird\&.
+.sp
+HINWEIS: Diese Option unterscheidet sich von \(Fcmax_id\(Fo wobei \(Fcmax_id\(Fo als Filter für die Ausgabe von Anfragen an diese Domain agiert, wohingegen diese Option den Bereich der ID\-Zuweisung steuert\&. Dies ist ein feiner Unterschied, aber es wäre ein allgemein guter Ratschlag, dass \(Fcmax_id\(Fo größer oder gleich \(Fcldap_idmap_range_max\(Fo sein sollte\&.
+.sp
+Voreinstellung: 2000200000
+.RE
+.PP
+ldap_idmap_range_size (Ganzzahl)
+.RS 4
+gibt die Anzahl der für jeden Slice verfügbaren IDs an\&. Falls sich die Bereichsgröße nicht gleichmäßig in die minimalen und maximalen Werte teilen lässt, werden so viele komplette Slices wie möglich erstellt\&.
+.sp
+HINWEIS: Der Wert dieser Option muss mindestens so groß sein wie die größte Benutzer\-RID, die jemals auf dem Active\-Directory\-Server verwendet werden soll\&. Das Nachschlagen und Anmelden von Benutzern wird scheitern, wenn deren RIDs größer sind als dieser Wert\&.
+.sp
+For example, if your most recently\-added Active Directory user has objectSid=S\-1\-5\-21\-2153326666\-2176343378\-3404031434\-1107,
+\(lqldap_idmap_range_size\(rq
+must be at least 1108 as range size is equal to maximal SID minus minimal SID plus one (e\&.g\&. 1108 = 1107 \- 0 + 1)\&.
+.sp
+Es ist wichtig, für spätere Erweiterungen vorauszuplanen, da die Änderung dieses Wertes zur Änderung aller ID\-Abbildungen des Systems führt\&. Dadurch können Benutzer andere lokale IDs als vorher haben\&.
+.sp
+Voreinstellung: 200000
+.RE
+.PP
+ldap_idmap_default_domain_sid (Zeichenkette)
+.RS 4
+gibt die Domain\-SID der Standard\-Domain an\&. Dies wird sicherstellen, dass diese Domain immer dem Slice null im ID\-Abbild zugeordnet wird\&. Dabei wird der oben beschriebene Murmurhash\-Algorithmus umgangen\&.
+.sp
+Voreinstellung: nicht gesetzt
+.RE
+.PP
+ldap_idmap_default_domain (Zeichenkette)
+.RS 4
+gibt den Namen der Standard\-Domain an\&.
+.sp
+Voreinstellung: nicht gesetzt
+.RE
+.PP
+ldap_idmap_autorid_compat (Boolesch)
+.RS 4
+ändert das Verhalten des ID\-Abbildungsalgorithmus so, dass es dem Algorithmus \(Fcidmap_autorid\(Fo von Winbind ähnlicher ist\&.
+.sp
+Wenn diese Option konfiguriert wurde, werden Domains beginnend bei Slice null reserviert und gleichmäßig mit jeder zusätzlichen Domain vergrößert\&.
+.sp
+HINWEIS: Der Algorithmus ist nicht deterministisch (er hängt von der Reihenfolge ab, in der Benutzer und Gruppen abgefragt werden)\&. Falls dieser Modus aus Kompatibilitätsgründen mit Maschinen, die Winbind ausführen, erforderlich ist, wird empfohlen, auch die Option \(Fcldap_idmap_default_domain_sid\(Fo zu verwenden\&. Dies soll sicherstellen, dass mindestens eine Domain beständig für den Slice null reserviert ist\&.
+.sp
+Voreinstellung: False
+.RE
+.PP
+ldap_idmap_helper_table_size (integer)
+.RS 4
+Maximal number of secondary slices that is tried when performing mapping from UNIX id to SID\&.
+.sp
+Note: Additional secondary slices might be generated when SID is being mapped to UNIX id and RID part of SID is out of range for secondary slices generated so far\&. If value of ldap_idmap_helper_table_size is equal to 0 then no additional secondary slices are generated\&.
+.sp
+Voreinstellung: 10
+.RE
+.RE
+.SS "Bekannte Sicherheits\-IDs"
+.PP
+SSSD unterstützt das Nachschlagen der Namen sogenannter bekannter Sicherheits\-IDs, die eine spezielle unveränderliche Bedeutung haben\&. Da generische Benutzer und Gruppen, die sich auf diese bekannten SIDs beziehen, keine Entsprechung in einer Linux/UNIX\-Umgebung haben, sind für diese Objekte keine POSIX\-IDs verfügbar\&.
+.PP
+Der SID\-Namensraum ist in Autoritäten organisiert, die als unterschiedliche Domains betrachtet werden können\&. Die Autoritäten für die bekannten SIDs sind
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Null\-Autorität (Null Authority)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Weltweit anerkannte Autorität (World Authority)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Lokale Autorität (Local Authority)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Ersteller\-Autorität (Creator Authority)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+NT\-Autorität (NT Authority)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Eingebaut
+.RE
+.sp
+Die mit großem Anfangsbuchstaben geschriebenen Versionen dieser Namen werden als Domainnamen verwendet, wenn der voll qualifizierte Name einer bekannten Sicherheits\-ID zurückgegeben wird\&.
+.PP
+Da einige Dienstprogramme die Änderung der Sicherheits\-ID\-basierten Zugriffskontrollinformationen mit Hilfe des Namens ermöglichen, anstelle die Sicherheits\-ID direkt zu verwenden, unterstützt SSSD die Suche nach der SID anhand des Namens ebenfalls\&. Um Überschneidungen zu vermeiden, können nur voll qualifizierte Namen bei der Suche nach bekannten Sicherheit\-IDs verwendet werden\&. Daher sollten die Domainnamen
+\(lqNULL AUTHORITY\(rq,
+\(lqWORLD AUTHORITY\(rq,
+\(lq LOCAL AUTHORITY\(rq,
+\(lqCREATOR AUTHORITY\(rq,
+\(lqNT AUTHORITY\(rq
+und
+\(lqBUILTIN\(rq
+nicht als Domainnamen in
+sssd\&.conf
+verwendet werden\&.
+.SH "BEISPIEL"
+.PP
+Das folgende Beispiel geht davon aus, dass SSSD korrekt konfiguriert ist und LDAP auf eine der Domains im Abschnitt
+\fI[domains]\fR
+gesetzt ist\&.
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/LDAP]
+id_provider = ldap
+auth_provider = ldap
+ldap_uri = ldap://ldap\&.mydomain\&.org
+ldap_search_base = dc=mydomain,dc=org
+ldap_tls_reqcert = demand
+cache_credentials = true
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "LDAP ACCESS FILTER EXAMPLE"
+.PP
+The following example assumes that SSSD is correctly configured and to use the ldap_access_order=lockout\&.
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/LDAP]
+id_provider = ldap
+auth_provider = ldap
+access_provider = ldap
+ldap_access_order = lockout
+ldap_pwdlockout_dn = cn=ppolicy,ou=policies,dc=mydomain,dc=org
+ldap_uri = ldap://ldap\&.mydomain\&.org
+ldap_search_base = dc=mydomain,dc=org
+ldap_tls_reqcert = demand
+cache_credentials = true
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "ANMERKUNGEN"
+.PP
+Die Beschreibungen einiger Konfigurationsoptionen auf dieser Handbuchseite basieren auf der Handbuchseite
+\fBldap.conf\fR(5)
+der Distribution OpenLDAP 2\&.4\&.
+.SH "SIEHE AUCH"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

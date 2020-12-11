@@ -1,0 +1,237 @@
+'\" t
+.\"     Title: sssd-kcm
+.\"    Author: Основна гілка розробки SSSD \(em https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Формати файлів та правила
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-KCM" "8" "12/09/2020" "SSSD" "Формати файлів та правила"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-kcm \- Керування кешем Kerberos SSSD
+.SH "ОПИС"
+.PP
+На цій сторінці підручника описано налаштування засобу керування кешем Kerberos SSSD (Kerberos Cache Manager або KCM)\&. KCM є процесом, який зберігає, стежить і керує кешем реєстраційних даних Kerberos\&. Ідея створення засобу походить із проєкту Heimdal Kerberos, хоча у бібліотеці Kerberos MIT також надається підтримка з боку клієнта для кешу реєстраційних даних KCM (докладніше про це нижче)\&.
+.PP
+У конфігураціях, де кешем Kerberos керує KCM, бібліотека Kerberos (типово використовується за допомогою якоїсь програми, наприклад
+\fBkinit\fR(1)) є
+\(lqклієнтом KCM\(rq, а фонова служба KCM вважається
+\(lqсервером KCM\(rq\&. Клієнт і сервер обмінюються даними за допомогою сокета UNIX\&.
+.PP
+Сервер KCM стежити за кожним власником кешу реєстраційних даних і виконує перевірку прав доступу на основі UID і GID клієнта KCM\&. Користувач root має доступ до усіх кешів реєстраційних даних\&.
+.PP
+Кеш реєстраційних даних KCM має декілька цікавих властивостей:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+оскільки процес виконується у просторі користувача, він підлягає обмеженням за простором назв UID, на відміну від набору ключів ядра
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+на відміну від кешу на основі наборів ключів ядра, який є спільним для усіх контейнерів, сервер KCM є окремим процесом, чия точка входу є сокетом UNIX
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+the SSSD implementation stores the ccaches in a database, typically located at
+\fI/var/lib/sss/secrets\fR
+allowing the ccaches to survive KCM server restarts or machine reboots\&.
+.RE
+.sp
+Це надає змогу системі використовувати кеш реєстраційних даних із врахуванням збірок, одночасно надаючи спільний доступ до кешу реєстраційних даних для декількох контейнерів або без контейнерів взагалі шляхом прив\*(Aqязування\-монтування сокета\&.
+.SH "КОРИСТУВАННЯ КЕШЕМ РЕЄСТРАЦІЙНИХ ДАНИХ KCM"
+.PP
+Для використання кешу реєстраційних даних KCM його слід вибрати стандартним типом реєстраційних даних у
+\fBkrb5.conf\fR(5)\&. Назвою кешу реєстраційних даних має бути лише
+\(lqKCM:\(rq
+без будь\-яких розширень шаблонами\&. Приклад:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[libdefaults]
+    default_ccache_name = KCM:
+            
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Далі, слід визначити однаковий шлях до сокета UNIX для клієнтських бібліотек Kerberos і сервера KCM\&. Типово, у обох випадках використовується однаковий шлях
+\fI/var/run/\&.heim_org\&.h5l\&.kcm\-socket\fR\&. Для налаштовування бібліотеки Kerberos змініть значення її параметра
+\(lqkcm_socket\(rq, як це описано на сторінці підручника
+\fBkrb5.conf\fR(5)\&.
+.PP
+Нарешті, переконайтеся, що з сервером KCM SSSD можна встановити зв\*(Aqязок\&. Типово, служба KCM вмикається за допомогою сокета з
+\fBsystemd\fR(1)\&. На відміну від інших служб SSSD, її не можна запустити додаванням рядка
+\(lqkcm\(rq
+до інструкції
+\(lqservice\(rq\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+systemctl start sssd\-kcm\&.socket
+systemctl enable sssd\-kcm\&.socket
+            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Будь ласка, зауважте, що відповідні налаштування модулів вже могло бути виконано засобами вашого дистрибутива\&.
+.SH "СХОВИЩЕ КЕШУ РЕЄСТРАЦІЙНИХ ДАНИХ"
+.PP
+Кеші реєстраційних даних зберігаються у базі даних, дуже подібно до кешів записів користувачів і груп SSSD\&. Типово, база даних зберігається у
+\(lq/var/lib/sss/secrets\(rq\&.
+.SH "ОТРИМАННЯ ДІАГНОСТИЧНОГО ЖУРНАЛУ"
+.PP
+Типово, служба sssd\-kcm активує крізь сокет
+\fBsystemd\fR(1)\&. Для створення діагностичних журналів додайте вказані нижче рядки або безпосередньо до файла
+/etc/sssd/sssd\&.conf, або як фрагмент налаштувань до каталогу
+/etc/sssd/conf\&.d/:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[kcm]
+debug_level = 10
+            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Далі, перезапустіть службу sssd\-kcm:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+systemctl restart sssd\-kcm\&.service
+            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Нарешті, виконайте дії, які не призводять до бажаних для вас наслідків\&. Журнал KCM буде записано до
+/var/log/sssd/sssd_kcm\&.log\&. Рекомендуємо вимкнути ведення діагностичного журналу, якщо вам не потрібні діагностичні дані, оскільки служба sssd\-kcm може породжувати доволі великий обсяг діагностичних даних\&.
+.PP
+Будь ласка, зауважте, що у поточній версії фрагменти налаштувань буде оброблено, лише якщо взагалі існує основний файл налаштувань
+/etc/sssd/sssd\&.conf\&.
+.SH "ПАРАМЕТРИ НАЛАШТУВАННЯ"
+.PP
+The KCM service is configured in the
+\(lqkcm\(rq
+section of the sssd\&.conf file\&. Please note that because the KCM service is typically socket\-activated, it is enough to just restart the
+\(lqsssd\-kcm\(rq
+service after changing options in the
+\(lqkcm\(rq
+section of sssd\&.conf:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+systemctl restart sssd\-kcm\&.service
+            
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The KCM service is configured in the
+\(lqkcm\(rq
+For a detailed syntax reference, refer to the
+\(lqFILE FORMAT\(rq
+section of the
+\fBsssd.conf\fR(5)
+manual page\&.
+.PP
+Службі kcm можна передавати типові параметри служби SSSD, зокрема
+\(lqdebug_level\(rq
+та
+\(lqfd_limit\(rq
+Із повним списком параметрів можна ознайомитися на сторінці підручника
+\fBsssd.conf\fR(5)\&. Крім того, передбачено декілька специфічних для KCM параметрів\&.
+.PP
+socket_path (рядок)
+.RS 4
+Сокет, на якому очікуватиме на з\*(Aqєднання служба KCM\&.
+.sp
+Типове значення:
+\fI/var/run/\&.heim_org\&.h5l\&.kcm\-socket\fR
+.RE
+.PP
+max_ccaches (integer)
+.RS 4
+How many credential caches does the KCM database allow for all users\&.
+.sp
+Default: 0 (unlimited, only the per\-UID quota is enforced)
+.RE
+.PP
+max_uid_ccaches (integer)
+.RS 4
+How many credential caches does the KCM database allow per UID\&. This is equivalent to
+\(lqwith how many principals you can kinit\(rq\&.
+.sp
+Default: 64
+.RE
+.PP
+max_ccache_size (integer)
+.RS 4
+How big can a credential cache be per ccache\&. Each service ticket accounts into this quota\&.
+.sp
+Default: 65536
+.RE
+.SH "ТАКОЖ ПЕРЕГЛЯНЬТЕ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+.SH "AUTHORS"
+.PP
+\fBОсновна гілка розробки SSSD \(em
+https://pagure\&.io/SSSD/sssd/\fR

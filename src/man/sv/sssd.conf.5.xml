@@ -1,0 +1,994 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<reference>
+<title>SSSD manualsidor</title>
+<refentry>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/upstream.xml" />
+
+    <refmeta>
+        <refentrytitle>sssd.conf</refentrytitle>
+        <manvolnum>5</manvolnum>
+        <refmiscinfo class="manual">Filformat och konventioner</refmiscinfo>
+    </refmeta>
+
+    <refnamediv id='name'>
+        <refname>sssd.conf</refname>
+        <refpurpose>konfigurationsfilen för SSSD</refpurpose>
+    </refnamediv>
+
+    <refsect1 id='file-format'>
+        <title>FILFORMAT</title>
+
+        <para>
+            Filen har en syntax i ini-stil och består av sektioner och parametrar.  En
+sektion börjar med namnet på sektionen i hakparenteser och fortsätter tills
+nästa sektion börjar.  Ett exempel på en sektion med enkla och flervärda
+parametrar: <programlisting>
+<replaceable>[sektion]</replaceable>
+<replaceable>nyckel</replaceable> = <replaceable>värde</replaceable>
+<replaceable>nyckel2</replaceable> = <replaceable>värde2,värde3</replaceable>
+            </programlisting>
+        </para>
+
+        <para>
+            Datatyperna som används är sträng (inga citationstecken behövs) , heltal och
+bool (med värdena <quote>TRUE/FALSE</quote>).
+        </para>
+
+        <para>
+            En kommentarsrad börjar med ett nummertecken (<quote>#</quote>) eller ett
+semikolon (<quote>;</quote>).  Kommentarer inom raden stödjs inte.
+        </para>
+
+        <para>
+            Alla sektioner kan valfritt ha en parameter
+<replaceable>description</replaceable>.  Dess funktion är endast som en
+etikett för sektionen.
+        </para>
+
+        <para>
+            <filename>sssd.conf</filename> måste vara en normal fil, ägd av root och
+endast root får läsa från eller skriva till filen.
+        </para>
+    </refsect1>
+
+    <refsect1 id='config-snippets'>
+        <title>KONFIGURATIONSSNUTTAR FRÅN EN INCLUDE-KATALOG</title>
+
+        <para>
+            Konfigurationsfilen <filename>sssd.conf</filename> kommer inkludiera
+konfigurationssnuttar från include-katalogen <filename>conf.d</filename>.
+Denna fuktion är tillgänglig om SSSD kompilerades med version 1.3.0 eller
+senare av libini.
+        </para>
+
+        <para>
+            Filer lagda i <filename>conf.d</filename> som slutar med
+<quote><filename>.conf</filename></quote> och inte börjar med en punkt
+(<quote>.</quote>) kommer användas tillsammans med
+<filename>sssd.conf</filename> för att konfigurera SSSD.
+        </para>
+
+        <para>
+            Konfigurationssnuttarna från <filename>conf.d</filename> har högre prioritet
+än <filename>sssd.conf</filename> och kommer åsidosätta
+<filename>sssd.conf</filename> när konflikter uppstår.  Om flera snuttar
+finns i <filename>conf.d</filename> inkluderas de i alfabetisk ordning
+(baserat på lokalen).  Filer som inkluderas senare har högre prioritet.
+Numeriska prefix (<filename>01_snutt.conf</filename>,
+<filename>02_snutt.conf</filename> etc.) kan hjälpa till att visualisera
+prioriteten (högre tals betyder högre prioritet).
+        </para>
+
+        <para>
+            Snuttfilerna behöver samma ägare och rättigheter som
+<filename>sssd.conf</filename>.  Vilket som standard är root:root och 0600.
+        </para>
+    </refsect1>
+
+    <refsect1 id='general-options'>
+        <title>ALLMÄNNA FLAGGOR</title>
+        <para>
+            Följande flaggor är användbara i mer än en konfigurationssektion.
+        </para>
+        <refsect2 id='all-section-options'>
+            <title>Flaggor användbara i alla sektioner</title>
+            <para>
+              <variablelist>
+                <varlistentry>
+                    <term>debug_level (heltal)</term>
+                    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/debug_levels.xml" />
+                </varlistentry>
+                <varlistentry>
+                    <term>debug (heltal)</term>
+                    <listitem>
+                        <para>
+                            SSSD 1.14 och senare inkluderar också aliaset
+<replaceable>debug</replaceable> för <replaceable>debug_level</replaceable>
+som en bekvämlighetsfiness.  Om båda anges kommer värdet
+på<replaceable>debug_level</replaceable> användas.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>debug_timestamps (bool)</term>
+                    <listitem>
+                        <para>
+                            Lägg till en tidsstämpel till felsökningsmeddelanden.  Om journald är
+aktiverat för SSSD-felsökningsloggning igoreras denna flagga.
+                        </para>
+                        <para>
+                            Standard: true
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>debug_microseconds (bool)</term>
+                    <listitem>
+                        <para>
+                            Lägg till mikrosekunder till tidsstämpeln till felsökningsmeddelanden.  Om
+journald är aktiverat för SSSD-felsökningsloggning igoreras denna flagga.
+                        </para>
+                        <para>
+                            Standard: false
+                        </para>
+                    </listitem>
+                </varlistentry>
+              </variablelist>
+            </para>
+        </refsect2>
+
+        <refsect2 id='services-and-domains-section-options'>
+            <title>Flaggor användbara i sektionerna SERVICE och DOMAIN</title>
+            <para>
+              <variablelist>
+                <varlistentry>
+                    <term>timeout (heltal)</term>
+                    <listitem>
+                        <para>
+                            Tidsgräns i sekunder mellan hjärtslag för denna tjänst.  Detta används för
+att säkerställa att processen lever och kan svara på begäranden.  Observera
+att efter tre missade hjärtslag kommer processen avsluta sig själv.
+                        </para>
+                        <para>
+                            Standard: 10
+                        </para>
+                    </listitem>
+                </varlistentry>
+              </variablelist>
+            </para>
+        </refsect2>
+    </refsect1>
+
+    <refsect1 id='special-sections'>
+        <title>SPECIALSEKTIONER</title>
+
+        <refsect2 id='services'>
+            <title>Sektionen [sssd]</title>
+            <para>
+                Enskilda delar av SSSD-funktionalitet tillhandahålls av speciella
+SSSD-tjänster som startas och stoppas tillsammans med SSSD.  Tjänsterna
+hanteras av en speciell tjänst som ofta kallas <quote>monitor</quote>.
+Sektionen <quote>[sssd]</quote> används för att konfigurerara övervakaren
+såväl som andra viktiga alternativ som identitetsdomänerna.  <variablelist>
+                    <title>Sektionsparametrar</title>
+                    <varlistentry>
+                        <term>config_file_version (heltal)</term>
+                        <listitem>
+                            <para>
+                                Indikerar vilken syntaxen är i konfigurationsfilen.  SSSD 0.6.0 och senare
+använder version 2.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>services</term>
+                        <listitem>
+                            <para>
+                                Kommaseparerad lista av tjänster som startas när sssd själv startas.
+<phrase condition="have_systemd"> Tjänstelistan är frivillig på plattformar
+där systemd stödjs, eftersom de antingen kommer vara uttags- eller
+D-Bus-aktiverade vid behov. </phrase>
+                            </para>
+                            <para>
+                                Tjänster som stödjs: nss, pam <phrase condition="with_sudo">, sudo</phrase>
+<phrase condition="with_autofs">, autofs</phrase> <phrase
+condition="with_ssh">, ssh</phrase> <phrase condition="with_pac_responder">,
+pac</phrase> <phrase condition="with_ifp">, ifp</phrase>
+                            </para>
+                            <para>
+                                <phrase condition="have_systemd"> Som standard är alla tjänster avaktiverade
+och administratören måste aktivera de tillåtna genom att köra: ”systemctl
+enable sssd-@service@.socket".  </phrase>
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>reconnection_retries (heltal)</term>
+                        <listitem>
+                            <para>
+                                Antal gånger som tjänster skall försöka återansluta i händelse av en
+dataleverantörkrasch eller starta om innan de ger upp
+                            </para>
+                            <para>
+                                Standard: 3
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>domains</term>
+                        <listitem>
+                            <para>
+                                En domän är en databas som innehåller användarinformation.  SSSD kan använda
+flera domäner på samma gång, men åtminstone en måste vara konfigurerad,
+annars kommer inte SSSD starta.  Denna parameter beskriver listan av domäner
+i den ordning du vill att de skall tillfrågas.  Ett domännamn skall endast
+bestå av alfanumeriska ASCII-tecken, bindestreck, punkter och
+understrykningstecken.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>re_expression (sträng)</term>
+                        <listitem>
+                            <para>
+                                Reguljärt standarduttryck som beskriver hur man skall tolka strängen som
+innehåller användarnamnet och domänen in i dessa komponenter.
+                            </para>
+                            <para>
+                                Varje domän kan ha ett eget reguljärt uttryck konfigurerat.  Får några
+ID-leverantörer finns det också reguljära standarduttryck.  Se
+DOMÄNSEKTIONER för mer information om dessa reguljära uttryck.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>full_name_format (sträng)</term>
+                        <listitem>
+                            <para>
+                                Ett <citerefentry> <refentrytitle>printf</refentrytitle>
+<manvolnum>3</manvolnum> </citerefentry>-kompatibelt format som beskriver
+hur man sätter samman ett fullständigt kvalificerat namn från namn- och
+domänkomponenter.
+                            </para>
+                            <para>
+                                Följande utvidgningar stödjs: <variablelist>
+                                    <varlistentry>
+                                        <term>%1$s</term>
+                                        <listitem><para>användarnamn</para></listitem>
+                                    </varlistentry>
+                                    <varlistentry>
+                                        <term>%2$s</term>
+                                        <listitem>
+                                            <para>
+                                                domännamn som det anges i SSSD-konfigurationsfilen.
+                                            </para>
+                                        </listitem>
+                                    </varlistentry>
+                                    <varlistentry>
+                                        <term>%3$s</term>
+                                        <listitem>
+                                            <para>
+                                                platt domännamn.  Huvudsakligen användbart för Active Directory-domäner,
+både direkt konfigurerade eller hittade via IPA-förtroenden.
+                                            </para>
+                                        </listitem>
+                                    </varlistentry>
+                                </variablelist>
+                            </para>
+                            <para>
+                                Varje domän kan ha en egen formatsträng konfigurerad.  Får några
+ID-leverantörer finns det också reguljära standarduttryck.  Se
+DOMÄNSEKTIONER för mer information om detta alternativ.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>monitor_resolv_conf (boolean)</term>
+                        <listitem>
+                            <para>
+                                Controls if SSSD should monitor the state of resolv.conf to identify when it
+needs to update its internal DNS resolver.
+                            </para>
+                            <para>
+                                Standard: true
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>try_inotify (boolean)</term>
+                        <listitem>
+                            <para>
+                                By default, SSSD will attempt to use inotify to monitor configuration files
+changes and will fall back to polling every five seconds if inotify cannot
+be used.
+                            </para>
+                            <para>
+                                Det finns vissa situationer när det är att föredra att vi skall hoppa över
+att ens försöka att använda inotify.  I dessa sällsynta fall skall detta
+alternativ sättas till ”false”
+                            </para>
+                            <para>
+                                Standard: true på plattformar där inotify stödjs.  False på andra
+plattformar.
+                            </para>
+                            <para>
+                                Obs: detta alternativ kommer inte ha någon effekt på plattformar där inotify
+inte är tillgängligt.  På dessa plattformar kommer pollning alltid användas.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>krb5_rcache_dir (sträng)</term>
+                        <listitem>
+                            <para>
+                                Katalog i filsystemet där SSSD skall spara Kerberos-cachefiler för
+återuppspelning.
+                            </para>
+                            <para>
+                                Detta alternativ godtar ett specialvärde __LIBKRB5_DEFAULTS__ som kommer
+instruera SSSD att låta libkrb5 bestämma den lämpliga platsen för
+cachefilerna för återuppspelning.
+                            </para>
+                            <para>
+                                Standard: distributionsspecifikt och anges vid
+byggtillfället. (__LIBKRB5_DEFAULTS__ om inte konfigurerat)
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>user (sträng)</term>
+                        <listitem>
+                            <para>
+                                Användaren att släppa privilegierna till där det är tillämpligt för att
+undvika att köra som användaren root.  <phrase
+condition="have_systemd">Detta alternativ fungerar vid körning som
+uttagsaktiverade tjänster, eftersom användaren som anges för att köra
+processerna anges vid kompileringstillfället.  Sättet att åsidosätta systemd
+unit-filerna är genom att skapa de tillämpliga i /etc/systemd/system/.  Kom
+ihåg att eventuella ändringar av uttagets användare, grupp eller rättigheter
+kan resultera i en oanvändbar SSSD.  Samma sak kan hända vid ändring av
+användaren som kör NSS-respondenten.</phrase>
+                            </para>
+                            <para>
+                                Standard: inte angivet, processer kommer köra som root
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>default_domain_suffix (sträng)</term>
+                        <listitem>
+                            <para>
+                                Strängen kommmer användas som ett standardnamn för domänen för alla namn
+utan en domännamnsdel.  Det huvudsakliga användningsfallet är miljöer där
+primärdomänen är avsedd för hantering av värdpolicyer och alla användare är
+placerade i en betrodd domän.  Alternativet låter dessa användare att logga
+in med bara sitt användarnamn utan att ange ett domännamn dessutom.
+                            </para>
+                            <para>
+                                Please note that if this option is set all users from the primary domain
+have to use their fully qualified name, e.g. user@domain.name, to log
+in. Setting this option changes default of use_fully_qualified_names to
+True. It is not allowed to use this option together with
+use_fully_qualified_names set to False. One exception from this rule are
+domains with <quote>id_provider=files</quote> that always try to match the
+behaviour of nss_files and therefore their output is not qualified even when
+the default_domain_suffix option is used.
+                            </para>
+                            <para>
+                                Standard: inte satt
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>override_space (sträng)</term>
+                        <listitem>
+                            <para>
+                                Denna parameter kommer ersätta blanksteg (mellanslag) med det angivna
+tecknet i användar- och gruppnamn, t.ex. (_).  Användarnamnet &quot;sven
+svensson&quot; blir &quot;sven_svensson&quot;  Denna funktion lades till för
+att hjälpa till med kompatibiliteten med skalskript som har svårigheter att
+hantera blanka, på grund av att det är standardfältsepearatorn i skalet.
+                            </para>
+                            <para>
+                                Observera att det är ett konfigurationsfel att använda ett ersättningstecken
+som kan användas i användar- eller gruppnamn.  Om ett namn innehåller
+ersättningstecknet försöker SSSD att returnera det omodifierade namnet men i
+allmänhet är resultatet av en uppslagning odefinierat.
+                            </para>
+                            <para>
+                                Default: not set (blanka kommer inte ersättas)
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>certificate_verification (sträng)</term>
+                        <listitem>
+                            <para>
+                                Med denna parameter kan verifieringen av certifikatet justeras med en
+kommaseparerad lista av alternativ.  Alternativ som stödjs är <variablelist>
+                                <varlistentry>
+                                    <term>no_ocsp</term>
+                                    <listitem>
+                                        <para>Avaktiverar kontroller enligt Online Certificate Status Protocol (OCSP).
+Detta kan behövas om OCSP-servrarna som definieras i certifikatet inte är
+nåbara från klienten.</para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>soft_ocsp</term>
+                                    <listitem>
+                                        <para>(NSS Version) This option is ignored.</para>
+
+                                        <para>(OpenSSL Version) If a connection cannot be established to an OCSP responder
+the OCSP check is skipped.  This option should be used to allow
+authentication when the system is offline and the OCSP responder cannot be
+reached.</para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>ocsp_dgst</term>
+                                    <listitem>
+                                        <para>Digest (hash) function used to create the certificate ID for the OCSP
+request. Allowed values are:
+                                        <itemizedlist>
+                                          <listitem><para>sha1</para></listitem>
+                                          <listitem><para>sha256</para></listitem>
+                                          <listitem><para>sha384</para></listitem>
+                                          <listitem><para>sha512</para></listitem>
+                                        </itemizedlist></para>
+                                        <para>
+                                            Default: sha256
+                                        </para>
+                                        <para>(NSS Version) This option is ignored, because NSS uses sha1 unconditionally.</para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>no_verification</term>
+                                    <listitem>
+                                        <para>Avaktiverar helt verifiering.  Detta alternativ skall endast användas för
+testning.</para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>ocsp_default_responder=URL</term>
+                                    <listitem>
+                                        <para>Anger standard-OCSP-respondent som skall användas istället för den som nämns
+i certifikatet.  URL:en måste ersättas med URL:en till
+standard-OCSP-respondenten t.ex. http://example.com:80/ocsp.</para>
+                                        <para>(NSS-version) Detta alternativ måste användas tillsammans med
+ocsp_default_responder_signing_cert.
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>
+                                    ocsp_default_responder_signing_cert=NAMN</term>
+                                    <listitem>
+                                        <para>(NSS-version) Smeknamnet på certifikatet att lita på att (förväntas) signera
+OCSP-svaren.  Certifikatet med det angivna smeknamnet måste vara tillgänglig
+i systemets NSS-databas.</para>
+                                        <para>Detta alternativ måste anges tillsammans med ocsp_default_responder.</para>
+                                        <para>(OpenSSL-version) Detta alternativ ignoreras för närvarande.  Alla
+nödvändiga certifikat måste vara tillgängliga i PEM-filen som anges av
+pam_cert_db_path.</para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>crl_file=/SÖKVÄG/TILL/CRL/FIL</term>
+                                    <listitem>
+                                        <para>(NSS-version) Detta alternativ ignoreras, se <citerefentry>
+<refentrytitle>crlutil</refentrytitle> <manvolnum>1</manvolnum>
+</citerefentry> för hur man importerar en certifikatåterkallelselista
+(Certificate Revocation List, CRL) in i en NSS-databas.</para>
+
+                                        <para>(OpenSSL-version) Använd certifikatåterkallelselistan (Certificate
+Revocation List, CRL) från den givna filen under verifikationen av
+certifikatet.  CRL:en måste ges i PEM-format, se <citerefentry>
+<refentrytitle>crl</refentrytitle> <manvolnum>1ssl</manvolnum>
+</citerefentry> för detaljer.</para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>soft_crl</term>
+                                    <listitem>
+                                        <para>(NSS Version) This option is ignored.</para>
+
+                                        <para>(OpenSSL Version) If a Certificate Revocation List (CRL) is expired ignore
+the CRL checks for the related certificates. This option should be used to
+allow authentication when the system is offline and the CRL cannot be
+renewed.</para>
+                                    </listitem>
+                                </varlistentry>
+                                </variablelist>
+                            </para>
+                            <para condition="with_nss">
+                                Denna manualsida genererades för NSS-versionen.
+                            </para>
+                            <para condition="with_openssl">
+                                Denna manualsida genererades för OpenSSL-versionen.
+                            </para>
+                            <para>
+                                Okända alternativ rapporteras men ignoreras.
+                            </para>
+                            <para>
+                                Standard: inte satt, d.v.s begränsa inte certifikatverifieringen
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>disable_netlink (boolean)</term>
+                        <listitem>
+                            <para>
+                                SSSD-hakar in i netlink-gränssnittet för att övervaka förändringar av
+rutter, adresser, länkar och utlösa vissa åtgärder.
+                            </para>
+                            <para>
+                                Förändringar av SSSD-tillståndet från netlink-händelser kan vara opålitliga
+och kan avaktiveras genom att sätta detta alternativ till ”true”
+                            </para>
+                            <para>
+                                Standard: false (netlink-förändringar detekteras)
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>enable_files_domain (boolean)</term>
+                        <listitem>
+                            <para>
+                                När detta alternativ är aktiverat skjuter SSSD in en implicit domän med
+<quote>id_provider=files</quote> före några explicit konfigurerade domäner.
+                            </para>
+                            <para condition="no_enable_files_domain">
+                                Standard: false
+                            </para>
+                            <para condition="enable_files_domain">
+                                Standard: true
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>domain_resolution_order</term>
+                        <listitem>
+                            <para>
+                                Kommaseparerad lista av domäner och underdomäner som representerar ordningen
+av uppslagningar skall följa.  Listan behöver inte innehålla alla möjliga
+domäner eftersom de saknade domänerna kommer slås upp baserat på ordningen
+de presenteras i i konfigurationsalternativet <quote>domains</quote>.
+Underdomäner som inte är listade som den del av <quote>lookup_order</quote>
+kommer slås upp i en slumpvis ordning för varje föräldradomän.
+                            </para>
+                            <para>
+                                Observera att när detta alternativ är satt är alltid utmatningsformatet för
+alla kommandon helt kvalificerat även när kortnamn används för indata, för
+alla användare utom de som hanteras av filleverantörer.  Ifall
+administratören vill att utdata inte skall vara fullständigt kvalificerat
+kan alternativet full_name_format anges som visas nedan:
+<quote>full_name_format=%1$s</quote> Kom dock ihåg att under inloggningen
+kanoniserar inloggningsprogram ofta användarnamnet genom att anropa
+<citerefentry> <refentrytitle>getpwnam</refentrytitle>
+<manvolnum>3</manvolnum> </citerefentry> som, om ett kortnamn returneras för
+en kvalificerad inmatning (vid försök att nå en användare som finns i flera
+domäner) kan dirigera om inloggningsförsöket till domänen som använder
+kortnamn, vilket gör att denna metod absolut inte rekommenderas i fall där
+användarnamn kan överlappa mellan domäner.
+                            </para>
+                            <para>
+                                Standard: inte satt
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+        </refsect2>
+
+    </refsect1>
+
+    <refsect1 id='services-sections'>
+        <title>TJÄNSTESEKTIONER</title>
+        <para>
+            Inställningar som kan användas för att konfigurera olika tjänster beskrivs i
+detta avsnitt.  De skall ligga i sektionen
+[<replaceable>$NAME</replaceable>], till exempel, för tjänsten NSS skulle
+sektionen vara <quote>[nss]</quote>
+        </para>
+
+        <refsect2 id='general'>
+            <title>Allmänna alternativ för tjänstekonfiguration</title>
+            <para>
+                Dessa alternativ kan användas för att konfigurera alla tjänster.
+            </para>
+            <variablelist>
+                <varlistentry>
+                    <term>reconnection_retries (heltal)</term>
+                    <listitem>
+                        <para>
+                            Antal gånger som tjänster skall försöka återansluta i händelse av en
+dataleverantörkrasch eller starta om innan de ger upp
+                        </para>
+                        <para>
+                            Standard: 3
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>fd_limit</term>
+                    <listitem>
+                        <para>
+                            Detta alternativ anger det maximala antalet filbeskrivare som kan öppnas på
+en gång av denna SSSD-process.  P system där SSSD ges förmågan
+CAP_SYS_RESOURCE kommer detta vara en absolut inställning.  På system utan
+denna förmåga kommer det reulterande värdet vara det lägre av detta värde
+och den ”hårda” gränsen i limits.conf.
+                        </para>
+                        <para>
+                            Standard: 8192 (eller den ”hårda” gränsen i limits.conf)
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>client_idle_timeout</term>
+                    <listitem>
+                        <para>
+                            Detta alternativ anger antalet sekunder som en klient till en SSSD-process
+kan hålla fast i en filbeskrivare utan att kommunincera över den.  Detta
+värde är begränsat för att undvika att resurserna på systemet tar slut.
+Tidsgränsen kan inte vara kortare än 10 sekunder.  Om ett lägre värde
+konfigureras kommer det att justeras till 10 sekunder.
+                        </para>
+                        <para>
+                            Standard: 60
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>offline_timeout (heltal)</term>
+                    <listitem>
+                        <para>
+                            När SSSD byter till frånkopplat läge, tiden före den försöker gå tillbaka
+till uppkopplat läge kommer öka baserat på tiden tillbringad frånkopplad.
+Detta värde är i sekunder och beräknas enligt följande:
+                        </para>
+                        <para>
+                             offline_timeout + slumptillägg
+                        </para>
+                        <para>
+                            Slumptillägget kan öka upp till 30 sekunder.  Efter varje misslyckat försöka
+att koppla upp kalkyleras det nya intervallet om enligt följande:
+                        </para>
+                        <para>
+                            nytt_intervall = gammalt_intervall·2 + slumptillägg
+                        </para>
+                        <para>
+                            Observera att den maximala längden på varje intervall för närvarande är
+begränsat till en timma.  Om den beräknade längden av nytt_intervall är
+större än en timma kommer det att tvingas tillbaka till en timma.
+                        </para>
+                        <para>
+                            Standard: 60
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>responder_idle_timeout</term>
+                    <listitem>
+                        <para>
+                            Detta alternativ anger antalet sekunder som en SSSD-respondentprocess kan
+vara uppe utan att användas.  Detta värde är begränsat för att undvika att
+resurserna på systemet tar slut.  Det minsta acceptabla värdet för detta
+alternativ är 60 sekunder.  Att sätta detta alternativ till 0 (noll) betyder
+att ingen tidsgräns kommer att sättas av respondenten.  Detta alternativ har
+bara effekt när SSSD är byggt med stöd för systemd och när tjänster är
+antingen uttags- eller D-Bus-aktiverade.
+                        </para>
+                        <para>
+                            Standard: 300
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>cache_first</term>
+                    <listitem>
+                        <para>
+                            Detta alternativ anger huruvida respondenten skall fråga alla cachar före
+den frågar dataleverantörerna.
+                        </para>
+                        <para>
+                            Standard: false
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </refsect2>
+
+        <refsect2 id='NSS'>
+            <title>NSS-konfigurationsalternativ</title>
+            <para>
+                Dessa alternativ kan användas för att konfigurera tjänsten Name Service
+Switch (NSS).
+            </para>
+            <variablelist>
+                <varlistentry>
+                    <term>enum_cache_timeout (heltal)</term>
+                    <listitem>
+                        <para>
+                            Hur många sekunder skall nss_sss cacha uppräkningar (begäranden för
+information om alla användare)
+                        </para>
+                        <para>
+                            Standard: 120
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>entry_cache_nowait_percentage (heltal)</term>
+                    <listitem>
+                        <para>
+                            Cachen över poster kan ställas in att automatiskt uppdatera poster i
+bakgrunden om de begärs utöver en procentsats av värdet entry_cache_timeout
+för domänen.
+                        </para>
+                        <para>
+                            Till exempel, om domänens entry_cache_timeout är satt till 30 s och
+entry_cache_nowait_percentage är satt till 50 (procent) kommer poster som
+kommer in 15 sekunder efter den sista cacheuppdateringen returneras
+omedelbart, men SSSD kommer att ta och uppdatera cachen på egen hand, så att
+framtida begäranden kommer behöva blockera i väntan på en cacheuppdatering.
+                        </para>
+                        <para>
+                            Giltiga värden för detta alternativ är 0-99 och representerar en procentsats
+av entry_cache_timeout för varje domän.  Av prestandaskäl kommer denna
+procentsats aldrig reducera nowait-tidsgränser till mindre än 10 sekunder.
+(0 avaktiverar denna funktion)
+                        </para>
+                        <para>
+                            Standard: 50
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>entry_negative_timeout (heltal)</term>
+                    <listitem>
+                        <para>
+                            Anger hur många sekunder nss_sss cachar negativa cacheträffar (det vill
+säga, frågor om ogiltiga databasposter, som sådana som inte finns) innan
+bakänden tillfrågas igen.
+                        </para>
+                        <para>
+                            Standard: 15
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>local_negative_timeout (heltal)</term>
+                    <listitem>
+                        <para>
+                            Anger hur många sekunder nss_sss skall hålla lokala användare och grupper i
+en negativ cache före den försöker slå upp dem i bakänden igen.  Att ställa
+in alternativet till 0 avaktiverar denna funktion.
+                        </para>
+                        <para>
+                            Standard: 14400 (4 timmar)
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>filter_users, filter_groups (sträng)</term>
+                    <listitem>
+                        <para>
+                            Uteslut vissa användare eller grupper från att hämtas från sss
+NSS-databasen.  Detta är särskilt användbart för systemkonton.  Detta
+alternativ kan också anges per domän eller inkludera fullständigt
+kvalificerade namn för att filtrera endast användare från den angivna
+domänen eller efter ett användarhuvudnamn (UPN).
+                        </para>
+                        <para>
+                            OBS: alternativet filter_groups påverkar inte arvet av nästade
+gruppmedlemmar, eftersom filtrering sker efter att de propagerats för att
+returnera via NSS.  T.ex. en grupp som har en medlemsgrupp bortfiltrerad
+kommer fortfarande ha medlemsanvändarna i den senare listade.
+                        </para>
+                        <para>
+                            Standard: root
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>filter_users_in_groups (bool)</term>
+                    <listitem>
+                        <para>
+                            Om du vill att filtrerade användare fortfarande skall vara gruppmedlemmar
+sätt då detta alternativ till false.
+                        </para>
+                        <para>
+                            Standard: true
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/override_homedir.xml" />
+                <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/homedir_substring.xml" />
+                <varlistentry>
+                    <term>fallback_homedir (sträng)</term>
+                    <listitem>
+                        <para>
+                            Ange en standardmall för en användares hemkatalog om ingen uttryckligen
+anges av domänens dataleverantör.
+                        </para>
+                        <para>
+                            De tillgängliga värdena för detta alternativ är samma som för
+override_homedir.
+                        </para>
+                        <para>
+                            exempel: <programlisting>
+fallback_homedir = /home/%u
+                            </programlisting>
+                        </para>
+                        <para>
+                            Standard: inte satt (ingen ersättning för ej angivna hemkataloger)
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>override_shell (sträng)</term>
+                    <listitem>
+                        <para>
+                            Åsidosätt inloggningsskalet för alla användare.  Detta alternativ går före
+alla andra skalalternativ om det har effekt och kan sättas antingen i
+sektionen [nss] eller per domän.
+                        </para>
+                        <para>
+                            Standard: inte angivet (SSSD kommer använda värdet som hämtats från LDAP)
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>allowed_shells (sträng)</term>
+                    <listitem>
+                        <para>
+                            Begränsa användarskal till en av de listade värdena.  Beräkningsordningen
+är:
+                        </para>
+                        <para>
+                            1. Om skalet finns i <quote>/etc/shells</quote> används det.
+                        </para>
+                        <para>
+                            2. Om skalet finns i listan allowed_shells men inte i
+<quote>/etc/shells</quote>, använd värdet på parametern shell_fallback.
+                        </para>
+                        <para>
+                            3. Om skalet inte finns i listan allowed_shells och inte i
+<quote>/etc/shells</quote> används ett nologin-skal.
+                        </para>
+                        <para>
+                            Jokertecknet (*) kan användas för att tillåta godtyckligt skal.
+                        </para>
+                        <para>
+                            (*) är användbart om du vill använda shell_fallback ifall den användarens
+skal inte finns i <quote>/etc/shells</quote> och att underhålla listan över
+alla skal i allowed_shells skulle vara för mycket overhead.
+                        </para>
+                        <para>
+                            En tom sträng som skal skickas som den är till libc.
+                        </para>
+                        <para>
+                            <quote>/etc/shells</quote> läses bara vid uppstart av SSSD, vilket betyder
+att en omstart av SSSD behövs ifall ett nytt skal installeras.
+                        </para>
+                        <para>
+                            Standard: inte satt.  Användarens skal används automatiskt.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>vetoed_shells (sträng)</term>
+                    <listitem>
+                        <para>
+                            Ersätt alla instanser av dessa skal med shell_fallback
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>shell_fallback (sträng)</term>
+                    <listitem>
+                        <para>
+                            Standardskalet att använda om ett tillåtet skal inte är installerat på
+maskinen.
+                        </para>
+                        <para>
+                            Standard: /bin/sh
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>default_shell</term>
+                    <listitem>
+                        <para>
+                            Standardskalet att använda om leverantören inte returnerar något under
+uppslagningen.  Detta alternativ kan anges globalt i sektionen [nss] eller
+per domän.
+                        </para>
+                        <para>
+                            Standard: inte satt (Returnera NULL om inget skal är angivet och lita på att
+libc ersätter med något rimligt när nödvändigt, vanligen /bin/sh)
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>get_domains_timeout (heltal)</term>
+                    <listitem>
+                        <para>
+                            Anger tiden i sekunder under vilken listan av underdomäner kommer betraktas
+som giltiga.
+                        </para>
+                        <para>
+                            Standard: 60
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>memcache_timeout (heltal)</term>
+                    <listitem>
+                        <para>
+                            Anger tiden i sekunder under vilken poster i minnescachen kommer vara
+giltiga.  Att sätta detta alternativ till noll kommer avaktivera cachen i
+minnet.
+                        </para>
+                        <para>
+                            Standard: 300
+                        </para>
+                        <para>
+                            VARNING: att avaktivera cachen i minnet kommer ha signifikant negativ
+påverkan på SSSDs prestanda och skall bara användas för testning.
+                        </para>
+                        <para>
+                            OBS: om miljövariabeln SSS_NSS_USE_MEMCACHE är satt till ”NO” kommer
+klientprogram inte använda den snabba cachen i minnet.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>user_attributes (sträng)</term>
+                    <listitem>
+                        <para>
+                            Några av de ytterligare NSS-respondentbegäranden kan returnera fler attribut
+än bara de som definieras av POSIX via NSS-gränssnittet.  Listan av attribut
+styrs av detta alternativ.  Det hanteras på samma sätt som alternativet
+<quote>user_attributes</quote> för InfoPipe-respondenten (se <citerefentry>
+<refentrytitle>sssd-ifp</refentrytitle> <manvolnum>5</manvolnum>
+</citerefentry> för detaljer) men utan standardvärden.
+                        </para>
+                        <para>
+                            För att förenkla konfigurationen kommer NSS-respondenten kontrollera
+InfoPipe-altenativet om det inte är satt för NSS-respondenten.
+                        </para>
+                        <para>
+                            Standard: inte satt, gåtillbaka till InfoPipe-alternativet
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>pwfield (sträng)</term>
+                    <listitem>
+                        <para>
+                            Värdet som NSS-operationer som returnerar användare eller grupper kommer att
+returnera i fältet <quote>password</quote>.
+                        </para>
+                        <para>
+                            Detta alternativ kan även sättas per domän.
+                        </para>
+                        <para>
+                            Standard: <quote>*</quote> (fjärrdomäner) eller <quote>x</quote>
+(fildomänerna)
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </refsect2>
+        <refsect2 id='PAM'>
+            <title>PAM-konfigurationsalternativ</title>
+            <para>
+                Dessa alternativ kan användas för att konfigurera tjänsten Pluggable
+Authentication Module (PAM).
+            </para>
+            

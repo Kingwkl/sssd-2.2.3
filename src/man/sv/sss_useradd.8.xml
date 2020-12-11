@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<reference>
+<title>SSSD manualsidor</title>
+<refentry>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/upstream.xml" />
+
+    <refmeta>
+        <refentrytitle>sss_useradd</refentrytitle>
+        <manvolnum>8</manvolnum>
+    </refmeta>
+
+    <refnamediv id='name'>
+        <refname>sss_useradd</refname>
+        <refpurpose>skapa en ny användare</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv id='synopsis'>
+        <cmdsynopsis>
+<command>sss_obfuscate</command> <arg choice='opt'>
+<replaceable>flaggor</replaceable> </arg> <arg
+choice='plain'><replaceable>INLOGGNINGSNAMN</replaceable></arg></cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1 id='description'>
+        <title>BESKRIVNING</title>
+        <para>
+            <command>sss_useradd</command> skapar ett nytt användarkonto med värdena som
+agnes på kommandoraden plus standardvärden från systemet
+        </para>
+    </refsect1>
+
+    <refsect1 id='options'>
+        <title>FLAGGOR</title>
+        <variablelist remap='IP'>
+            <varlistentry>
+                <term>
+                    <option>-u</option>,<option>--uid</option> <replaceable>UID</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Sätt UID:n för användaren till värdet av <replaceable>UID</replaceable>.  Om
+det inte anges väljs det automatiskt.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-c</option>,<option>--gecos</option>
+<replaceable>KOMMENTAR</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Godtycklig textsträng som beskriver användaren.  Ofta använt som ett fält
+för användarens fullständiga namn.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-h</option>,<option>--home</option>
+<replaceable>HEMKATALOG</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Hemkatalogen för användarkontot.  Standardvärde är att lägga till namnet
+<replaceable>INLOGGNINGSNAMN</replaceable> till <filename>/home</filename>
+och använda det som hemkatalog.  Basen som läggs till före
+<replaceable>INLOGGNINGSNAMN</replaceable> kan ställas in med inställningen
+<quote>user_defaults/baseDirectory</quote> i sssd.conf.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-s</option>,<option>--shell</option> <replaceable>SKAL</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Användarens inloggningsskal.  Standard är för närvarande
+<filename>/bin/bash</filename>.  Standardvärdet kan ändras med inställningen
+<quote>user_defaults/defaultShell</quote> i sssd.conf.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-G</option>,<option>--groups</option>
+<replaceable>GRUPPER</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        En lista av befintliga grupper denna användare också är en medlem i.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-m</option>,<option>--create-home</option>
+                </term>
+                <listitem>
+                    <para>
+                        Skapa användarens hemkatalog om den inte redan finns.  Filerna och
+katalogerna som finns i skelettkatalogen (som kan definieras med flaggan -k
+eller i konfigurationsfilen) kommer kopieras till hemkatalogen.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-M</option>,<option>--no-create-home</option>
+                </term>
+                <listitem>
+                    <para>
+                        Skapa inte användarens hemkatalog.  Åsidosätter konfigurationsinställningar.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-k</option>,<option>--skel</option>
+<replaceable>SKELKAT</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Skelettkatalogen, som innehåller filer och kataloger som skall kopieras till
+användarens hemkatalog, när hemkatalogen skapas av
+<command>sss_useradd</command>.
+                    </para>
+                    <para>
+                        Specialfiler (blockenheter, teckenenheter, namngivna rör och unix-uttag)
+kommer inte kopieras.
+                    </para>
+                    <para>
+                        Denna flagga är endast giltig om flaggan <option>-m</option> (eller
+<option>--create-home</option>) anges, eller att skapandet av hemkataloger
+är satt till TRUE i konfigurationen.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-Z</option>,<option>--selinux-user</option>
+<replaceable>SELINUX-ANVÄNDARE</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        SELinux-användaren för användarens inloggning.  Om det inte anges används
+systemstandarden.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/param_help.xml" />
+        </variablelist>
+    </refsect1>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/local.xml" />
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/seealso.xml" />
+
+</refentry>
+</reference>

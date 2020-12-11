@@ -1,0 +1,148 @@
+'\" t
+.\"     Title: sss_useradd
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: SSSD マニュアル ページ
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_USERADD" "8" "12/09/2020" "SSSD" "SSSD マニュアル ページ"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_useradd \- 新しいユーザーを作成する
+.SH "SYNOPSIS"
+.HP \w'\fBsss_useradd\fR\ 'u
+\fBsss_useradd\fR [\fIoptions\fR] \fILOGIN\fR
+.SH "概要"
+.PP
+\fBsss_useradd\fR
+は、コマンドラインにおいて指定された値とシステムの初期値を使用して、新しいユーザーを作成します。
+.SH "オプション"
+.PP
+\fB\-u\fR,\fB\-\-uid\fR \fIUID\fR
+.RS 4
+ユーザーの UID を
+\fIUID\fR
+の値を設定します。与えられないと、自動的に選択されます。
+.RE
+.PP
+\fB\-c\fR,\fB\-\-gecos\fR \fICOMMENT\fR
+.RS 4
+ユーザーを説明している任意のテキスト文字列です。しばしばユーザーの完全名の項目として使用されます。
+.RE
+.PP
+\fB\-h\fR,\fB\-\-home\fR \fIHOME_DIR\fR
+.RS 4
+ユーザーアカウントのホームディレクトリーです。初期値は
+/home
+に
+\fILOGIN\fR
+の名前を追加して、ホームディレクトリーとして使用します。
+\fILOGIN\fR
+の前につけるベースは sssd\&.conf において
+\(lquser_defaults/baseDirectory\(rq
+設定で変更できます。
+.RE
+.PP
+\fB\-s\fR,\fB\-\-shell\fR \fISHELL\fR
+.RS 4
+ユーザーのログインシェルです。初期値は現在
+/bin/bash
+です。初期値は sssd\&.conf において
+\(lquser_defaults/defaultShell\(rq
+で変更できます。
+.RE
+.PP
+\fB\-G\fR,\fB\-\-groups\fR \fIGROUPS\fR
+.RS 4
+このユーザーがメンバーである既存のユーザーの一覧です。
+.RE
+.PP
+\fB\-m\fR,\fB\-\-create\-home\fR
+.RS 4
+ユーザーのホームディレクトリーが存在しなければ、それを作成します。（\-k オプションまたは設定ファイルで定義できる）スケルトンディレクトリーにあるファイルとディレクトリーがホームディレクトリーにコピーされます。
+.RE
+.PP
+\fB\-M\fR,\fB\-\-no\-create\-home\fR
+.RS 4
+ユーザーのホームディレクトリーを作成しません。設定を上書きします。
+.RE
+.PP
+\fB\-k\fR,\fB\-\-skel\fR \fISKELDIR\fR
+.RS 4
+スケルトンディレクトリーです。ホームディレクトリーが
+\fBsss_useradd\fR
+により作成されるとき、ユーザーのホームディレクトリーにコピーされるファイルとディレクトリーを含みます。
+.sp
+特殊ファイル (ブロックデバイス、キャラクターデバイス、名前付きパイプおよび UNIX ソケット) はコピーされません。
+.sp
+\fB\-m\fR
+(または
+\fB\-\-create\-home\fR) オプションが指定されたとき、またはホームディレクトリーの作成が設定において TRUE に設定されている場合のみ、このオプションが有効です。
+.RE
+.PP
+\fB\-Z\fR,\fB\-\-selinux\-user\fR \fISELINUX_USER\fR
+.RS 4
+ユーザーがログインする際の SELinux ユーザーです。未指定の場合、システムの初期値を使います。
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+ヘルプメッセージを表示して終了します。
+.RE
+.SH "ローカルドメイン"
+.PP
+In order to function correctly, a domain with
+\(lqid_provider=local\(rq
+must be created and the SSSD must be running\&.
+.PP
+The administrator might want to use the SSSD local users instead of traditional UNIX users in cases where the group nesting (see
+\fBsss_groupadd\fR(8)) is needed\&. The local users are also useful for testing and development of the SSSD without having to deploy a full remote server\&. The
+\fBsss_user*\fR
+and
+\fBsss_group*\fR
+tools use a local LDB storage to store users and groups\&.
+.SH "関連項目"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

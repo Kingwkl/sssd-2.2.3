@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<reference>
+<title>SSSD manualsidor</title>
+<refentry>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/upstream.xml" />
+
+    <refmeta>
+        <refentrytitle>sss_groupshow</refentrytitle>
+        <manvolnum>8</manvolnum>
+    </refmeta>
+
+    <refnamediv id='name'>
+        <refname>sss_groupshow</refname>
+        <refpurpose>skriv ut egenskaperna hos en grupp</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv id='synopsis'>
+        <cmdsynopsis>
+<command>sss_groupshow</command> <arg choice='opt'>
+<replaceable>flaggor</replaceable> </arg> <arg
+choice='plain'><replaceable>GRUPP</replaceable></arg></cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1 id='description'>
+        <title>BESKRIVNING</title>
+        <para>
+            <command>sss_groupsho</command> visar information om en grupp identifierad
+av sitt namn <replaceable>GRUPP</replaceable>.  Informationen inkluderar
+grupp-ID-numret, medlemmar i gruppen och föräldragruppen.
+        </para>
+    </refsect1>
+
+    <refsect1 id='options'>
+        <title>FLAGGOR</title>
+        <variablelist remap='IP'>
+            <varlistentry>
+                <term>
+                    <option>-R</option>,<option>--recursive</option>
+                </term>
+                <listitem>
+                    <para>
+                        Skriv även ut indirekta gruppmedlemmar i en trädliknande hierarki.
+Observera att detta även påverkar utskriften av föräldragrupper – utan
+<option>R</option> kommer endast dem direkta föräldern skrivas ut.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/param_help.xml" />
+        </variablelist>
+    </refsect1>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/local.xml" />
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="include/seealso.xml" />
+
+</refentry>
+</reference>

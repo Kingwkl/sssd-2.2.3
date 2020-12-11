@@ -1,0 +1,117 @@
+'\" t
+.\"     Title: sss_ssh_knownhostsproxy
+.\"    Author: Основна гілка розробки SSSD \(em https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Сторінки підручника SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_SSH_KNOWNHOSTSPR" "1" "12/09/2020" "SSSD" "Сторінки підручника SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_ssh_knownhostsproxy \- отримати ключі вузла OpenSSH
+.SH "SYNOPSIS"
+.HP \w'\fBsss_ssh_knownhostsproxy\fR\ 'u
+\fBsss_ssh_knownhostsproxy\fR [\fIпараметри\fR] \fIВУЗОЛ\fR [\fIКОМАНДА_ПРОКСІ\fR]
+.SH "ОПИС"
+.PP
+\fBsss_ssh_knownhostsproxy\fR
+отримує відкриті ключі вузла SSH для вузла
+\fIВУЗОЛ\fR, зберігає їх до нетипового файла OpenSSH known_hosts (щоб дізнатися більше, ознайомтеся з розділом
+\(lqФОРМАТ ФАЙЛІВ SSH_KNOWN_HOSTS\(rq
+сторінки підручника (man)
+\fBsshd\fR(8)) за адресою
+/var/lib/sss/pubconf/known_hosts
+і встановлює з\(cqєднання з вузлом\&.
+.PP
+Якщо вказано параметр
+\fIКОМАНДА_ПРОКСІ\fR, замість відкриття сокета для створення з\(cqєднання буде використано відповідну команду\&.
+.PP
+\fBssh\fR(1)
+можна налаштувати на використання
+\fBsss_ssh_knownhostsproxy\fR
+для розпізнавання вузлів за ключами за допомогою таких інструкцій у налаштуваннях
+\fBssh\fR(1):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ProxyCommand /usr/bin/sss_ssh_knownhostsproxy \-p %p %h
+GlobalKnownHostsFile /var/lib/sss/pubconf/known_hosts
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "ПАРАМЕТРИ"
+.PP
+\fB\-p\fR,\fB\-\-port\fR \fIПОРТ\fR
+.RS 4
+Використовувати для встановлення з\(cqєднання з вузлом порт
+\fIПОРТ\fR\&. Типовим портом є порт 22\&.
+.RE
+.PP
+\fB\-d\fR,\fB\-\-domain\fR \fIДОМЕН\fR
+.RS 4
+Шукати відкриті ключі вузлів у домені SSSD
+\fIДОМЕН\fR\&.
+.RE
+.PP
+\fB\-k\fR,\fB\-\-pubkey\fR
+.RS 4
+Вивести відкриті ключі SSH для вузла
+\fIHOST\fR\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Показати довідкове повідомлення і завершити роботу\&.
+.RE
+.SH "СТАН ВИХОДУ"
+.PP
+У випадку успіху значення стану виходу дорівнює 0\&. У всіх інших випадках програма повертає 1\&.
+.SH "ТАКОЖ ПЕРЕГЛЯНЬТЕ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBОсновна гілка розробки SSSD \(em
+https://pagure\&.io/SSSD/sssd/\fR

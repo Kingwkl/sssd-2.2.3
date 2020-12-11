@@ -1,0 +1,146 @@
+'\" t
+.\"     Title: sss_useradd
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Páginas de manual de SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_USERADD" "8" "12/09/2020" "SSSD" "Páginas de manual de SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_useradd \- Crea un nuevo usuario
+.SH "SYNOPSIS"
+.HP \w'\fBsss_useradd\fR\ 'u
+\fBsss_useradd\fR [\fIoptions\fR] \fILOGIN\fR
+.SH "DESCRIPCION"
+.PP
+\fBsss_useradd\fR
+crea una nueva cuenta de usuario usando los valores especificados en la línea de comandos más los valores por defecto del sistema\&.
+.SH "OPCIONES"
+.PP
+\fB\-u\fR,\fB\-\-uid\fR \fIUID\fR
+.RS 4
+Fija la UID del usuario al valor de
+\fIUID\fR\&. Si no se da, se elige automáticamente\&.
+.RE
+.PP
+\fB\-c\fR,\fB\-\-gecos\fR \fICOMENTARIO\fR
+.RS 4
+Cualquier cadena de texto describiendo al usuario\&. Frecuentemente se usa como el campo para el nombre completo del usuario\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-home\fR \fIHOME_DIR\fR
+.RS 4
+El directorio home de la cuenta de usuario\&. Por defecto se añade el nombre
+\fILOGIN\fR
+a
+/home
+y utiliza esto como directorio home\&. La base de que se antepondrá antes
+\fILOGIN\fR
+es sintonizable con el ajuste
+\(lquser_defaults/baseDirectory\(rq
+en sssd\&.conf\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-shell\fR \fISHELL\fR
+.RS 4
+La shell de acceso del usuario\&. Por defecto es actualmente
+/bin/bash\&. El valor por defecto puede ser cambiado con el ajuste
+\(lquser_defaults/defaultShell\(rq
+en sssd\&.conf\&.
+.RE
+.PP
+\fB\-G\fR,\fB\-\-groups\fR \fIGRUPOS\fR
+.RS 4
+Una lista de grupos existentes de los que el usuario también es miembro\&.
+.RE
+.PP
+\fB\-m\fR,\fB\-\-create\-home\fR
+.RS 4
+Crea el directorio home del usuario si no existe\&. Los ficheros y directorios contenidos en el directorio esqueleto (que pueden ser definidos con la opción \(enk o en el fichero de configuración) serán copiados en el directorio home\&.
+.RE
+.PP
+\fB\-M\fR,\fB\-\-no\-create\-home\fR
+.RS 4
+No se crear el directorio principal del usuario\&. Reemplaza los valores de configuración\&.
+.RE
+.PP
+\fB\-k\fR,\fB\-\-skel\fR \fISKELDIR\fR
+.RS 4
+El directorio esqueleto, que contiene ficheros y directorios a copiar en el directorio home del usuario, cuando el directorio home es creado por
+\fBsss_useradd\fR\&.
+.sp
+Special files (block devices, character devices, named pipes and unix sockets) will not be copied\&.
+.sp
+Esta opción sólo es válida si se ha especificado la opción
+\fB\-m\fR
+(o
+\fB\-\-create\-home\fR), o la creación de directorios home está fijada a TRUE en la configuración\&.
+.RE
+.PP
+\fB\-Z\fR,\fB\-\-selinux\-user\fR \fISELINUX_USER\fR
+.RS 4
+El usuario SELinux para el acceso de usuario\&. Si no se especifica, se usará el valor por defecto del sistema\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Muestra mensaje de ayuda y sale\&.
+.RE
+.SH "EL DOMINIO LOCAL"
+.PP
+Con el objetivo de que funcione correctamente, se debe crear un dominio con
+\(lqid_provider=local\(rq
+y el SSSD debe estar corriendo\&.
+.PP
+El administrador puede desear usar los usuarios locales SSSD en lugar de los usuarios tradicionales UNIX en los casos donde los grupos anidados (vea
+\fBsss_groupadd\fR(8)) sean necesarios\&. Los usuarios locales son también útiles para la prueba y el desarrollo del SSSD sin tener que desplegar un servidor remoto completo\&. Las herramientas
+\fBsss_user*\fR
+y
+\fBsss_group*\fR
+usan un almacenamiento LDB local para almacenar usuarios y grupos\&.
+.SH "VEA TAMBIEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

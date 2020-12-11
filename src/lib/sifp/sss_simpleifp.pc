@@ -1,0 +1,12 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: sss_simpleifp
+Description: A library that simplifies work with the InfoPipe responder
+Version: 2.2.3
+Requires: dbus-1, dhash
+Libs: -L${exec_prefix}/lib -lsss_simpleifp
+Cflags: -I${includedir}
+URL: https://pagure.io/SSSD/sssd/

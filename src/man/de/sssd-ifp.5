@@ -1,0 +1,145 @@
+'\" t
+.\"     Title: sssd-ifp
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Dateiformate und Konventionen
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-IFP" "5" "12/09/2020" "SSSD" "Dateiformate und Konventionen"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-ifp \- SSSD InfoPipe\-Responder
+.SH "BESCHREIBUNG"
+.PP
+Diese Handbuchseite beschreibt die Konfiguration des InfoPipe\-Responders für
+\fBsssd\fR(8)\&. Eine detaillierte Syntaxreferenz finden Sie im Abschnitt
+\(lqDATEIFORMAT\(rq
+in der Handbuchseite zu
+\fBsssd.conf\fR(5)\&.
+.PP
+Der InfoPipe\-Responder stellt eine öffentliche D\-Bus\-Schnittstelle bereit, auf die über den Systembus zugegriffen werden kann\&. Die Schnittstelle ermöglicht die Abfrage von Informationen zu entfernten Benutzern und Gruppen über den Systembus\&.
+.SH "KONFIGURATIONSOPTIONEN"
+.PP
+Diese Optionen können zur Konfiguration des InfoPipe\-Responders verwendet werden\&.
+.PP
+allowed_uids (Zeichenkette)
+.RS 4
+Gibt eine durch Kommata getrennte Liste der Benutzer\-ID\-Werte oder Benutzernamen an, denen der Zugriff auf den InfoPipe\-Responder erlaubt ist\&. Benutzernamen werden beim Start in Benutzer\-IDs aufgelöst\&.
+.sp
+Voreinstellung: 0 (nur der Benutzer \(Fcroot\(Fo darf auf den InfoPipe\-Responder zugreifen)
+.sp
+Beachten Sie, dass trotz der Verwendung der Benutzer\-ID 0 als Voreinstellung diese durch die Option überschrieben wird\&. Falls Sie wollen, dass dem Root\-Benutzer der Zugriff auf den InfoPipe\-Responder gewährt werden soll, was der typische Fall ist, müssen Sie 0 ebenfalls zur Liste der erlaubten Benutzer\-IDs hinzufügen\&.
+.RE
+.PP
+user_attributes (Zeichenkette)
+.RS 4
+Gibt eine durch Kommata getrennte Liste der auf die weiße (erlaubt) beziehungsweise schwarze Liste (blockiert) gesetzten Attribute an\&.
+.sp
+In der Voreinstellung erlaubt der InfoPipe\-Responder nur die Abfrage des Standardsatzes an POSIX\-Attributen\&. Dieser Satz ist der gleiche, wie er von
+\fBgetpwnam\fR(3)
+zurückgegeben wird und enthält Folgendes:
+.PP
+name
+.RS 4
+Anmeldename des Benutzers
+.RE
+.PP
+uidNumber
+.RS 4
+Benutzer\-ID
+.RE
+.PP
+gidNumber
+.RS 4
+primäre Gruppen\-ID
+.RE
+.PP
+gecos
+.RS 4
+Benutzerinformation, typischerweise der vollständige Name
+.RE
+.PP
+homeDirectory
+.RS 4
+Home\-Verzeichnis
+.RE
+.PP
+loginShell
+.RS 4
+Benutzershell
+.RE
+.sp
+Es ist möglich, ein weiteres Attribut zu diesem Satz hinzuzufügen, indem Sie
+\(lq+attr_name\(rq
+verwenden\&. Explizit entfernen lässt sich ein Attribut mit
+\(lq\-attr_name\(rq\&. Um beispielsweise
+\(lqtelephoneNumber\(rq
+zu erlauben, aber
+\(lqloginShell\(rq
+abzuweisen, können Sie folgende Konfiguration verwenden:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+user_attributes = +telephoneNumber, \-loginShell
+                        
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Voreinstellung: Nicht gesetzt\&. Nur der Standardsatz an POSIX\-Attributen ist erlaubt\&.
+.RE
+.PP
+wildcard_limit (integer)
+.RS 4
+Specifies an upper limit on the number of entries that are downloaded during a wildcard lookup that overrides caller\-supplied limit\&.
+.sp
+Default: 0 (let the caller set an upper limit)
+.RE
+.SH "SIEHE AUCH"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

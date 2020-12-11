@@ -1,0 +1,234 @@
+'\" t
+.\"     Title: sssd
+.\"    Author: SSSD uppströms \(en https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: SSSD manualsidor
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD" "8" "12/09/2020" "SSSD" "SSSD manualsidor"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd \- Demonen för systemsäkerhetstjänster
+.SH "SYNOPSIS"
+.HP \w'\fBsssd\fR\ 'u
+\fBsssd\fR [\fIflaggor\fR]
+.SH "BESKRIVNING"
+.PP
+\fBSSSD\fR
+tillhandahåller en uppsättning demoner för att hantera åtkomst till fjärrkataloger och autentiseringmekanismer\&. Det tillhandahåller ett NSS\- och PAM\-gränssnitt mot systemet och ett system med insticksmoduler till bakänden för att ansluta till flera olika kontokällor, såväl som ett D\-Bus\-gränssnit\&. Det är också basen för att tillhandahålla klientgranskning och policytjänster för projekt som FreeIPA\&. Det tillhandahåller en mer robust databas att spara lokala användare såväl som utökade användardata\&.
+.SH "FLAGGOR"
+.PP
+\fB\-d\fR,\fB\-\-debug\-level\fR \fINIVÅ\fR
+.RS 4
+SSSD stödjer två representationer för att ange felsökningsnivå\&. Det enklaste är att ange ett decimalt värde från 0\-9 som representerar aktivering av den nivån och alla lägre nivåer av felsökningsmeddelanden\&. Det mer fullständiga alternativet är att ange en hexadecimal bitmask för att aktivera eller avaktivera specifika nivåer (såsom om du önskar undertrycka en nivå)\&.
+.sp
+Observera att varje SSSD\-tjänst loggar till sin egen loggfil\&. Observera också att aktivering av
+\(lqdebug_level\(rq
+i avsnittet
+\(lq[sssd]\(rq
+bara aktiverar felsökning just för själva sssd\-processen, inte för respondent\- eller leverantörsprocesser\&. Parametern
+\(lqdebug_level\(rq
+skall läggas till i alla sektioner som man vill producera felsökningsloggar ifrån\&.
+.sp
+Utöver att ändra loggninvån i konfigurationsfilen med parametern
+\(lqdebug_level\(rq, som är bestående, men kräver omstart av SSSD, är det även möjligt att ändra felsökningsnivån i farten med verktyget
+\fBsss_debuglevel\fR(8)\&.
+.sp
+Felsökningsnivåer som för närvarande stödjs:
+.sp
+\fI0\fR,
+\fI0x0010\fR: Ödesdigra fel\&. Allt som skulle hindra SSSD från att starta upp eller får den att sluta köra\&.
+.sp
+\fI1\fR,
+\fI0x0020\fR: Kritiska fel\&. Ett fel som inte dödar SSSD, men ett som indikerar att åtminstone en viktig funktion inte kommer fungera korrekt\&.
+.sp
+\fI2\fR,
+\fI0x0040\fR: Allvarliga fel\&. Ett fel som rapporterar att en viss begäran eller operation har misslyckats\&.
+.sp
+\fI3\fR,
+\fI0x0080\fR: Smärre fel\&. Detta är fel som skulle kunna bubbla ner till att orsaka funktionsfelet 2\&.
+.sp
+\fI4\fR,
+\fI0x0100\fR: Konfigurationsinställningar\&.
+.sp
+\fI5\fR,
+\fI0x0200\fR: Funktionsdata\&.
+.sp
+\fI6\fR,
+\fI0x0400\fR: Spårmeddelanden för åtgärdsfunktioner\&.
+.sp
+\fI7\fR,
+\fI0x1000\fR: Spårmeddelanden för interna styrfunktioner\&.
+.sp
+\fI8\fR,
+\fI0x2000\fR: Innehållet i interna variabler som kan vara intressant\&.
+.sp
+\fI9\fR,
+\fI0x4000\fR: Spårningsinformation på extremt låg nivå\&.
+.sp
+För att logga begärda bitmaskfelsökningsnivåer, lägg helt enkelt ihop deras tal som visas i följande exempel:
+.sp
+\fIExempel\fR: För att logga ödesdrigra fel, kritiska fel, allvarliga fel och funktionsdata, använd 0x0270\&.
+.sp
+\fIExempel\fR: För att logga ödesdigra fel, konfigurationsinställningar, funktionsdata och spårmeddelanden för interna styrfunktioner, använd 0x1310\&.
+.sp
+\fIObservera\fR: bitmaskformatet för felsökningsnivåer introducerades i 1\&.7\&.0\&.
+.sp
+\fIStandard\fR: 0
+.RE
+.PP
+\fB\-\-debug\-timestamps=\fR\fIläge\fR
+.RS 4
+\fI1\fR: Lägg till en tidsstämpel till felsökningsmeddelandena
+.sp
+\fI0\fR: Avaktivera tidsstämpeln i felsökningsmeddelanden
+.sp
+Standard: 1
+.RE
+.PP
+\fB\-\-debug\-microseconds=\fR\fIläge\fR
+.RS 4
+\fI1\fR: Lägg till mikrosekunder till tidsstämpeln i felsökningsmeddelanden
+.sp
+\fI0\fR: Avaktivera mikrosekunder i tidsstämpeln
+.sp
+Standard: 0
+.RE
+.PP
+\fB\-f\fR,\fB\-\-debug\-to\-files\fR
+.RS 4
+Skicka felutskrifter till filer istället för standard fel\&. Som standard sparas loggfilerna i
+/var/log/sssd
+och det finns separata loggfiler för varje SSSD\-tjänst och domän\&.
+.sp
+Denna flagga undanbedes\&. Den är ersatt av
+\fB\-\-logger=files\fR\&.
+.RE
+.PP
+\fB\-\-logger=\fR\fIvärde\fR
+.RS 4
+Plats dit SSSD skall skicka loggmeddelanden\&. Denna flagga åsidosätter värdet på den undanbedda flaggan
+\fB\-\-debug\-to\-files\fR\&. Den undanbedda flaggan kommer fortfarande fungera om
+\fB\-\-logger\fR
+inte används\&.
+.sp
+\fIstderr\fR: Omdirigera felmeddelanden till standard fel\-utmatning\&.
+.sp
+\fIfiles\fR: Omdirigera felsökningsmeddelanden till loggfilerna\&. Som standard lagras loggfilerna i
+/var/log/sssd
+och det finns separata loggfiler för varje SSSD\-tjänstoch domän\&.
+.sp
+\fIjournald\fR: Omdirigera felsökningsmeddelanden till systemd\-journald
+.sp
+Standard: inte satt
+.RE
+.PP
+\fB\-D\fR,\fB\-\-daemon\fR
+.RS 4
+Bli en demon efter att ha startat upp\&.
+.RE
+.PP
+\fB\-i\fR,\fB\-\-interactive\fR
+.RS 4
+Kör i förgrunden, bli inte en demon\&.
+.RE
+.PP
+\fB\-c\fR,\fB\-\-config\fR
+.RS 4
+Ange en annan konfigurationsfil än standard\&. Standard är
+/etc/sssd/sssd\&.conf\&. För referens till konfigurationfilsyntaxen och \-alternativ, konsultera manualsidan
+\fBsssd.conf\fR(5)\&.
+.RE
+.PP
+\fB\-g\fR,\fB\-\-genconf\fR
+.RS 4
+Starta inte SSSD, men uppdatera konfigurationsdatabasen från innehållet i
+/etc/sssd/sssd\&.conf
+och avsluta sedan\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-genconf\-section\fR
+.RS 4
+Liknande
+\(lq\-\-genconf\(rq, men uppdatera endast ett enskilt avsnitt av konfigurationsfilen\&. Detta alternativt är huvudsakligen användbart för att anropas från systemd:s unit\-filer för att låta uttagsaktiverade respondenter att uppdatera sina konfigurationer utan att kräva att administratören startar om hela SSSD\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Visa ett hjälpmeddelande och avsluta\&.
+.RE
+.PP
+\fB\-\-version\fR
+.RS 4
+Skriv ut versionsnumret och avsluta\&.
+.RE
+.SH "SIGNALER"
+.PP
+SIGTERM/SIGINT
+.RS 4
+Säger till SSSD att snyggt avsluta alla dess barnprocesser och sedan stänga av monitorn\&.
+.RE
+.PP
+SIGHUP
+.RS 4
+Säger till SSSD att sluta skriva till dess aktuella felsökningsfilbeskrivare och stänga och öppna om dem\&. Detta är tänkt att möjliggöra loggrullning med program som logrotate\&.
+.RE
+.PP
+SIGUSR1
+.RS 4
+Säger till SSSD att simulera frånkopplad funktion under tiden hos parametern
+\(lqoffline_timeout\(rq\&. Detta är användbart för att testa\&. Signalen kan skickas antingen till sssd\-processen eller direkt till någon sssd_be\-process\&.
+.RE
+.PP
+SIGUSR2
+.RS 4
+Säger till SSSD att gå till uppkopplat läge omedelbart\&. Detta är användbart för att testa\&. Signalen kan skickas antingen till sssd\-processen eller direkt till någon sssd_be\-process\&.
+.RE
+.SH "NOTER"
+.PP
+If the environment variable SSS_NSS_USE_MEMCACHE is set to "NO", client applications will not use the fast in\-memory cache\&.
+.SH "SE ÄVEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBSSSD uppströms \(en
+https://pagure\&.io/SSSD/sssd/\fR

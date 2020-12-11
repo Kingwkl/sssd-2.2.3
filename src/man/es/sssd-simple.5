@@ -1,0 +1,163 @@
+'\" t
+.\"     Title: sssd-simple
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Formatos de archivo y convenciones
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-SIMPLE" "5" "12/09/2020" "SSSD" "Formatos de archivo y convenci"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-simple \- el fichero de configuración para en proveedor de control de acceso \*(Aqsimple\*(Aq de SSSD
+.SH "DESCRIPCION"
+.PP
+Esta página de manual describe la configuración del proveedor de control de acceso simple para
+\fBsssd\fR(8)\&. Para una referencia detallada de sintaxis, vea la sección
+\(lqFILE FORMAT\(rq
+de la página de manual
+\fBsssd.conf\fR(5)\&.
+.PP
+El proveedor de acceso simple otorga o deniega el acceso en base a una lista de acceso o denegación de usuarios o grupo de nombres\&. Se aplican las siguientes reglas:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Si todas las listas están vacías, se concede acceso
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Si se ha suministrado alguna lista, el orden de evaluación es permitir,denegar\&. Esto significa que cualquier regla de denegación será saltada por cualquier regla de permiso coincidente\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Si una o ambas listas de "permiso" se suministran, todos los usuarios serán denegados a no ser que aparezcan en la lista\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Si sólo se suministran listas de "denegación", todos los usuarios obtendran acceso a no ser que aparezcan en la lista\&.
+.RE
+.sp
+.SH "OPCIONES DE CONFIGURACIÓN"
+.PP
+Vea la sección
+\(lqDOMAIN SECTIONS\(rq
+de la página de manual
+\fBsssd.conf\fR(5)
+para detalles sobre la configuración de un dominio SSSD\&.
+.PP
+simple_allow_users (cadena)
+.RS 4
+Lista separada por comas de usuarios a los está permitido el acceso\&.
+.RE
+.PP
+simple_deny_users (cadena)
+.RS 4
+Lista separada por comas de usuarios a los que explicítamente se les deniega el acceso\&.
+.RE
+.PP
+simple_allow_groups (cadena)
+.RS 4
+Lista separada por comas de grupos que tienen permitido el acceso\&. Esto se aplica sólo a los grupos dentro del dominio SSSD\&. Los grupos locales no serán evaluados\&.
+.RE
+.PP
+simple_deny_groups (cadena)
+.RS 4
+Lista separada por comas de grupos a los que explicítamente se les deniega el acceso\&. Esto se aplica sólo a los grupos dentro del dominio SSSD\&. Los grupos locales no serán evaluados\&.
+.RE
+.PP
+No especificando valores para ninguna de las listas es equivalente a saltarle totalmente\&. Tenga cuidado de esto mientras genera parámetros para el simple proveedor usando secuencias de comandos automatizadas\&.
+.PP
+Por favor advierta que es un error de configuración si tanto, simple_allow_users como simple_deny_user, están definidos\&.
+.SH "EJEMPLO"
+.PP
+El siguiente ejemplo asume que SSSD está correctamente configurado y example\&.com es uno de los dominios en la sección
+\fI[sssd]\fR\&. Este ejemplo muestra sólo las opciones específicas del proveedor de acceso simple\&.
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/example\&.com]
+access_provider = simple
+simple_allow_users = user1, user2
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "NOTAS"
+.PP
+La jerarquía completa de membresía del grupo se resuelve antes de la comprobación de acceso, así incluso los grupos anidados se pueden incluir en las listas de acceso\&. Por favor tenga cuidado en que la opción
+\(lqldap_group_nesting_level\(rq
+puede impactar en los resultados y deberia ser establecidad a un valor suficiente\&. Opción (\fBsssd-ldap\fR(5))\&.
+.SH "VEA TAMBIEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

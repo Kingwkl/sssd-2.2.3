@@ -1,0 +1,121 @@
+'\" t
+.\"     Title: sss_ssh_knownhostsproxy
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Pages de manuel de SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_SSH_KNOWNHOSTSPR" "1" "12/09/2020" "SSSD" "Pages de manuel de SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_ssh_knownhostsproxy \- obtenir les clés d\*(Aqhôtes OpenSSH
+.SH "SYNOPSIS"
+.HP \w'\fBsss_ssh_knownhostsproxy\fR\ 'u
+\fBsss_ssh_knownhostsproxy\fR [\fIoptions\fR] \fIHOST\fR [\fIPROXY_COMMAND\fR]
+.SH "DESCRIPTION"
+.PP
+\fBsss_ssh_knownhostsproxy\fR
+acquires SSH host public keys for host
+\fIHOST\fR, stores them in a custom OpenSSH known_hosts file (see the
+\(lqSSH_KNOWN_HOSTS FILE FORMAT\(rq
+section of
+\fBsshd\fR(8)
+for more information)
+/var/lib/sss/pubconf/known_hosts
+and establishes the connection to the host\&.
+.PP
+Si
+\fIPROXY_COMMAND\fR
+est indiqué, elle est alors utilisée pour établier la connexion vers le système au lieu d\*(Aqouvrir une socket\&.
+.PP
+\fBssh\fR(1)
+peut être configuré pour utiliser
+\fBsss_ssh_knownhostsproxy\fR
+pour l\*(Aqauthentication par clés en utilisant les directives suivantes pour la configuration de
+\fBssh\fR(1)\ \&:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ProxyCommand /usr/bin/sss_ssh_knownhostsproxy \-p %p %h
+GlobalKnownHostsFile /var/lib/sss/pubconf/known_hosts
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "OPTIONS"
+.PP
+\fB\-p\fR,\fB\-\-port\fR \fIPORT\fR
+.RS 4
+Utiliser le port
+\fIPORT\fR
+pour se connecter au système\&. Par défaut, le port 22 est utilisé\&.
+.RE
+.PP
+\fB\-d\fR,\fB\-\-domain\fR \fIDOMAINE\fR
+.RS 4
+Rechercher les clés publiques dans le domaine SSSD
+\fIDOMAINE\fR
+hôte\&.
+.RE
+.PP
+\fB\-k\fR,\fB\-\-pubkey\fR
+.RS 4
+Print the host ssh public keys for host
+\fIHOST\fR\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Affiche l\*(Aqaide et quitte\&.
+.RE
+.SH "CODE RETOUR"
+.PP
+Dans le cas d\*(Aqun opération achevée avec succès, une valeur de retour de 0 est renvoyée\&. Dans le cas contraire, 1 est renvoyé\&.
+.SH "VOIR AUSSI"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

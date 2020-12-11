@@ -1,0 +1,11 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib/sssd/modules
+includedir=${prefix}/include
+
+Name: wbclient
+Description: SSSD implementation of Samba wbclient API
+Version: 0.14
+Libs: -L${libdir} -lwbclient
+Cflags:
+URL: https://pagure.io/SSSD/sssd/, http://www.samba.org

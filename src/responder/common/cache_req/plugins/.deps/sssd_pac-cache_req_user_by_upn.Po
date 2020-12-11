@@ -1,0 +1,483 @@
+src/responder/common/cache_req/plugins/sssd_pac-cache_req_user_by_upn.o: \
+ src/responder/common/cache_req/plugins/cache_req_user_by_upn.c \
+ /usr/include/stdc-predef.h /usr/include/talloc.h /usr/include/stdlib.h \
+ /usr/include/bits/libc-header-start.h /usr/include/features.h \
+ /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
+ /usr/include/bits/long-double.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h \
+ /usr/lib/gcc/x86_64-redhat-linux/9/include/stddef.h \
+ /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
+ /usr/include/bits/floatn.h /usr/include/bits/floatn-common.h \
+ /usr/include/bits/types/locale_t.h /usr/include/bits/types/__locale_t.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/timesize.h /usr/include/bits/typesizes.h \
+ /usr/include/bits/time64.h /usr/include/bits/types/clock_t.h \
+ /usr/include/bits/types/clockid_t.h /usr/include/bits/types/time_t.h \
+ /usr/include/bits/types/timer_t.h /usr/include/bits/stdint-intn.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/bits/byteswap.h /usr/include/bits/uintn-identity.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/types/sigset_t.h /usr/include/bits/types/__sigset_t.h \
+ /usr/include/bits/types/struct_timeval.h \
+ /usr/include/bits/types/struct_timespec.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/bits/thread-shared-types.h \
+ /usr/include/bits/pthreadtypes-arch.h /usr/include/alloca.h \
+ /usr/include/bits/stdlib-bsearch.h /usr/include/bits/stdlib-float.h \
+ /usr/include/stdio.h /usr/lib/gcc/x86_64-redhat-linux/9/include/stdarg.h \
+ /usr/include/bits/types/__fpos_t.h /usr/include/bits/types/__mbstate_t.h \
+ /usr/include/bits/types/__fpos64_t.h /usr/include/bits/types/__FILE.h \
+ /usr/include/bits/types/FILE.h /usr/include/bits/types/struct_FILE.h \
+ /usr/include/bits/types/cookie_io_functions_t.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/bits/stdio.h /usr/include/ldb.h \
+ /usr/lib/gcc/x86_64-redhat-linux/9/include/stdbool.h \
+ /usr/include/tevent.h \
+ /usr/lib/gcc/x86_64-redhat-linux/9/include/stdint.h \
+ /usr/include/stdint.h /usr/include/bits/wchar.h \
+ /usr/include/bits/stdint-uintn.h /usr/include/sys/time.h \
+ /usr/include/ldb_version.h /usr/include/ldb_errors.h src/db/sysdb.h \
+ src/util/util.h config.h /usr/include/libintl.h /usr/include/locale.h \
+ /usr/include/bits/locale.h /usr/include/time.h /usr/include/bits/time.h \
+ /usr/include/bits/timex.h /usr/include/bits/types/struct_tm.h \
+ /usr/include/bits/types/struct_itimerspec.h /usr/include/sys/stat.h \
+ /usr/include/bits/stat.h /usr/include/bits/statx.h \
+ /usr/include/netinet/in.h /usr/include/sys/socket.h \
+ /usr/include/bits/types/struct_iovec.h /usr/include/bits/socket.h \
+ /usr/include/bits/socket_type.h /usr/include/bits/sockaddr.h \
+ /usr/include/asm/socket.h /usr/include/asm-generic/socket.h \
+ /usr/include/asm/sockios.h /usr/include/asm-generic/sockios.h \
+ /usr/include/bits/types/struct_osockaddr.h /usr/include/bits/in.h \
+ /usr/include/dhash.h src/confdb/confdb.h src/shared/io.h \
+ src/shared/safealign.h /usr/include/string.h /usr/include/strings.h \
+ src/util/atomic_io.h /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/include/bits/environments.h /usr/include/bits/confname.h \
+ /usr/include/bits/getopt_posix.h /usr/include/bits/getopt_core.h \
+ /usr/include/poll.h /usr/include/sys/poll.h /usr/include/bits/poll.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/bits/types/error_t.h src/util/util_errors.h \
+ src/util/sss_format.h /usr/include/inttypes.h src/util/sss_regexp.h \
+ /usr/include/pcre.h src/util/debug.h src/util/dlinklist.h \
+ src/sss_client/sss_cli.h /usr/include/nss.h /usr/include/pwd.h \
+ /usr/include/grp.h /usr/lib/gcc/x86_64-redhat-linux/9/include/limits.h \
+ /usr/lib/gcc/x86_64-redhat-linux/9/include/syslimits.h \
+ /usr/include/limits.h /usr/include/bits/posix1_lim.h \
+ /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+ /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
+ /usr/include/bits/uio_lim.h src/providers/data_provider.h \
+ /usr/include/sys/un.h /usr/include/keyutils.h \
+ /usr/include/dbus-1.0/dbus/dbus.h \
+ /usr/lib64/dbus-1.0/include/dbus/dbus-arch-deps.h \
+ /usr/include/dbus-1.0/dbus/dbus-macros.h \
+ /usr/include/dbus-1.0/dbus/dbus-address.h \
+ /usr/include/dbus-1.0/dbus/dbus-types.h \
+ /usr/include/dbus-1.0/dbus/dbus-errors.h \
+ /usr/include/dbus-1.0/dbus/dbus-protocol.h \
+ /usr/include/dbus-1.0/dbus/dbus-bus.h \
+ /usr/include/dbus-1.0/dbus/dbus-connection.h \
+ /usr/include/dbus-1.0/dbus/dbus-memory.h \
+ /usr/include/dbus-1.0/dbus/dbus-message.h \
+ /usr/include/dbus-1.0/dbus/dbus-shared.h \
+ /usr/include/dbus-1.0/dbus/dbus-misc.h \
+ /usr/include/dbus-1.0/dbus/dbus-pending-call.h \
+ /usr/include/dbus-1.0/dbus/dbus-server.h \
+ /usr/include/dbus-1.0/dbus/dbus-signature.h \
+ /usr/include/dbus-1.0/dbus/dbus-syntax.h \
+ /usr/include/dbus-1.0/dbus/dbus-threads.h src/util/authtok.h \
+ src/util/authtok-utils.h src/util/sss_pam_data.h \
+ src/providers/data_provider_req.h \
+ src/responder/common/cache_req/cache_req_plugin.h \
+ src/responder/common/cache_req/cache_req_private.h \
+ src/responder/common/responder.h /usr/include/sys/resource.h \
+ /usr/include/bits/resource.h /usr/include/bits/types/struct_rusage.h \
+ src/sss_iface/sss_iface_async.h src/sss_iface/sbus_sss_server.h \
+ src/sbus/sbus.h src/sbus/sbus_typeof.h src/sbus/sbus_declarations.h \
+ src/sbus/sbus_interface.h src/sbus/sbus_request.h src/sbus/sbus_opath.h \
+ src/sbus/sbus_interface_declarations.h src/sbus/sbus_errors.h \
+ src/sss_iface/sbus_sss_interface.h src/sss_iface/sbus_sss_invokers.h \
+ src/sss_iface/sbus_sss_symbols.h src/sss_iface/sbus_sss_keygens.h \
+ src/sss_iface/sbus_sss_arguments.h src/sss_iface/sss_iface_types.h \
+ src/sss_iface/sbus_sss_client_async.h \
+ src/sss_iface/sbus_sss_client_properties.h src/sss_iface/sss_iface.h \
+ src/providers/data_provider/dp_flags.h src/responder/common/negcache.h \
+ src/responder/common/cache_req/cache_req_domain.h \
+ src/util/session_recording.h src/responder/common/cache_req/cache_req.h
+
+/usr/include/stdc-predef.h:
+
+/usr/include/talloc.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/bits/libc-header-start.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/bits/long-double.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/9/include/stddef.h:
+
+/usr/include/bits/waitflags.h:
+
+/usr/include/bits/waitstatus.h:
+
+/usr/include/bits/floatn.h:
+
+/usr/include/bits/floatn-common.h:
+
+/usr/include/bits/types/locale_t.h:
+
+/usr/include/bits/types/__locale_t.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/timesize.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/bits/time64.h:
+
+/usr/include/bits/types/clock_t.h:
+
+/usr/include/bits/types/clockid_t.h:
+
+/usr/include/bits/types/time_t.h:
+
+/usr/include/bits/types/timer_t.h:
+
+/usr/include/bits/stdint-intn.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/byteswap.h:
+
+/usr/include/bits/uintn-identity.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/select.h:
+
+/usr/include/bits/types/sigset_t.h:
+
+/usr/include/bits/types/__sigset_t.h:
+
+/usr/include/bits/types/struct_timeval.h:
+
+/usr/include/bits/types/struct_timespec.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/bits/thread-shared-types.h:
+
+/usr/include/bits/pthreadtypes-arch.h:
+
+/usr/include/alloca.h:
+
+/usr/include/bits/stdlib-bsearch.h:
+
+/usr/include/bits/stdlib-float.h:
+
+/usr/include/stdio.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/9/include/stdarg.h:
+
+/usr/include/bits/types/__fpos_t.h:
+
+/usr/include/bits/types/__mbstate_t.h:
+
+/usr/include/bits/types/__fpos64_t.h:
+
+/usr/include/bits/types/__FILE.h:
+
+/usr/include/bits/types/FILE.h:
+
+/usr/include/bits/types/struct_FILE.h:
+
+/usr/include/bits/types/cookie_io_functions_t.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
+
+/usr/include/ldb.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/9/include/stdbool.h:
+
+/usr/include/tevent.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/9/include/stdint.h:
+
+/usr/include/stdint.h:
+
+/usr/include/bits/wchar.h:
+
+/usr/include/bits/stdint-uintn.h:
+
+/usr/include/sys/time.h:
+
+/usr/include/ldb_version.h:
+
+/usr/include/ldb_errors.h:
+
+src/db/sysdb.h:
+
+src/util/util.h:
+
+config.h:
+
+/usr/include/libintl.h:
+
+/usr/include/locale.h:
+
+/usr/include/bits/locale.h:
+
+/usr/include/time.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/bits/timex.h:
+
+/usr/include/bits/types/struct_tm.h:
+
+/usr/include/bits/types/struct_itimerspec.h:
+
+/usr/include/sys/stat.h:
+
+/usr/include/bits/stat.h:
+
+/usr/include/bits/statx.h:
+
+/usr/include/netinet/in.h:
+
+/usr/include/sys/socket.h:
+
+/usr/include/bits/types/struct_iovec.h:
+
+/usr/include/bits/socket.h:
+
+/usr/include/bits/socket_type.h:
+
+/usr/include/bits/sockaddr.h:
+
+/usr/include/asm/socket.h:
+
+/usr/include/asm-generic/socket.h:
+
+/usr/include/asm/sockios.h:
+
+/usr/include/asm-generic/sockios.h:
+
+/usr/include/bits/types/struct_osockaddr.h:
+
+/usr/include/bits/in.h:
+
+/usr/include/dhash.h:
+
+src/confdb/confdb.h:
+
+src/shared/io.h:
+
+src/shared/safealign.h:
+
+/usr/include/string.h:
+
+/usr/include/strings.h:
+
+src/util/atomic_io.h:
+
+/usr/include/unistd.h:
+
+/usr/include/bits/posix_opt.h:
+
+/usr/include/bits/environments.h:
+
+/usr/include/bits/confname.h:
+
+/usr/include/bits/getopt_posix.h:
+
+/usr/include/bits/getopt_core.h:
+
+/usr/include/poll.h:
+
+/usr/include/sys/poll.h:
+
+/usr/include/bits/poll.h:
+
+/usr/include/errno.h:
+
+/usr/include/bits/errno.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/asm/errno.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/usr/include/bits/types/error_t.h:
+
+src/util/util_errors.h:
+
+src/util/sss_format.h:
+
+/usr/include/inttypes.h:
+
+src/util/sss_regexp.h:
+
+/usr/include/pcre.h:
+
+src/util/debug.h:
+
+src/util/dlinklist.h:
+
+src/sss_client/sss_cli.h:
+
+/usr/include/nss.h:
+
+/usr/include/pwd.h:
+
+/usr/include/grp.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/9/include/limits.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/9/include/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/bits/posix1_lim.h:
+
+/usr/include/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/bits/posix2_lim.h:
+
+/usr/include/bits/xopen_lim.h:
+
+/usr/include/bits/uio_lim.h:
+
+src/providers/data_provider.h:
+
+/usr/include/sys/un.h:
+
+/usr/include/keyutils.h:
+
+/usr/include/dbus-1.0/dbus/dbus.h:
+
+/usr/lib64/dbus-1.0/include/dbus/dbus-arch-deps.h:
+
+/usr/include/dbus-1.0/dbus/dbus-macros.h:
+
+/usr/include/dbus-1.0/dbus/dbus-address.h:
+
+/usr/include/dbus-1.0/dbus/dbus-types.h:
+
+/usr/include/dbus-1.0/dbus/dbus-errors.h:
+
+/usr/include/dbus-1.0/dbus/dbus-protocol.h:
+
+/usr/include/dbus-1.0/dbus/dbus-bus.h:
+
+/usr/include/dbus-1.0/dbus/dbus-connection.h:
+
+/usr/include/dbus-1.0/dbus/dbus-memory.h:
+
+/usr/include/dbus-1.0/dbus/dbus-message.h:
+
+/usr/include/dbus-1.0/dbus/dbus-shared.h:
+
+/usr/include/dbus-1.0/dbus/dbus-misc.h:
+
+/usr/include/dbus-1.0/dbus/dbus-pending-call.h:
+
+/usr/include/dbus-1.0/dbus/dbus-server.h:
+
+/usr/include/dbus-1.0/dbus/dbus-signature.h:
+
+/usr/include/dbus-1.0/dbus/dbus-syntax.h:
+
+/usr/include/dbus-1.0/dbus/dbus-threads.h:
+
+src/util/authtok.h:
+
+src/util/authtok-utils.h:
+
+src/util/sss_pam_data.h:
+
+src/providers/data_provider_req.h:
+
+src/responder/common/cache_req/cache_req_plugin.h:
+
+src/responder/common/cache_req/cache_req_private.h:
+
+src/responder/common/responder.h:
+
+/usr/include/sys/resource.h:
+
+/usr/include/bits/resource.h:
+
+/usr/include/bits/types/struct_rusage.h:
+
+src/sss_iface/sss_iface_async.h:
+
+src/sss_iface/sbus_sss_server.h:
+
+src/sbus/sbus.h:
+
+src/sbus/sbus_typeof.h:
+
+src/sbus/sbus_declarations.h:
+
+src/sbus/sbus_interface.h:
+
+src/sbus/sbus_request.h:
+
+src/sbus/sbus_opath.h:
+
+src/sbus/sbus_interface_declarations.h:
+
+src/sbus/sbus_errors.h:
+
+src/sss_iface/sbus_sss_interface.h:
+
+src/sss_iface/sbus_sss_invokers.h:
+
+src/sss_iface/sbus_sss_symbols.h:
+
+src/sss_iface/sbus_sss_keygens.h:
+
+src/sss_iface/sbus_sss_arguments.h:
+
+src/sss_iface/sss_iface_types.h:
+
+src/sss_iface/sbus_sss_client_async.h:
+
+src/sss_iface/sbus_sss_client_properties.h:
+
+src/sss_iface/sss_iface.h:
+
+src/providers/data_provider/dp_flags.h:
+
+src/responder/common/negcache.h:
+
+src/responder/common/cache_req/cache_req_domain.h:
+
+src/util/session_recording.h:
+
+src/responder/common/cache_req/cache_req.h:

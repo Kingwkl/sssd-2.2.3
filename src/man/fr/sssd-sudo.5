@@ -1,0 +1,212 @@
+'\" t
+.\"     Title: sssd-sudo
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Formats de fichier et conventions
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-SUDO" "5" "12/09/2020" "SSSD" "Formats de fichier et conventi"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-sudo \- Configuration de sudo avec le moteur SSSD
+.SH "DESCRIPTION"
+.PP
+Cette page de manuel décrit comment configurer
+\fBsudo\fR(8)
+pour travailler avec
+\fBsssd\fR(8)
+et comment SSSD met en cache les règles sudo\&.
+.SH "CONFIGURATION DE SUDO POUR COOPéRER AVEC SSSD"
+.PP
+Pour activer SSSD comme source pour les règles de sudo, ajouter
+\fIsss\fR
+à l\*(Aqentrée
+\fIsudoers\fR
+dans
+\fBnsswitch.conf\fR(5)\&.
+.PP
+Par exemple, pour configurer sudo pour rechercher d\*(Aqabord les règles dans le fichier standard
+\fBsudoers\fR(5)
+(qui doit contenir les règles qui s\*(Aqappliquent aux utilisateurs locaux) et ensuite dans SSSD, le fichier nsswitch\&.conf doit contenir la ligne suivante\ \&:
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+sudoers: files sss
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Plus d\*(Aqinformations sur la configuration de l\*(Aqordre de recherche de sudoers depuis le fichier nsswitch\&.conf, mais aussi les informations sur le schéma LDAP qui est utilisé pour stocker les règles sudo dans l\*(Aqannuaire sont disponibles dans
+\fBsudoers.ldap\fR(5)\&.
+.PP
+\fINote\fR: in order to use netgroups or IPA hostgroups in sudo rules, you also need to correctly set
+\fBnisdomainname\fR(1)
+to your NIS domain name (which equals to IPA domain name when using hostgroups)\&.
+.SH "CONFIGURATION DE SSSD POUR ALLER CHERCHER LES RèGLES DE SUDO"
+.PP
+All configuration that is needed on SSSD side is to extend the list of
+\fIservices\fR
+with "sudo" in [sssd] section of
+\fBsssd.conf\fR(5)\&. To speed up the LDAP lookups, you can also set search base for sudo rules using
+\fIldap_sudo_search_base\fR
+option\&.
+.PP
+L\*(Aqexemple suivant montre comment configurer SSSD pour télécharger les règles sudo à partir d\*(Aqun serveur LDAP\&.
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+[sssd]
+config_file_version = 2
+services = nss, pam, sudo
+domains = EXAMPLE
+
+[domain/EXAMPLE]
+id_provider = ldap
+sudo_provider = ldap
+ldap_uri = ldap://example\&.com
+ldap_sudo_search_base = ou=sudoers,dc=example,dc=com
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+When SSSD is configured to use IPA as the ID provider, the sudo provider is automatically enabled\&. The sudo search base is configured to use the IPA native LDAP tree (cn=sudo,$SUFFIX)\&. If any other search base is defined in sssd\&.conf, this value will be used instead\&. The compat tree (ou=sudoers,$SUFFIX) is no longer required for IPA sudo functionality\&.
+.SH "LE MéCANISME DE MISE EN CACHE DE RèGLES SUDO"
+.PP
+Le plus grand défi lors du développement de la prise en charge de sudo dans SSSD était de de s\*(Aqassurer que l\*(Aqutilisation d\*(Aqun sudo exploitant SSSD comme source de données fournissait la même expérience utilisateur et était aussi rapide que sudo, tout en conservant le jeu de règles le plus à jour possible\&. Pour satisfaire ces exigences, SSSD utilise trois types de mises à jour\&. Elles sont appelées actualisation complète, rafraîchissement intelligent et rafraîchissement des règles\&.
+.PP
+Le
+\fIrafraîchissement intelligent\fR
+télécharge périodiquement les règles qui sont nouvelles ou qui ont été modifiées après la dernière mise à jour\&. Son but premier est d\*(Aqéviter à la base de données de grossir en allant chercher de petits incréments qui ne génèrent pas de gros de trafic réseau\&.
+.PP
+Le
+\fIrafracîchissement complèt\fR
+supprime simplement toutes les règles sudo stockées dans le cache et les remplace par toutes les règles qui sont stockées sur le serveur\&. Ceci est utilisé pour assurer la cohérence de cache en supprimant toutes les règles qui ont été supprimées du serveur\&. Cependant, un rafraîchissement complet peut produire beaucoup de trafic et doit n\*(Aqêtre exécuté qu\*(Aqoccasionnellement selon la taille et de la stabilité des règles sudo\&.
+.PP
+Le
+\fIrafraîchissement des règles\fR
+fait en sorte de ne pas accorder à l\*(Aqutilisateur plus d\*(Aqautorisations que défini\&. Il est déclenché chaque fois que l\*(Aqutilisateur exécute sudo\&. L\*(Aqactualisation des règles trouvera toutes les règles qui s\*(Aqappliquent à cet utilisateur, vérifie leur date d\*(Aqexpiration et les retéléchargera si elles ont expiré\&. Dans le cas où l\*(Aqune de ces règles est manquante sur le serveur, SSSD programmera en parallèle un rafraîchissement complet hors ligne car d\*(Aqautres règles (s\*(Aqappliquant à d\*(Aqautres utilisateurs) peuvent avoir été supprimées\&.
+.PP
+Si activé, SSSD stocke uniquement les règles qui peuvent être appliquées à cette machine\&. En d\*(Aqautres termes, ce sont les règles qui contiennent une des valeurs suivantes dans l\*(Aqattribut de
+\fIsudoHost\fR\ \&:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+mot\-clé ALL
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+joker
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+netgroup (sous la forme \(Fo +netgroup \(Fc)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+nom de système ou le nom de domaine pleinement qualifié de cette machine
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+une des adresses IP de cette machine
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+une des adresses IP du réseau (sous la forme \(Fo adresse/masque \(Fc)
+.RE
+.PP
+Il existe de nombreuses options de configuration qui peuvent être utilisées pour ajuster le comportement\&. Consulter \(Fo ldap_sudo_ * \(Fc dans
+\fBsssd-ldap\fR(5)
+et \(Fo\ \&sudo_ *\ \&\(Fc dans
+\fBsssd.conf\fR(5)\&.
+.SH "VOIR AUSSI"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

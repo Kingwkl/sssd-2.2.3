@@ -1,0 +1,3 @@
+PROJECT_NAME            = sss_certmap
+OUTPUT_DIRECTORY        = certmap_doc
+INPUT                   = /home/wkl/下载/sssd_2.2.3.orig/sssd-2.2.3/src/lib/certmap/sss_certmap.h

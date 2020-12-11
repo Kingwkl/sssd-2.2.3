@@ -1,0 +1,150 @@
+'\" t
+.\"     Title: sssd_krb5_locator_plugin
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Páginas de manual de SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD_KRB5_LOCATOR_PL" "8" "12/09/2020" "SSSD" "Páginas de manual de SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd_krb5_locator_plugin \- Complemento localizador Kerberos
+.SH "DESCRIPCION"
+.PP
+El complemento localizador Kerberos
+\fBsssd_krb5_locator_plugin\fR
+es usado por libkrb5 para encontrar KDCs en un reino Kerberos dado\&. SSSD proporciona dicho complemento para guiar a todos los clientes Kerberos es un sistema a un único KDC\&. En general, no debería importar con qué KDC está hablando un proceso de cliente\&. Pero hay casos, e\&.g\&. después de un cambio de contraseña, donde no todos los KDCs etán en el mismo estado porque los nuevos datos tienen que ser replicados primero\&. Para evitar fallos de autenticación inesperados y quizás bloqueos de cuentas sería bueno hablar con un único KDC todo lo que sea posible\&.
+.PP
+libkrb5 buscará el complemento localizador en el subdirectorio libkrb5 del directorio de complementos Kerberos, vea más detalles en plugin_base_dir en
+\fBkrb5.conf\fR(5)\&. El complemento solo se puede deshabilitar borrando el fichero del complemento\&. No hay opción en a configuración de Kerberos para deshabilitarlo\&. Pero la variable de entorno SSSD_KRB5_LOCATOR_DISABLE puede ser usada para deshabilitar el complemento en comandos individuales\&. Alternativamente la opción SSSD krb5_use_kdcinfo=False puede ser usada para no generar los datos necesarios para el complemento\&. Con esto, todavía se llama al complemento, pero no proporcionará datos a la persona que llama para que libkrb5 pueda recurrir a otros métodos definidos en krb5\&.conf\&.
+.PP
+El complemento lee la información sobre los KDCs de un reino dado desde un fichero llamado
+kdcinfo\&.REALM\&. El fichero debería contener uno o más nombres de DNS o direcciones IP ya sea en anotación decimal con puntos IPv4 o en anotación hexadecimal IPv6\&. Su puede añadir un número de puerto adicional al final separado con dos puntos, la dirección IPv6 tiene que estar encerrada entre corchetes en este caso como es usual\&. Las entradas válidas son:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+kdc\&.example\&.com
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+kdc\&.example\&.com:321
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+1\&.2\&.3\&.4
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+5\&.6\&.7\&.8:99
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+2001:db8:85a3::8a2e:370:7334
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+[2001:db8:85a3::8a2e:370:7334]:321
+.RE
+.sp
+Krb5 auth\-provider de SSSD que es utilizado por IPA y los proveedores AD que también agrega la dirección del actual KDC o controlador de dominio SSSD se utiliza para este fichero\&.
+.PP
+En entornos con KDCs de solo lectura y lectura\-escritura donde los clientes esperan usar las instancias solo lectura para las operaciones generales y solo KDC de lectura\-escritura para cambio de configuración como cambios de contraseña se utiliza
+kpasswdinfo\&.REALM
+también para identificar KDCs de lectura\-escritura\&. Si existe este fichero para el reino dado el contenido será usado por el complemento para contestar las peticiones de un servidor kpasswd o kadmin opara el maestro específico KDC MIT Kerberos\&. Si la dirección contiene un número de puerto el puerto predeterminado KDC 88 será usado para los posteriores\&.
+.SH "NOTAS"
+.PP
+No todas las implementaciones Kerberos soportan el uso de plugins\&. Si
+\fBsssd_krb5_locator_plugin\fR
+no está disponible en su sistema usted tiene que editar /etc/krb5\&.conf para reflejar sus ajustes Kerberos\&.
+.PP
+Si la variable de entorno SSSD_KRB5_LOCATOR_DEBUR está fijada a cualquier valor los mensajes de depuración se enviarán a stderr\&.
+.PP
+Si la variable de entorno SSSD_KRB5_LOCATOR_DISABLE está establecida a cualquier valor el complemento es deshabilitado y y devolverá KRB5_PLUGIN_NO_HANDLE al llamante\&.
+.PP
+Si la variable de entorno SSSD_KRB5_LOCATOR_IGNORE_DNS_FAILURES etá establecida a cualquier valor el complemento intentará resolver todos los nombres DNS en el fichero kdcinfo\&. Por defecto el complemento devuelve KRB5_PLUGIN_NO_HANDLE al llamante inmediatamente en el primer fallo resolviendo DNS\&.
+.SH "VEA TAMBIEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

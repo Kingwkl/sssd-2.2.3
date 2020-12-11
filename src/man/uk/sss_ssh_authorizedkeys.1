@@ -1,0 +1,176 @@
+'\" t
+.\"     Title: sss_ssh_authorizedkeys
+.\"    Author: Основна гілка розробки SSSD \(em https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Сторінки підручника SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_SSH_AUTHORIZEDKE" "1" "12/09/2020" "SSSD" "Сторінки підручника SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_ssh_authorizedkeys \- отримати уповноважені ключі OpenSSH
+.SH "SYNOPSIS"
+.HP \w'\fBsss_ssh_authorizedkeys\fR\ 'u
+\fBsss_ssh_authorizedkeys\fR [\fIпараметри\fR] \fIКОРИСТУВАЧ\fR
+.SH "ОПИС"
+.PP
+\fBsss_ssh_authorizedkeys\fR
+отримує відкриті ключі SSH для користувача
+\fIКОРИСТУВАЧ\fR
+і виводить їх у форматі authorized_keys OpenSSH (щоб дізнатися більше, див\&. розділ
+\(lqФОРМАТ ФАЙЛІВ AUTHORIZED_KEYS\(rq
+на сторінці підручника (man) з
+\fBsshd\fR(8))\&.
+.PP
+\fBsshd\fR(8)
+можна налаштувати на використання
+\fBsss_ssh_authorizedkeys\fR
+для розпізнавання користувачів за відкритими ключами, якщо програму зібрано із підтримкою параметра
+\(lqAuthorizedKeysCommand\(rq\&. Будь ласка, зверніться до сторінки підручника
+\fBsshd_config\fR(5), щоб дізнатися більше про цей параметр\&.
+.PP
+Якщо передбачено підтримку
+\(lqAuthorizedKeysCommand\(rq,
+\fBsshd\fR(8)
+можна налаштувати на використання ключів за допомогою таких інструкцій у
+\fBsshd_config\fR(5):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+  AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys
+  AuthorizedKeysCommandUser nobody
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SS "КЛЮЧІ З СЕРТИФІКАТІВ"
+.PP
+Окрім відкрити ключів SSH для користувача
+\fIКОРИСТУВАЧ\fR,
+\fBsss_ssh_authorizedkeys\fR
+може повертати ключі SSH, які походять від відкритого ключа сертифіката X\&.509\&.
+.PP
+Щоб уможливити це, слід встановити для параметра
+\(lqssh_use_certificate_keys\(rq
+значення true (типове значення) у розділі [ssh] файла
+sssd\&.conf\&. Якщо запис користувача містить сертифікати (див
+\(lqldap_user_certificate\(rq
+на сторінці
+\fBsssd-ldap\fR(5), щоб дізнатися більше) або існує сертифікат у записі перевизначення для користувача (див\&.
+\fBsss_override\fR(8)
+або
+\fBsssd-ipa\fR(5), щоб дізнатися більше), а сертифікат є чинним, SSSD видобуде відкритий ключі з сертифіката і перетворить його до формату, який може використовувати sshd\&.
+.PP
+Окрім
+\(lqssh_use_certificate_keys\(rq, може бути використано параметри
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ca_db
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+p11_child_timeout
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+certificate_verification
+.RE
+.sp
+для керування способом встановлення чинності сертифікатів (докладніше див\&.
+\fBsssd.conf\fR(5))\&.
+.PP
+Перевірка чинності є перевагою використання сертифікатів X\&.509 замість ключів SSH безпосередньо, оскільки, наприклад, це поліпшує можливості керування часом придатності ключів\&. Якщо клієнт ssh налаштовано не використання закритих ключів з смарткартки за допомогою бібліотеки PKCS#11 спільного використання (див\&.
+\fBssh\fR(1), щоб дізнатися більше), може дратувати те, що розпізнавання залишається працездатним, навіть якщо пов\*(Aqязаний із ним сертифікат X\&.509 на смарткартці вже втратив чинність, оскільки ні
+\fBssh\fR, ні
+\fBsshd\fR
+не братимуть сертифікат до уваги взагалі\&.
+.PP
+Слід зауважити, що похідний відкритий ключ SSH все одно можна додати до файла
+authorized_keys
+користувача, щоб обійти перевірку чинності сертифіката, якщо налаштування
+\fBsshd\fR
+надають змогу це робити\&.
+.SH "ПАРАМЕТРИ"
+.PP
+\fB\-d\fR,\fB\-\-domain\fR \fIДОМЕН\fR
+.RS 4
+Шукати відкриті ключі користувачів у домені SSSD
+\fIДОМЕН\fR\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Показати довідкове повідомлення і завершити роботу\&.
+.RE
+.SH "СТАН ВИХОДУ"
+.PP
+У випадку успіху значення стану виходу дорівнює 0\&. У всіх інших випадках програма повертає 1\&.
+.SH "ТАКОЖ ПЕРЕГЛЯНЬТЕ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBОсновна гілка розробки SSSD \(em
+https://pagure\&.io/SSSD/sssd/\fR

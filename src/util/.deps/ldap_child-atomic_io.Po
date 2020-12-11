@@ -1,0 +1,74 @@
+src/util/ldap_child-atomic_io.o: src/util/atomic_io.c \
+ /usr/include/stdc-predef.h src/util/atomic_io.h /usr/include/unistd.h \
+ /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/bits/long-double.h \
+ /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
+ /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
+ /usr/include/bits/types.h /usr/include/bits/timesize.h \
+ /usr/include/bits/typesizes.h /usr/include/bits/time64.h \
+ /usr/lib/gcc/x86_64-redhat-linux/9/include/stddef.h \
+ /usr/include/bits/confname.h /usr/include/bits/getopt_posix.h \
+ /usr/include/bits/getopt_core.h \
+ /usr/lib/gcc/x86_64-redhat-linux/9/include/stdbool.h /usr/include/poll.h \
+ /usr/include/sys/poll.h /usr/include/bits/poll.h /usr/include/errno.h \
+ /usr/include/bits/errno.h /usr/include/linux/errno.h \
+ /usr/include/asm/errno.h /usr/include/asm-generic/errno.h \
+ /usr/include/asm-generic/errno-base.h
+
+/usr/include/stdc-predef.h:
+
+src/util/atomic_io.h:
+
+/usr/include/unistd.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/bits/long-double.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/usr/include/bits/posix_opt.h:
+
+/usr/include/bits/environments.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/timesize.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/bits/time64.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/9/include/stddef.h:
+
+/usr/include/bits/confname.h:
+
+/usr/include/bits/getopt_posix.h:
+
+/usr/include/bits/getopt_core.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/9/include/stdbool.h:
+
+/usr/include/poll.h:
+
+/usr/include/sys/poll.h:
+
+/usr/include/bits/poll.h:
+
+/usr/include/errno.h:
+
+/usr/include/bits/errno.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/asm/errno.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/asm-generic/errno-base.h:

@@ -1,0 +1,149 @@
+'\" t
+.\"     Title: sss_cache
+.\"    Author: SSSD uppströms \(en https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: SSSD manualsidor
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_CACHE" "8" "12/09/2020" "SSSD" "SSSD manualsidor"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_cache \- utför cacherensning
+.SH "SYNOPSIS"
+.HP \w'\fBsss_cache\fR\ 'u
+\fBsss_cache\fR [\fIflaggor\fR]
+.SH "BESKRIVNING"
+.PP
+\fBsss_cache\fR
+invalidrtst poster i SSSD\-cachen\&. Invaliderade poster måste hämtas om från servern så fort den tillhörande SSSD\-bakänden är ansluten\&. Flaggor som invaliderar ett enstaka objekt tar bara ett ensamt argument\&.
+.SH "FLAGGOR"
+.PP
+\fB\-E\fR,\fB\-\-everything\fR
+.RS 4
+Invalidera alla cachade poster\&.
+.RE
+.PP
+\fB\-u\fR,\fB\-\-user\fR \fIinloggning\fR
+.RS 4
+Invalidera en viss användare\&.
+.RE
+.PP
+\fB\-U\fR,\fB\-\-users\fR
+.RS 4
+Invalidera alla användarposter\&. Detta alternativ åsidosätter invalidering av en viss användare om det också angavs\&.
+.RE
+.PP
+\fB\-g\fR,\fB\-\-group\fR \fIgrupp\fR
+.RS 4
+Invalidera en viss grupp\&.
+.RE
+.PP
+\fB\-G\fR,\fB\-\-groups\fR
+.RS 4
+Invalidera alla grupposter\&. Detta alternativ åsidosätter invalidering av en viss grupp om det också angavs\&.
+.RE
+.PP
+\fB\-n\fR,\fB\-\-netgroup\fR \fInätgrupp\fR
+.RS 4
+Invalidera en viss nätgrupp\&.
+.RE
+.PP
+\fB\-N\fR,\fB\-\-netgroups\fR
+.RS 4
+Invalidera alla nätgruppsposter\&. Detta alternativ åsidosätter invalidering av en viss nätgrupp om det också angavs\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-service\fR \fItjänst\fR
+.RS 4
+Invalidera en viss tjänst\&.
+.RE
+.PP
+\fB\-S\fR,\fB\-\-services\fR
+.RS 4
+Invalidera alla tjänsteposter\&. Detta alternativ åsidosätter invalidering av en viss tjänst om det också angavs\&.
+.RE
+.PP
+\fB\-a\fR,\fB\-\-autofs\-map\fR \fIautofs\-översättning\fR
+.RS 4
+Invalidera specifika autofs\-översättningar\&.
+.RE
+.PP
+\fB\-A\fR,\fB\-\-autofs\-maps\fR
+.RS 4
+Invalidera alla autofs\-översättningar\&. Detta alternativ åsidosätter invalidering av en viss översättning om det också angavs\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-ssh\-host\fR \fIvärdnamn\fR
+.RS 4
+Invalidera publika SSH\-nycklar för en viss värd\&.
+.RE
+.PP
+\fB\-H\fR,\fB\-\-ssh\-hosts\fR
+.RS 4
+Invalidera publika SSH\-nycklar för alla värdar\&. Detta alternativ åsidosätter invalidering av SSH\-nycklar för en viss värd om det också angavs\&.
+.RE
+.PP
+\fB\-r\fR,\fB\-\-sudo\-rule\fR \fIregel\fR
+.RS 4
+Invalidera en viss sudo\-regel\&.
+.RE
+.PP
+\fB\-R\fR,\fB\-\-sudo\-rules\fR
+.RS 4
+Invalidera alla cachade sudo\-regler\&. Detta alternativ åsidosätter invalidering av en viss sudo\-regel om det också angavs\&.
+.RE
+.PP
+\fB\-d\fR,\fB\-\-domain\fR \fIdomän\fR
+.RS 4
+Begränsa invalideringsprocessen till endast en viss domän\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Visa ett hjälpmeddelande och avsluta\&.
+.RE
+.SH "SE ÄVEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBSSSD uppströms \(en
+https://pagure\&.io/SSSD/sssd/\fR

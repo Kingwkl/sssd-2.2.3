@@ -1,0 +1,677 @@
+'\" t
+.\"     Title: sssd-ldap-attributes
+.\"    Author: Основна гілка розробки SSSD \(em https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Формати файлів та правила
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-LDAP\-ATTRIBUT" "5" "12/09/2020" "SSSD" "Формати файлів та правила"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-ldap-attributes \- SSSD LDAP Provider: Mapping Attributes
+.SH "ОПИС"
+.PP
+This manual page describes the mapping attributes of SSSD LDAP provider
+\fBsssd-ldap\fR(5)\&. Refer to the
+\fBsssd-ldap\fR(5)
+manual page for full details about SSSD LDAP provider configuration options\&.
+.SH "USER ATTRIBUTES"
+.PP
+.PP
+ldap_user_object_class (рядок)
+.RS 4
+Клас об\(cqєктів запису користувача у LDAP\&.
+.sp
+Типове значення: posixAccount
+.RE
+.PP
+ldap_user_name (рядок)
+.RS 4
+Атрибут LDAP, що відповідає назві облікового запису користувача\&.
+.sp
+Типове значення: uid (rfc2307, rfc2307bis і IPA), sAMAccountName (AD)
+.RE
+.PP
+ldap_user_uid_number (рядок)
+.RS 4
+Атрибут LDAP, що відповідає ідентифікатору користувача\&.
+.sp
+Типове значення: uidNumber
+.RE
+.PP
+ldap_user_gid_number (рядок)
+.RS 4
+Атрибут LDAP, що відповідає ідентифікатору основної групи користувача\&.
+.sp
+Типове значення: gidNumber
+.RE
+.PP
+ldap_user_primary_group (рядок)
+.RS 4
+Атрибут основної групи Active Directory для встановлення відповідності ідентифікатора\&. Зауважте, що цей атрибут слід встановлювати вручну, лише якщо ви користуєтеся засобом надання даних
+\(lqldap\(rq
+з прив\*(Aqязкою до ідентифікаторів\&.
+.sp
+Типове значення: unset (LDAP), primaryGroupID (AD)
+.RE
+.PP
+ldap_user_gecos (рядок)
+.RS 4
+Атрибут LDAP, що відповідає полю gecos користувача\&.
+.sp
+Типове значення: gecos
+.RE
+.PP
+ldap_user_home_directory (рядок)
+.RS 4
+Атрибут LDAP, що містить назву домашнього каталогу користувача\&.
+.sp
+Default: homeDirectory (LDAP and IPA), unixHomeDirectory (AD)
+.RE
+.PP
+ldap_user_shell (рядок)
+.RS 4
+Атрибут LDAP, що містить шлях до типової командної оболонки користувача\&.
+.sp
+Типове значення: loginShell
+.RE
+.PP
+ldap_user_uuid (рядок)
+.RS 4
+Атрибут LDAP, що містить UUID/GUID об\(cqєкта користувача LDAP\&.
+.sp
+Типове значення: не встановлено у загальному випадку, objectGUID для AD і ipaUniqueID для IPA
+.RE
+.PP
+ldap_user_objectsid (рядок)
+.RS 4
+Атрибут LDAP, що містить objectSID об\(cqєкта користувача LDAP\&. Зазвичай, потрібен лише для серверів ActiveDirectory\&.
+.sp
+Типове значення: objectSid для ActiveDirectory, не встановлено для інших серверів\&.
+.RE
+.PP
+ldap_user_modify_timestamp (рядок)
+.RS 4
+Атрибут LDAP, що містить часову позначку останньої зміни батьківського об\(cqєкта\&.
+.sp
+Типове значення: modifyTimestamp
+.RE
+.PP
+ldap_user_shadow_last_change (рядок)
+.RS 4
+У разі використання ldap_pwd_policy=shadow цей параметр містить назву атрибута LDAP, який є відповідником параметра
+\fBshadow\fR(5)
+(дати останньої зміни пароля)\&.
+.sp
+Типове значення: shadowLastChange
+.RE
+.PP
+ldap_user_shadow_min (рядок)
+.RS 4
+У разі використання ldap_pwd_policy=shadow цей параметр містить назву атрибута LDAP, який є відповідником параметра
+\fBshadow\fR(5)
+(мінімального віку пароля)\&.
+.sp
+Типове значення: shadowMin
+.RE
+.PP
+ldap_user_shadow_max (рядок)
+.RS 4
+У разі використання ldap_pwd_policy=shadow цей параметр містить назву атрибута LDAP, який є відповідником параметра
+\fBshadow\fR(5)
+(максимального віку пароля)\&.
+.sp
+Типове значення: shadowMax
+.RE
+.PP
+ldap_user_shadow_warning (рядок)
+.RS 4
+У разі використання ldap_pwd_policy=shadow цей параметр містить назву атрибута LDAP, який є відповідником параметра
+\fBshadow\fR(5)
+(проміжку попередження щодо пароля)\&.
+.sp
+Типове значення: shadowWarning
+.RE
+.PP
+ldap_user_shadow_inactive (рядок)
+.RS 4
+У разі використання ldap_pwd_policy=shadow цей параметр містить назву атрибута LDAP, який є відповідником параметра
+\fBshadow\fR(5)
+(тривалості періоду невикористання пароля)\&.
+.sp
+Типове значення: shadowInactive
+.RE
+.PP
+ldap_user_shadow_expire (рядок)
+.RS 4
+У разі використання ldap_pwd_policy=shadow або ldap_account_expire_policy=shadow цей параметр містить назву атрибута LDAP, який є відповідником параметра
+\fBshadow\fR(5)
+(дати завершення строку дії пароля)\&.
+.sp
+Типове значення: shadowExpire
+.RE
+.PP
+ldap_user_krb_last_pwd_change (рядок)
+.RS 4
+Якщо використано значення ldap_pwd_policy=mit_kerberos, цей параметр містить назву атрибута LDAP, у якому зберігається дата і час останньої зміни пароля у kerberos\&.
+.sp
+Типове значення: krbLastPwdChange
+.RE
+.PP
+ldap_user_krb_password_expiration (рядок)
+.RS 4
+Якщо використано значення ldap_pwd_policy=mit_kerberos, цей параметр містить назву атрибута LDAP, у якому зберігається дата і час завершення строку дії поточного пароля\&.
+.sp
+Типове значення: krbPasswordExpiration
+.RE
+.PP
+ldap_user_ad_account_expires (рядок)
+.RS 4
+Якщо вказано ldap_account_expire_policy=ad, цей параметр містить назву атрибута LDAP, у якому зберігаються дані щодо строку завершення дії облікового запису\&.
+.sp
+Типове значення: accountExpires
+.RE
+.PP
+ldap_user_ad_user_account_control (рядок)
+.RS 4
+Якщо вказано ldap_account_expire_policy=ad, цей параметр містить назву атрибута LDAP, у якому зберігаються дані щодо поля контрольного біта облікового запису користувача\&.
+.sp
+Типове значення: userAccountControl
+.RE
+.PP
+ldap_ns_account_lock (рядок)
+.RS 4
+Якщо вказано ldap_account_expire_policy=rhds або еквівалентне налаштування, цей параметр визначає, заборонено чи дозволено доступ\&.
+.sp
+Типове значення: nsAccountLock
+.RE
+.PP
+ldap_user_nds_login_disabled (рядок)
+.RS 4
+Якщо вказано ldap_account_expire_policy=nds, цей атрибут визначає, дозволено чи заборонено доступ\&.
+.sp
+Типове значення: loginDisabled
+.RE
+.PP
+ldap_user_nds_login_expiration_time (рядок)
+.RS 4
+Якщо вказано ldap_account_expire_policy=nds, цей атрибут визначає дату, до якої надано доступ\&.
+.sp
+Типове значення: loginDisabled
+.RE
+.PP
+ldap_user_nds_login_allowed_time_map (рядок)
+.RS 4
+Якщо вказано ldap_account_expire_policy=nds, цей атрибут визначає годити дня тижня, коли надається доступ\&.
+.sp
+Типове значення: loginAllowedTimeMap
+.RE
+.PP
+ldap_user_principal (рядок)
+.RS 4
+Атрибут LDAP, що містить Kerberos User Principal Name (UPN) користувача\&.
+.sp
+Типове значення: krbPrincipalName
+.RE
+.PP
+ldap_user_extra_attrs (рядок)
+.RS 4
+Відокремлений комами список атрибутів LDAP, які SSSD має отримувати разом зі звичайним набором атрибутів запису користувача\&.
+.sp
+Список може або містити лише назви атрибутів LDAP, або відокремлені двокрапками кортежі з назви атрибута кешу SSSD та назви атрибута LDAP\&. Якщо вказано лише назву атрибута LDAP, атрибут зберігається до кешу буквально\&. Використання нетипової назви атрибута SSSD може бути потрібним середовищам, де налаштовано декілька доменів SSSD з різними схемами LDAP\&.
+.sp
+Будь ласка, зауважте, що декілька назв атрибутів зарезервовано SSSD, зокрема атрибут \(Foname\(Fc\&. SSSD повідомить про помилку, якщо будь\-які із зарезервованих назв атрибутів використано як назву додаткового атрибута\&.
+.sp
+Приклади:
+.sp
+ldap_user_extra_attrs = telephoneNumber
+.sp
+Зберегти атрибут \(FotelephoneNumber\(Fc з LDAP як \(FotelephoneNumber\(Fc до кешу\&.
+.sp
+ldap_user_extra_attrs = phone:telephoneNumber
+.sp
+Зберегти атрибут \(FotelephoneNumber\(Fc з LDAP як \(Fophone\(Fc до кешу\&.
+.sp
+Типове значення: not set
+.RE
+.PP
+ldap_user_ssh_public_key (рядок)
+.RS 4
+Атрибут LDAP, який містить відкриті ключі SSH користувача\&.
+.sp
+Типове значення: sshPublicKey
+.RE
+.PP
+ldap_user_fullname (рядок)
+.RS 4
+Атрибут LDAP, що відповідає повному імені користувача\&.
+.sp
+Типове значення: cn
+.RE
+.PP
+ldap_user_member_of (рядок)
+.RS 4
+Атрибут LDAP зі списком груп, у яких бере участь користувач\&.
+.sp
+Типове значення: memberOf
+.RE
+.PP
+ldap_user_authorized_service (рядок)
+.RS 4
+Якщо access_provider=ldap і ldap_access_order=authorized_service, SSSD використовуватиме наявність атрибута authorizedService у записі користувача LDAP для визначення прав доступу\&.
+.sp
+Спочатку визначаються явні заборони (!svc)\&. Далі SSSD шукає явні дозволи (svc) і нарешті загальні дозволи або allow_all (*)\&.
+.sp
+Будь ласка, зауважте, що параметр налаштування ldap_access_order
+\fIмає\fR
+включати
+\(lqauthorized_service\(rq, щоб система змогла скористатися параметром ldap_user_authorized_service\&.
+.sp
+Some distributions (such as Fedora\-29+ or RHEL\-8) always include the
+\(lqsystemd\-user\(rq
+PAM service as part of the login process\&. Therefore when using service\-based access control, the
+\(lqsystemd\-user\(rq
+service might need to be added to the list of allowed services\&.
+.sp
+Типове значення: authorizedService
+.RE
+.PP
+ldap_user_authorized_host (рядок)
+.RS 4
+Якщо access_provider=ldap і ldap_access_order=host, SSSD використовуватиме наявність атрибута host у записі користувача LDAP для визначення прав доступу\&.
+.sp
+Спочатку визначаються явні заборони (!host)\&. Далі SSSD шукає явні дозволи (host) і нарешті загальні дозволи або allow_all (*)\&.
+.sp
+Будь ласка, зауважте, що параметр налаштування ldap_access_order
+\fIмає\fR
+включати
+\(lqhost\(rq, щоб можна було скористатися параметром ldap_user_authorized_host\&.
+.sp
+Типове значення: host
+.RE
+.PP
+ldap_user_authorized_rhost (рядок)
+.RS 4
+Якщо access_provider=ldap і ldap_access_order=rhost, SSSD використовуватиме наявність атрибута rhost у записі користувача LDAP для визначення прав доступу\&. Те саме стосується і процесу перевірки вузла\&.
+.sp
+Спочатку визначаються явні заборони (!rhost)\&. Далі SSSD шукає явні дозволи (rhost) і нарешті загальні дозволи або allow_all (*)\&.
+.sp
+Будь ласка, зауважте, що параметр налаштування ldap_access_order
+\fIмає\fR
+включати
+\(lqrhost\(rq, щоб можна було скористатися параметром ldap_user_authorized_rhost\&.
+.sp
+Типове значення: rhost
+.RE
+.PP
+ldap_user_certificate (рядок)
+.RS 4
+Назва атрибута LDAP, що містить сертифікат X509 користувача\&.
+.sp
+Типове значення: userCertificate;binary
+.RE
+.PP
+ldap_user_email (рядок)
+.RS 4
+Назва атрибута LDAP, який містить адресу електронної пошти користувача\&.
+.sp
+Зауваження: якщо адреса електронної пошти користувача конфліктує із адресою електронної пошти або повним ім\*(Aqям іншого користувача, SSSD не зможе обслуговувати належним чином записи таких користувачів\&. Якщо з якоїсь причини у декількох користувачів має бути одна адреса електронної пошти, встановіть для цього параметра довільну назву атрибута, щоб вимкнути пошук і вхід до системи за адресою електронної пошти\&.
+.sp
+Типове значення: mail
+.RE
+.SH "GROUP ATTRIBUTES"
+.PP
+.PP
+ldap_group_object_class (рядок)
+.RS 4
+Клас об\(cqєктів запису групи у LDAP\&.
+.sp
+Типове значення: posixGroup
+.RE
+.PP
+ldap_group_name (рядок)
+.RS 4
+Атрибут LDAP, що відповідає назві групи\&.
+.sp
+Типове значення: cn (rfc2307, rfc2307bis і IPA), sAMAccountName (AD)
+.RE
+.PP
+ldap_group_gid_number (рядок)
+.RS 4
+Атрибут LDAP, що відповідає ідентифікатору групи\&.
+.sp
+Типове значення: gidNumber
+.RE
+.PP
+ldap_group_member (рядок)
+.RS 4
+Атрибут LDAP, у якому містяться імена учасників групи\&.
+.sp
+Типове значення: memberuid (rfc2307) / member (rfc2307bis)
+.RE
+.PP
+ldap_group_uuid (рядок)
+.RS 4
+Атрибут LDAP, що містить UUID/GUID об\(cqєкта групи LDAP\&.
+.sp
+Типове значення: не встановлено у загальному випадку, objectGUID для AD і ipaUniqueID для IPA
+.RE
+.PP
+ldap_group_objectsid (рядок)
+.RS 4
+Атрибут LDAP, що містить objectSID об\(cqєкта групи LDAP\&. Зазвичай, потрібен лише для серверів ActiveDirectory\&.
+.sp
+Типове значення: objectSid для ActiveDirectory, не встановлено для інших серверів\&.
+.RE
+.PP
+ldap_group_modify_timestamp (рядок)
+.RS 4
+Атрибут LDAP, що містить часову позначку останньої зміни батьківського об\(cqєкта\&.
+.sp
+Типове значення: modifyTimestamp
+.RE
+.PP
+ldap_group_type (string)
+.RS 4
+Атрибут LDAP, що містить ціле значення і позначає тип групи, а також, можливо, інші прапорці\&.
+.sp
+Цей атрибут у поточній версії використовується лише засобом надання даних AD для визначення, чи є група локальною групою домену і чи має бути її відфільтровано у списку надійних (довірених) доменів\&.
+.sp
+Типове значення: groupType у засобі надання даних AD, у інших засобах не встановлено
+.RE
+.PP
+ldap_group_external_member (рядок)
+.RS 4
+Атрибут LDAP, який посилається на записи учасників групи, які визначено у зовнішньому домені\&. У поточній версії передбачено підтримку лише зовнішніх записів учасників IPA\&.
+.sp
+Типове значення: ipaExternalMember у засобі надання даних IPA, у інших засобах не визначено\&.
+.RE
+.SH "NETGROUP ATTRIBUTES"
+.PP
+.PP
+ldap_netgroup_object_class (рядок)
+.RS 4
+Клас об\(cqєктів запису мережевої групи (netgroup) у LDAP\&.
+.sp
+У надавачі даних IPA має бути використано ipa_netgroup_object_class\&.
+.sp
+Типове значення: nisNetgroup
+.RE
+.PP
+ldap_netgroup_name (рядок)
+.RS 4
+Атрибут LDAP, що відповідає назві мережевої групи (netgroup)\&.
+.sp
+У надавачі даних IPA має бути використано ipa_netgroup_name\&.
+.sp
+Типове значення: cn
+.RE
+.PP
+ldap_netgroup_member (рядок)
+.RS 4
+Атрибут LDAP, у якому містяться імена учасників мережевої групи (netgroup)\&.
+.sp
+У надавачі даних IPA має бути використано ipa_netgroup_member\&.
+.sp
+Типове значення: memberNisNetgroup
+.RE
+.PP
+ldap_netgroup_triple (рядок)
+.RS 4
+Атрибут LDAP, що містить трійки мережевої групи (вузол, користувач, домен)\&.
+.sp
+Цим параметром не можна скористатися у надавачі даних IPA\&.
+.sp
+Типове значення: nisNetgroupTriple
+.RE
+.PP
+ldap_netgroup_modify_timestamp (рядок)
+.RS 4
+Атрибут LDAP, що містить часову позначку останньої зміни батьківського об\(cqєкта\&.
+.sp
+Цим параметром не можна скористатися у надавачі даних IPA\&.
+.sp
+Типове значення: modifyTimestamp
+.RE
+.SH "HOST ATTRIBUTES"
+.PP
+.PP
+ldap_host_object_class (рядок)
+.RS 4
+Клас об\(cqєктів запису вузла у LDAP\&.
+.sp
+Типове значення: ipService
+.RE
+.PP
+ldap_host_name (рядок)
+.RS 4
+Атрибут LDAP, що відповідає назві вузла\&.
+.sp
+Типове значення: cn
+.RE
+.PP
+ldap_host_fqdn (рядок)
+.RS 4
+Атрибут LDAP, що відповідає повній назві вузла\&.
+.sp
+Типове значення: fqdn
+.RE
+.PP
+ldap_host_serverhostname (рядок)
+.RS 4
+Атрибут LDAP, що відповідає назві вузла\&.
+.sp
+Типове значення: serverHostname
+.RE
+.PP
+ldap_host_member_of (рядок)
+.RS 4
+Атрибут LDAP зі списком груп, у яких бере участь вузол\&.
+.sp
+Типове значення: memberOf
+.RE
+.PP
+ldap_host_ssh_public_key (рядок)
+.RS 4
+Атрибут LDAP, який містить відкриті ключі SSH вузла\&.
+.sp
+Типове значення: sshPublicKey
+.RE
+.PP
+ldap_host_uuid (рядок)
+.RS 4
+Атрибут LDAP, що містить UUID/GUID об\(cqєкта вузла LDAP\&.
+.sp
+Типове значення: not set
+.RE
+.SH "SERVICE ATTRIBUTES"
+.PP
+.PP
+ldap_service_object_class (рядок)
+.RS 4
+Клас об\(cqєктів запису служби у LDAP\&.
+.sp
+Типове значення: ipService
+.RE
+.PP
+ldap_service_name (рядок)
+.RS 4
+Атрибут LDAP, що містить назву атрибутів служби та замінників цих атрибутів\&.
+.sp
+Типове значення: cn
+.RE
+.PP
+ldap_service_port (рядок)
+.RS 4
+Атрибут LDAP, що містить номер порту, яким керує ця служба\&.
+.sp
+Типове значення: ipServicePort
+.RE
+.PP
+ldap_service_proto (рядок)
+.RS 4
+Атрибут LDAP, що містить протоколи, за яким може працювати ця служба\&.
+.sp
+Типове значення: ipServiceProtocol
+.RE
+.SH "SUDO ATTRIBUTES"
+.PP
+.PP
+ldap_sudorule_object_class (рядок)
+.RS 4
+Клас об\(cqєктів запису правила sudo у LDAP\&.
+.sp
+Типове значення: sudoRole
+.RE
+.PP
+ldap_sudorule_name (рядок)
+.RS 4
+Атрибут LDAP, що відповідає назві правила sudo\&.
+.sp
+Типове значення: cn
+.RE
+.PP
+ldap_sudorule_command (рядок)
+.RS 4
+Атрибут LDAP, що відповідає назві команди\&.
+.sp
+Типове значення: sudoCommand
+.RE
+.PP
+ldap_sudorule_host (рядок)
+.RS 4
+Атрибут LDAP, який відповідає назві вузла (або IP\-адресі вузла, IP\-мережі вузла, мережевій групі вузла)
+.sp
+Типове значення: sudoHost
+.RE
+.PP
+ldap_sudorule_user (рядок)
+.RS 4
+Атрибут LDAP, що відповідає назві імені користувача (або UID, назві групи або назві мережевої групи користувача)
+.sp
+Типове значення: sudoUser
+.RE
+.PP
+ldap_sudorule_option (рядок)
+.RS 4
+Атрибут LDAP, що відповідає параметрам sudo\&.
+.sp
+Типове значення: sudoOption
+.RE
+.PP
+ldap_sudorule_runasuser (рядок)
+.RS 4
+Атрибут LDAP, що відповідає користувачеві, від імені якого можна виконувати команди\&.
+.sp
+Типове значення: sudoRunAsUser
+.RE
+.PP
+ldap_sudorule_runasgroup (рядок)
+.RS 4
+Атрибут LDAP, що відповідає назві групи або GID, від імені якої можна виконувати команди\&.
+.sp
+Типове значення: sudoRunAsGroup
+.RE
+.PP
+ldap_sudorule_notbefore (рядок)
+.RS 4
+Атрибут LDAP, що відповідає даті і часу набуття чинності правилом sudo\&.
+.sp
+Типове значення: sudoNotBefore
+.RE
+.PP
+ldap_sudorule_notafter (рядок)
+.RS 4
+Атрибут LDAP, що відповідає даті і часу втрати чинності правилом sudo\&.
+.sp
+Типове значення: sudoNotAfter
+.RE
+.PP
+ldap_sudorule_order (рядок)
+.RS 4
+Атрибут LDAP, що відповідає порядковому номеру правила\&.
+.sp
+Типове значення: sudoOrder
+.RE
+.SH "AUTOFS ATTRIBUTES"
+.PP
+.PP
+ldap_autofs_map_object_class (рядок)
+.RS 4
+Клас об\(cqєктів запису карти автоматичного монтування у LDAP\&.
+.sp
+Типове значення: nisMap (rfc2307, autofs_provider=ad), у інших випадках automountMap
+.RE
+.PP
+ldap_autofs_map_name (рядок)
+.RS 4
+Назва запису карти автоматичного монтування у LDAP\&.
+.sp
+Типове значення: nisMapName (rfc2307, autofs_provider=ad), у інших випадках automountMapName
+.RE
+.PP
+ldap_autofs_entry_object_class (рядок)
+.RS 4
+Клас об\*(Aqєктів автоматичного монтування LDAP\&. Цей запис зазвичай відповідає точні монтування\&.
+.sp
+Типове значення: nisObject (rfc2307, autofs_provider=ad), у інших випадках automount
+.RE
+.PP
+ldap_autofs_entry_key (рядок)
+.RS 4
+Ключ запису автоматичного монтування LDAP\&. Цей запис зазвичай відповідає точні монтування\&.
+.sp
+Типове значення: cn (rfc2307, autofs_provider=ad), у інших випадках automountKey
+.RE
+.PP
+ldap_autofs_entry_value (рядок)
+.RS 4
+Ключ запису автоматичного монтування LDAP\&. Цей запис зазвичай відповідає точні монтування\&.
+.sp
+Типове значення: nisMapEntry (rfc2307, autofs_provider=ad), у інших випадках automountInformation
+.RE
+.SH "ТАКОЖ ПЕРЕГЛЯНЬТЕ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBОсновна гілка розробки SSSD \(em
+https://pagure\&.io/SSSD/sssd/\fR

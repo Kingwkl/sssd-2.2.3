@@ -1,0 +1,143 @@
+'\" t
+.\"     Title: sss_useradd
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Pàgines del manual de l'SSSD
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS_USERADD" "8" "12/09/2020" "SSSD" "Pàgines del manual de l'SSSD"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss_useradd \- crea un nou usuari
+.SH "SYNOPSIS"
+.HP \w'\fBsss_useradd\fR\ 'u
+\fBsss_useradd\fR [\fIOPCIONS\fR] \fIUSUARI\fR
+.SH "DESCRIPCIÓ"
+.PP
+\fBsss_useradd\fR
+crea un nou compte d\*(Aqusuari amb els valors que s\*(Aqespecifiquen en la línia d\*(Aqordres més els valors per defecte del sistema\&.
+.SH "OPCIONS"
+.PP
+\fB\-u\fR,\fB\-\-uid\fR \fIUID\fR
+.RS 4
+Estableix l\*(AqUID de l\*(Aqusuari al valor de l\*(Aq\fIUID\fR\&. Si no se\*(Aqn proporciona cap, es tria automàticament\&.
+.RE
+.PP
+\fB\-c\fR,\fB\-\-gecos\fR \fICOMMENTARI\fR
+.RS 4
+Qualsevol cadena de text amb la descripció de l\*(Aqusuari\&. Sovint s\*(Aqutilitza com a camp per al nom complet de l\*(Aqusuari\&.
+.RE
+.PP
+\fB\-h\fR,\fB\-\-home\fR \fIDIRECTORI_INICIAL\fR
+.RS 4
+El directori inicial del compte de l\*(Aqusuari\&. Per defecte s\*(Aqafegeix l\*(Aq\fIUSUARI\fR
+a
+/home
+i s\*(Aqutilitza aquest com el directori inicial\&. La base que s\*(Aqafegeix abans de l\*(Aq\fIUSUARI\fR
+es pot personalitzar amb l\*(Aqajust
+\(lquser_defaults/baseDirectory\(rq
+a l\*(Aqsssd\&.conf\&.
+.RE
+.PP
+\fB\-s\fR,\fB\-\-shell\fR \fISHELL\fR
+.RS 4
+El shell d\*(Aqinici de sessió de l\*(Aqusuari\&. Per defecte és
+/bin/bash\&. Es pot canviar el valor per defecte amb l\*(Aqajust
+\(lquser_defaults/defaultShell\(rq
+de l\*(Aqsssd\&.conf\&.
+.RE
+.PP
+\fB\-G\fR,\fB\-\-groups\fR \fIGRUPS\fR
+.RS 4
+Una llista dels grups existents que aquest usuari també n\*(Aqés membre\&.
+.RE
+.PP
+\fB\-m\fR,\fB\-\-create\-home\fR
+.RS 4
+Crea el directori inicial de l\*(Aqusuari si no existeix\&. Al directori inicial es copiaran els fitxers i els directoris continguts al directori esquemàtic (que es pot definir amb l\*(Aqopció \-k o al fitxer de configuració)\&.
+.RE
+.PP
+\fB\-M\fR,\fB\-\-no\-create\-home\fR
+.RS 4
+No crea el directori inicial de l\*(Aqusuari\&. Substitueix els ajusts de la configuració\&.
+.RE
+.PP
+\fB\-k\fR,\fB\-\-skel\fR \fIDIRECTORI_ESQUEMÀTIC\fR
+.RS 4
+El directori esquemàtic que conté els fitxers i els directoris per copiar al directori inicial de l\*(Aqusuari, quan es crea el directori inicial amb
+\fBsss_useradd\fR\&.
+.sp
+No es copiaran els fitxers especials (dispositius de blocs, dispositius de caràcters, canonades amb noms i sòcols d\*(AqUNIX)\&.
+.sp
+Aquesta opció tan sols és vàlida si s\*(Aqespecifica l\*(Aqopció
+\fB\-m\fR
+(o
+\fB\-\-create\-home\fR), o bé la creació dels directoris inicials està establerta a TRUE a la configuració\&.
+.RE
+.PP
+\fB\-Z\fR,\fB\-\-selinux\-user\fR \fISELINUX_USER\fR
+.RS 4
+L\*(Aqusuari de SELinux per a l\*(Aqinici de sessió de l\*(Aqusuari\&. Si no s\*(Aqespecifica, s\*(Aqutilitzarà el predeterminat del sistema\&.
+.RE
+.PP
+\fB\-?\fR,\fB\-\-help\fR
+.RS 4
+Mostra el missatge d\*(Aqajuda i surt\&.
+.RE
+.SH "EL DOMINI LOCAL"
+.PP
+Per a un funcionament correcte, s\*(Aqha de crear un domini amb
+\(lqid_provider=local\(rq
+i l\*(AqSSSD ha d\*(Aqestar en execució\&.
+.PP
+L\*(Aqadministrador pot ser que vulgui utilitzar els usuaris locals de l\*(AqSSSD en lloc dels usuaris tradicionals d\*(AqUNIX en els casos en què es requereixi la imbricació dels grups (vegeu
+\fBsss_groupadd\fR(8))\&. Els usuaris locals també són útils per provar i desplegar l\*(AqSSSD sense haver de desplegar tot un servidor remot\&. Les eines
+\fBsss_user*\fR
+i
+\fBsss_group*\fR
+utilitzen l\*(Aqemmagatzematge LDB local per emmagatzemar els usuaris i els grups\&.
+.SH "VEGEU TAMBÉ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

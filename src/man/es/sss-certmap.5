@@ -1,0 +1,518 @@
+'\" t
+.\"     Title: sss-certmap
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Formatos de archivo y convenciones
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSS\-CERTMAP" "5" "12/09/2020" "SSSD" "Formatos de archivo y convenci"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sss-certmap \- Reglas de Correspondencia y Asignación de Certificados SSSD
+.SH "DESCRIPCION"
+.PP
+La página de manual describe las reglas que pueden ser usadas por SSSD y otros componentes para corresponder con los certificados X\&.509 y asignarlos a cuentas\&.
+.PP
+Cada regla tiene cuatro componentes, una
+\(lqpriority\(rq, una
+\(lqmatching rule\(rq, una
+\(lqmapping rule\(rq
+y una
+\(lqdomain list\(rq\&. Todos los componentes son opcionales\&. Si no hay
+\(lqpriority\(rq
+se añadirá la regla con el nivel de prioridad más bajo\&. La
+\(lqmatching rule\(rq
+predeterminada hará coincidir los certificados con la clave de utilización digitalSignature y la clave de utilización extendida clientAuth\&. Si
+\(lqmapping rule\(rq
+está vacía los certificados serán buscados en el atributo userCertificate como DER codificado en binario\&. Si no se dan dominios solo se buscará en el dominio local\&.
+.SH "COMPONENTES DE LA REGLA"
+.SS "PRIORIDAD"
+.PP
+Las reglas son procesados por prioridad sabiendo que el número \*(Aq0\*(Aq (cero) indica la prioridad más alta\&. Más alto en número más baja la prioridad\&. Un valor desaparecido indica la prioridad más baja\&. Las reglas de procesamiento se para cuando una regla coincidente y no se comprueban más reglas\&.
+.PP
+Internamente la prioridad se trata como un entero no firmado de 32 bitr, la utilización de in valor de prioridad superior a 4294967295 causará un error\&.
+.SS "REGLA DE COINCIDENCIA"
+.PP
+La regla de coincidencia se usa para seleccionar un certificado al que sería aplicado la regla de asignación\&. Usa un sistema similar al usado por la opción
+\(lqpkinit_cert_match\(rq
+de MIT Kerberos\&. Consiste en una clave encerrada entre \*(Aq<\*(Aq y \*(Aq>\*(Aq ue identifica una cierta parte del certificado y un patrón para que la regla coincida\&. Se pueden unir varios pares de palabras claves con \*(Aq&&\*(Aq (y) o \*(Aq||\*(Aq (o)\&.
+.PP
+Las opciones disponibles son:
+.PP
+<SUBJECT>regular\-expression
+.RS 4
+Con esto una parte o todo el nombre de sujeto del certificado pueden coincidir\&. Para la coincidencia se usa la sintaxis Expresión Regular Extendida POSIX, vea detalles en regex(7)\&.
+.sp
+Para coincidir el nombre sujeto almacenado en el certificado en codificación DER ASN\&.1 se convierte en una cadena de acuerdo a RFC 4514\&. Esto significa que el componente de nombre más específico es el primero\&. Por favor advierta que no todos los posibles nombres de atributo están cubiertos por RFC 4514\&. Los nombres incluidos son \*(AqCN\*(Aq, \*(AqL\*(Aq, \*(AqST\*(Aq, \*(AqO\*(Aq, \*(AqOU\*(Aq, \*(AqC\*(Aq, \*(AqSTREET\*(Aq, \*(AqDC\*(Aq y \*(AqUID\*(Aq\&. Otros nombres de atributo pueden ser mostrados de forma diferente sobre plataformas distintas y por herramientas diferentes\&. Para evitar la confusión es mejor que no se usen estos nombres de atributos o se cubran por una expresión regular a medida\&.
+.sp
+Ejemplo: <SUBJECT>\&.*,DC=MY,DC=DOMAIN
+.RE
+.PP
+<ISSUER>regular\-expression
+.RS 4
+Con esto, se puede hacer coincidir una parte o el nombre completo del emisor del certificado\&. Todos los comentarios para <SUBJECT> se le aplican también\&.
+.sp
+Ejemplo: <ISSUER>^CN=My\-CA,DC=MY,DC=DOMAIN$
+.RE
+.PP
+<KU>key\-usage
+.RS 4
+Esta opción se puede usar para especificar que valores de uso clave debe tener el certificado\&. Se pueden usar los siguientes valores en una lista separados por comas:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+digitalSignature
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+nonRepudiation
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+keyEncipherment
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+dataEncipherment
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+keyAgreement
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+keyCertSign
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+cRLSign
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+encipherOnly
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+decipherOnly
+.RE
+.sp
+Un valor numérico en el rango de un entero sin signo de 32 bit se puede usar también para cubrir casos de uso especiales\&.
+.sp
+Ejemplo: <KU>digitalSignature,keyEncipherment
+.RE
+.PP
+<EKU>extended\-key\-usage
+.RS 4
+Esta opción se puede usar para especificar que uso de clave extendida puede tener el certificado\&. El siguiente valor se puede usar en una lista separada por comas:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+serverAuth
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+clientAuth
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+codeSigning
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+emailProtection
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+timeStamping
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+OCSPSigning
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+KPClientAuth
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+pkinit
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+msScLogin
+.RE
+.sp
+La utilización de claves extendidas que no están listadas arriba pueden ser especificadas con sus OID en anotación decimal con puntos\&.
+.sp
+Ejemplo: <EKU>clientAuth,1\&.3\&.6\&.1\&.5\&.2\&.3\&.4
+.RE
+.PP
+<SAN>regular\-expression
+.RS 4
+Para ser compatible con la utilización de MIT Kerberos esta opción coincidirá con los principios de Kerberos en PKINIT o AD NT Principal SAN como hace <SAN:Principal>\&.
+.sp
+Ejemplo: <SAN>\&.*@MY\e\&.REALM
+.RE
+.PP
+<SAN:Principal>regular\-expression
+.RS 4
+Haga coincidir los principios principales de Kerberos en la SAN principal de PKINIT o AD NT\&.
+.sp
+Example: <SAN:Principal>\&.*@MY\e\&.REALM
+.RE
+.PP
+<SAN:ntPrincipalName>regular\-expression
+.RS 4
+Haga coincidir los principales de Kerberos de la SAN principal de AD NT\&.
+.sp
+Example: <SAN:ntPrincipalName>\&.*@MY\&.AD\&.REALM
+.RE
+.PP
+<SAN:pkinit>regular\-expression
+.RS 4
+Haga coincidir los principales de Kerberos con los PKINIT SAN\&.
+.sp
+Example: <SAN:ntPrincipalName>\&.*@MY\e\&.PKINIT\e\&.REALM
+.RE
+.PP
+<SAN:dotted\-decimal\-oid>regular\-expression
+.RS 4
+Toma el valor del componente SAN otherName dado por el de OID en anotación decimal con puntos, lo interpreta como una cadena e intenta hacerlo coincidir con la expresión regular\&.
+.sp
+Example: <SAN:1\&.2\&.3\&.4>test
+.RE
+.PP
+<SAN:otherName>base64\-string
+.RS 4
+Haga una coincidencia binaria con el blob codificado en base64 con todos los demás componentes SAN otheName\&. Con esta opción es posible la coincidencia con los componentes otherName personales con codificación especial que podrían no ser tratados como cadenas\&.
+.sp
+Example: <SAN:otherName>MTIz
+.RE
+.PP
+<SAN:rfc822Name>regular\-expression
+.RS 4
+Haga coincidir el valor del rfc822Name SAN\&.
+.sp
+Example: <SAN:rfc822Name>\&.*@email\e\&.domain
+.RE
+.PP
+<SAN:dNSName>regular\-expression
+.RS 4
+Haga coincidir el valor del dNSName SAN\&.
+.sp
+Example: <SAN:dNSName>\&.*\e\&.my\e\&.dns\e\&.domain
+.RE
+.PP
+<SAN:x400Address>base64\-string
+.RS 4
+Binario coincide con el valor del x400Address SAN\&.
+.sp
+Example: <SAN:x400Address>MTIz
+.RE
+.PP
+<SAN:directoryName>regular\-expression
+.RS 4
+Haga coincidir el valor del directoryName SAN\&. Los mismos comentarios dados para <ISSUER> and <SUBJECT> se aplican aquí también\&.
+.sp
+Example: <SAN:directoryName>\&.*,DC=com
+.RE
+.PP
+<SAN:ediPartyName>base64\-string
+.RS 4
+Hacer coincidir binario el valor del ediPartyName SAN\&.
+.sp
+Ejemplo: <SAN:ediPartyName>MTIz
+.RE
+.PP
+<SAN:uniformResourceIdentifier>regular\-expression
+.RS 4
+Hacer coincidir el valor del uniformResourceIdentifier SAN\&.
+.sp
+Ejemplo: <SAN:uniformResourceIdentifier>URN:\&.*
+.RE
+.PP
+<SAN:iPAddress>regular\-expression
+.RS 4
+Haga coincidir el valor del iPAddress SAN\&.
+.sp
+Ejemplo: <SAN:iPAddress>192\e\&.168\e\&.\&.*
+.RE
+.PP
+<SAN:registeredID>regular\-expression
+.RS 4
+Haga coincidir el valor de registeredID SAN como cadena decimal con puntos\&.
+.sp
+Ejemplo: <SAN:registeredID>1\e\&.2\e\&.3\e\&.\&.*
+.RE
+.SS "REGLA DE MAPEO"
+.PP
+La regla de mapeo se usa para asociar un certificado con una o mas cuentas\&. Una Smartcard con el certificado y la clave privada correspondiente puede ser usada entonces para autenticar una de estas cuentas\&.
+.PP
+Actualmente SSSD básicamente solo soporta LDAP para buscar información de usuario (la excepción es el proveedor proxy que no tiene relevancia aqui)\&. Por esto la regla de mapeo se basa en una búsqueda por filtro de sintaxis LDAP con plantillas para añadir el contenido del certificado al filtro\&. Se espra que ese filtro solo contendrá los datos específicos para el mapeo y que la persona que llama lo incrustará en otro filtro para hacer la búsqueda real\&. Debido a esto la cadena de filtro de empezar y terminar con \*(Aq(\*(Aqand\*(Aq)\*(Aq respectivamente\&.
+.PP
+En general se recomienda usar atributos del certificado y añadirlos a atributos especiales al objeto usuario LDAP\&. E\&.g\&. el atributo \*(AqaltSecurityIdentities\*(Aq en AD o el atributo \*(AqipaCertMapData\*(Aq para IPA se pueden usar\&.
+.PP
+Debería preferible leer datos específicos del usuario del certificado, e\&.g\&. una dirección de correo electrónico y buscarla en el servidor LDAP\&. La razón es que los datos específicos del usuario en el LDAP podrían cambiar por diversas razones y romper el mapeo\&. Por otro lado, sería difícil romper el mapeo a propósito para un usuario específico\&.
+.PP
+La plantilla para añadir datos de certificado al filtro de búsqueda están basados sobre cadenas formateadas en estilo Python\&. Consiste en una palabra clave entre llaves con un subcomponente especificador opcional separado por un \*(Aq\&.\*(Aq o una opción opcional de conversión/formateo separada por un \*(Aq!\*(Aq\&. Los valores permitidos son:
+.PP
+{issuer_dn[!((ad|ad_x500)|ad_ldap|nss_x500|(nss|nss_ldap))]}
+.RS 4
+Esta plantilla agregará el DN del emisor completo convertido en una plantilla de acuerdo con el RFC 4514\&. Si se ordena X\&.500 (más especifico RDN viene el último) se debería usar un opción con el prefijo \*(Aq_x500\*(Aq\&.
+.sp
+Las opciones de conversión que empiezan con \*(Aqad_\*(Aq usarán nombres de atributos como los usados por AD, p\&. ej\&. \*(AqS\*(Aq en lugar de \*(AqST\*(Aq\&.
+.sp
+Las opciones de conversión que empiezan por \*(Aqnss_\*(Aq usarán nombres de atributos como los usados por NSS\&.
+.sp
+La opción de conversión predeterminada es \*(Aqnss\*(Aq, i\&.e\&. los nombres de atributo de acuerdo con la ordenación NSS y LDAP/RFC 4514\&.
+.sp
+Ejemplo: (ipacertmapdata=X509:<I>{issuer_dn!ad}<S>{subject_dn!ad})
+.RE
+.PP
+{subject_dn[!((ad|ad_x500)|ad_ldap|nss_x500|(nss|nss_ldap))]}
+.RS 4
+Esta plantilla añadirá el sujeto completo DN convertido en una cadena de acuerdo a RFC 4514\&. Si la ordenación X\&.500 (más específico RDN viene el último) se usaría una opción con el prefijo \*(Aq_x500\*(Aq\&.
+.sp
+Las opciones de conversión que empiezan con \*(Aqad_\*(Aq usarán nombres de atributos como los usados por AD, p\&. ej\&. \*(AqS\*(Aq en lugar de \*(AqST\*(Aq\&.
+.sp
+Las opciones de conversión que empiezan por \*(Aqnss_\*(Aq usarán nombres de atributos como los usados por NSS\&.
+.sp
+La opción de conversión predeterminada es \*(Aqnss\*(Aq, i\&.e\&. los nombres de atributo de acuerdo con la ordenación NSS y LDAP/RFC 4514\&.
+.sp
+Ejemplo: (ipacertmapdata=X509:<I>{issuer_dn!nss_x500}<S>{subject_dn!nss_x500})
+.RE
+.PP
+{cert[!(bin|base64)]}
+.RS 4
+Esta plantilla añadirá el certificado completo codificado DER como una cadena al filtro de búsqueda\&. Dependiendo de la opción de conversión el certificado binario se convierte en una secuencia hexadecimal escapada \*(Aq\exx\*(Aq o base64\&. La secuencia hexadecimal escapada es la predeterminada y puede, por ejemplo, ser usada con el atributo LDAP \*(AquserCertificate;binary\*(Aq\&.
+.sp
+Ejemplo: (userCertificate;binary={cert!bin})
+.RE
+.PP
+{subject_principal[\&.short_name]}
+.RS 4
+Esta plantilla añadirá el principal Kerberos bien desde el SAN usado por pkinit o del usado por AD\&. El componente \*(Aqshort_name\*(Aq representa la primera parte del principal antes del signo \*(Aq@\*(Aq\&.
+.sp
+Ejemplo: (|(userPrincipal={subject_principal})(samAccountName={subject_principal\&.short_name}))
+.RE
+.PP
+{subject_pkinit_principal[\&.short_name]}
+.RS 4
+Esta plantilla añadirá el principal Kerberos que es dado por el SAN usado por pkinit\&. El componente \*(Aqshort_name\*(Aq representa la primera parte del principal antes del signo \*(Aq@\*(Aq\&.
+.sp
+Ejemplo: (|(userPrincipal={subject_pkinit_principal})(uid={subject_pkinit_principal\&.short_name}))
+.RE
+.PP
+{subject_nt_principal[\&.short_name]}
+.RS 4
+Esta plantilla añadirá el principal Kerberos que es dado por el SAN usado por AD\&. El componente \*(Aqshort_name\*(Aq represebta la primera parte del principal antes del signo \*(Aq@\*(Aq\&.
+.sp
+Ejemplo: (|(userPrincipal={subject_principal})(samAccountName={subject_principal\&.short_name}))
+.RE
+.PP
+{subject_rfc822_name[\&.short_name]}
+.RS 4
+Esta plantilla añadirá la cadena que está almacenada en el componente rfc822Name del SAN, normalmente una dirección de correo electrónico\&. El componente \*(Aqshort_name\*(Aq representa la primera parte de la dirección antes del signo \*(Aq@\*(Aq\&.
+.sp
+Ejemplo: (|(mail={subject_rfc822_name})(uid={subject_rfc822_name\&.short_name}))
+.RE
+.PP
+{subject_dns_name[\&.short_name]}
+.RS 4
+Esta plantilla añadirá la cadena que está almacenada en el componente dNSName del SAN, normalmente un nombre de host totalmente cualificado\&. El componente \*(Aqshort_name\*(Aq representa la primera parte del nombre antes del primer signo \*(Aq\&.\*(Aq\&.
+.sp
+Ejemplo: (|(fqdn={subject_dns_name})(host={subject_dns_name\&.short_name}))
+.RE
+.PP
+{subject_uri}
+.RS 4
+Esta plantilla añadirá la cadena que está almacenada en el componente uniformResourceIdentifier del SAN\&.
+.sp
+Ejemplo: (uri={subject_uri})
+.RE
+.PP
+{subject_ip_address}
+.RS 4
+Esta plantilla añadirá la cadena que está almacenada en el componente iPAddress del SAN\&.
+.sp
+Ejemplo: (ip={subject_ip_address})
+.RE
+.PP
+{subject_x400_address}
+.RS 4
+Esta plantilla añadirá el valor que está almacenado en el componente x400Address del SAN como secuencia hexadecimal escapada\&.
+.sp
+Ejemplo: (attr:binary={subject_x400_address})
+.RE
+.PP
+{subject_directory_name[!((ad|ad_x500)|ad_ldap|nss_x500|(nss|nss_ldap))]}
+.RS 4
+Esta plantilla añadirá la cadena DN del valor que está almacenado en el componente directoryName del SAN\&.
+.sp
+Ejemplo: (orig_dn={subject_directory_name})
+.RE
+.PP
+{subject_ediparty_name}
+.RS 4
+Esta plantilla añadirá el valor que está almacenado en el componente ediPartyName del SAN como secuencia hexadecimal escapada\&.
+.sp
+Ejemplo: (attr:binary={subject_ediparty_name})
+.RE
+.PP
+{subject_registered_id}
+.RS 4
+Esta plantilla añadirá la OID que está almacenada en el componente registeredID del SAN como una cadena decimal con puntos\&.\&.
+.sp
+Ejemplo: (oid={subject_registered_id})
+.RE
+.SS "LISTA DE DOMINIO"
+.PP
+Si la lista de dominio no está vacía los usuarios mapeados a un certificado dado no serán buscados solo en el dominio local sino también en los dominios listados siempre que sean conocidos por SSSD\&. Los dominios no conocidos por SSSD serán ignorados\&.
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

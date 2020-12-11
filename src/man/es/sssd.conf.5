@@ -1,0 +1,2466 @@
+'\" t
+.\"     Title: sssd.conf
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Formatos de archivo y convenciones
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\&.CONF" "5" "12/09/2020" "SSSD" "Formatos de archivo y convenci"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd.conf \- El archivo de configuración de SSSD
+.SH "FORMATO DE ARCHIVO"
+.PP
+El archivo posee una sintaxis de tipo ini consistente de secciones y parámetros\&. Una sección comienza con el nombre de dicha sección colocado entre corchetes, y continua hasta que comienza la próxima sección\&. Este es un ejemplo de una sección con parámetros de valores simples y múltiples:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fI[section]\fR
+\fIkey\fR = \fIvalue\fR
+\fIkey2\fR = \fIvalue2,value3\fR
+            
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Los tipos de datos utilizados son cadenas (no es necesario ingresarlos entre comillas), enteros o booleanos (cuyos valores son
+\(lqTRUE/FALSE\(rq)\&.
+.PP
+Una línea de comentario empieza con una almohadilla (\(lq#\(rq) o un punto y coma (\(lq;\(rq)\&. Los comentarios en línea no están soportados\&.
+.PP
+Todas las secciones pueden tener un parámetro opcional de
+\fIdescripción\fR\&. Su función es solo la de servir como etiqueta a tal sección\&.
+.PP
+sssd\&.conf
+debe ser un archivo regular, cuyo dueño sea el usuario root, y sólo este usuario podrá tener permisos de lectura y escritura sobre él\&.
+.SH "FRAGMENTOS DE CONFIGURACIÓN DESDE EL DIRECTORIO INCLUDE"
+.PP
+El fichero de configuración
+sssd\&.conf
+incluirá fragmenteo de configuración usando el directorio include
+conf\&.d\&. Esta característica está disponible si SSSD fue compilado con libini versión 1\&.3\&.0 o posterior\&.
+.PP
+Cualquier fichero situado en
+conf\&.d
+que termine en
+\(lq\&.conf\(rq
+y no empiece con un punto (\(lq\&.\(rq) será usado junto con
+sssd\&.conf
+para configurar SSSD\&.
+.PP
+Los fragmentos de configuración de
+conf\&.d
+tienen mayor prioridad que los de
+sssd\&.conf
+y anularán
+sssd\&.conf
+cuando ocurran conflictos\&. Si varios fragmentos están presentes en
+conf\&.d
+serán incluidos en orden alfabético (en base a la localización)\&. Los ficheros incluidos más tarde tienen prioridad mas alta\&. Prefijos numéricos (01_snippet\&.conf,
+02_snippet\&.conf
+etc\&.) pueden ayudar a visualizar la prioridad (números mas altos significan prioridad más alta)\&.
+.PP
+Los ficheros fragmentos requieren los mismos propietarios y permisos que
+sssd\&.conf\&. Que son por defecto root:root y 0600\&.
+.SH "OPCIONES GENERALES"
+.PP
+Las siguientes opciones son útiles en más de una de las secciones de configuración\&.
+.SS "Opciones utilizables en todas las secciones"
+.PP
+.PP
+debug_level (entero)
+.RS 4
+SSSD supports two representations for specifying the debug level\&. The simplest is to specify a decimal value from 0\-9, which represents enabling that level and all lower\-level debug messages\&. The more comprehensive option is to specify a hexadecimal bitmask to enable or disable specific levels (such as if you wish to suppress a level)\&.
+.sp
+Please note that each SSSD service logs into its own log file\&. Also please note that enabling
+\(lqdebug_level\(rq
+in the
+\(lq[sssd]\(rq
+section only enables debugging just for the sssd process itself, not for the responder or provider processes\&. The
+\(lqdebug_level\(rq
+parameter should be added to all sections that you wish to produce debug logs from\&.
+.sp
+In addition to changing the log level in the config file using the
+\(lqdebug_level\(rq
+parameter, which is persistent, but requires SSSD restart, it is also possible to change the debug level on the fly using the
+\fBsss_debuglevel\fR(8)
+tool\&.
+.sp
+Niveles de depuración actualmente soportados:
+.sp
+\fI0\fR,
+\fI0x0010\fR: Fatal failures\&. Anything that would prevent SSSD from starting up or causes it to cease running\&.
+.sp
+\fI1\fR,
+\fI0x0020\fR: Critical failures\&. An error that doesn\*(Aqt kill SSSD, but one that indicates that at least one major feature is not going to work properly\&.
+.sp
+\fI2\fR,
+\fI0x0040\fR: Serious failures\&. An error announcing that a particular request or operation has failed\&.
+.sp
+\fI3\fR,
+\fI0x0080\fR: Minor failures\&. These are the errors that would percolate down to cause the operation failure of 2\&.
+.sp
+\fI4\fR,
+\fI0x0100\fR: Configuration settings\&.
+.sp
+\fI5\fR,
+\fI0x0200\fR: Function data\&.
+.sp
+\fI6\fR,
+\fI0x0400\fR: Trace messages for operation functions\&.
+.sp
+\fI7\fR,
+\fI0x1000\fR: Trace messages for internal control functions\&.
+.sp
+\fI8\fR,
+\fI0x2000\fR: Contents of function\-internal variables that may be interesting\&.
+.sp
+\fI9\fR,
+\fI0x4000\fR: Extremely low\-level tracing information\&.
+.sp
+To log required bitmask debug levels, simply add their numbers together as shown in following examples:
+.sp
+\fIEjemplo\fR: Para registrar fallos fatales, críticos y serios y datos de función use 0x0270\&.
+.sp
+\fIExample\fR: Para registrar fallos fatales, ajustes de configuración, datos de función, mensajes de traza para funciones de control interno use 0x1310\&.
+.sp
+\fINote\fR: The bitmask format of debug levels was introduced in 1\&.7\&.0\&.
+.sp
+\fIDefault\fR: 0
+.RE
+.PP
+debug (entero)
+.RS 4
+SSSD 1\&.14 y posteriores también incluyen el alias
+\fIdebug\fR
+para
+\fIdebug_level\fR
+como ua característica de conveniencia\&. Si se usan ambas se usará el valor de
+\fIdebug_level\fR\&.
+.RE
+.PP
+debug_timestamps (bool)
+.RS 4
+Añade una sello de tiempo a los mensajes de depuración\&. Si journald está habilitado para el registro de la depuración SSSD esta opción se ignora\&.
+.sp
+Predeterminado: true
+.RE
+.PP
+debug_microseconds (bool)
+.RS 4
+Añade microsegundos al sello de tiempo en los mensajes de depuración\&. Si journald está habilitado para el registro de la depuración SSSD esta opción se ignora\&.
+.sp
+Predeterminado: false
+.RE
+.SS "Opciones utilizables en las secciones SERVICIO y DOMINIO"
+.PP
+.PP
+timeout (entero)
+.RS 4
+Tiempo de salid en segundos entre pulsaciones para este servicio\&. Se usa para asegurar que el proceso está vivo y capaz de contestar peticiones\&. Advierta que después de tres pulsaciones perdidas el servicio se terminará\&.
+.sp
+Predeterminado: 10
+.RE
+.SH "SECCIONES ESPECIALES"
+.SS "La sección [sssd]"
+.PP
+Trozos individuales de funcionalidad SSSD son suministrados por servicios especiales SSSD que se inician y parar junto a SSSD\&. Los servicios son gestionados por un servicio especial frecuentemente llamado
+\(lqmonitor\(rq\&. La sección
+\(lq[sssd]\(rq
+se usa para configurar el monitor así como algunas otras opciones importantes como la identidad de dominios\&.
+.PP
+\fBParámetros de sección\fR
+.PP
+config_file_version (entero)
+.RS 4
+Indica cuál es la sintaxis del archivo de configuración\&. SSSD 0\&.6\&.0 y posteriores utilizan una versión 2\&.
+.RE
+.PP
+servicios
+.RS 4
+Lista separada por comas de los servicios que se han iniciado cuando el mismo sssd se inició\&.
+.sp
+Servicios soportados: nss, pam
+, sudo
+, autofs
+, ssh
+, pac
+, ifp
+.sp
+.RE
+.PP
+reconnection_retries (entero)
+.RS 4
+Cantidad de intentos de reconexión de los servicios ante una eventual caída de datos del proveedor, o de reiniciarse antes de abandonar
+.sp
+Predeterminado: 3
+.RE
+.PP
+dominios
+.RS 4
+Un dominio es una base de datos que contiene información del usuario\&. SSSD puede usar más dominios a la vez, pero al menos se debe configurar uno o SSSD no arrancará\&. Este parámetros describe la lista de dominios en el orden que usted desea que sean consultados\&. Un nombre de dominio debería solo constar de caracteres ASCII alfanuméricos, guiones, puntos y guiones bajos\&.
+.RE
+.PP
+re_expression (cadena)
+.RS 4
+Expresión regular por defecto que describe como analizar la cadena que contiene el nombre de usuario y el dominio en estos componentes\&.
+.sp
+Cada dominio puede tener una expresión regular individual configurada\&. Para algunos proveedores de ID hay también expresiones regulares por defecto\&. Vea las SECCIONES DOMINIO para mas información sobre estas expresiones regulares\&.
+.RE
+.PP
+full_name_format (cadena)
+.RS 4
+\fBprintf\fR(3)\-formato compatible que describe como componer un nombre de dominio totalmente cualificado y los componentes del nombre de dominio\&.
+.sp
+Son soportadas las siguientes expresiones:
+.PP
+%1$s
+.RS 4
+nombre de usuario
+.RE
+.PP
+%2$s
+.RS 4
+nombre de dominio como se especifica en el fichero de configuración SSSD
+.RE
+.PP
+%3$s
+.RS 4
+nombre plano de dominio\&. Principalmente usado por los dominios Active Directory tanto los configurados directamente como los descubiertos por medio de IPA de confianza\&.
+.RE
+.sp
+Cada dominio puede tener una cadena de formato individual configurar\&. Vea SECCIONES DOMINIO para más información sobre esta opción\&.
+.RE
+.PP
+monitor_resolv_conf (boolean)
+.RS 4
+Controls if SSSD should monitor the state of resolv\&.conf to identify when it needs to update its internal DNS resolver\&.
+.sp
+Predeterminado: true
+.RE
+.PP
+try_inotify (boolean)
+.RS 4
+By default, SSSD will attempt to use inotify to monitor configuration files changes and will fall back to polling every five seconds if inotify cannot be used\&.
+.sp
+Existen algunas pocas situaciones en donde lo preferible es evitar el uso de inotify\&. En estas raras excepciones, la opción debería ser definida en \*(Aqfalse\*(Aq
+.sp
+Predeterminado: \*(Aqtrue\*(Aq en plataformas donde inotify tenga soporte\&. \*(AqFalse\*(Aq en el resto de las plataformas\&.
+.sp
+Nota: esta opción no tendrá efecto en plataformas donde inotify no se encuenytre disponible\&. En estas plataformas, la consulta (polling) será utilizada siempre\&.
+.RE
+.PP
+krb5_rcache_dir (cadena)
+.RS 4
+Directorio en el sistema de archivos donde SSSD debería guardar fichero de reproducción de cache de Kerberos\&.
+.sp
+Esta opción acepta un valor especial __LIBKRB5_DEFAULTS__ que instruirá a SSSD para dejar a libkrb5 decidir la localización apropiada del escondrijo de respuesta\&.
+.sp
+Por defecto: Distribución específica y especificado en la acumulación de tiempo\&. (si no se configura __LIBKRB5_DEFAULTS__)
+.RE
+.PP
+usuario (cadena)
+.RS 4
+El usuario debe dejar los privilegios donde corresponda para evitar que se ejecute como usuario root\&.
+.sp
+Por defecto: no ajustado, los procesos correrán como root
+.RE
+.PP
+default_domain_suffix (cadena)
+.RS 4
+Esta cadena será usada como nombre de dominio por defecto para todos los nombre sin un componente de nombre de dominio\&. El principal caso de uso es en entornos donde el dominio principal está dirigido a gestionar las políticas de host y todos los usuarios están localizados en un dominio confiable\&. La opción permite a esos usuarios acceder sólo con su nombre de usuario sin dar también un nombre de dominio\&.
+.sp
+Please note that if this option is set all users from the primary domain have to use their fully qualified name, e\&.g\&. user@domain\&.name, to log in\&. Setting this option changes default of use_fully_qualified_names to True\&. It is not allowed to use this option together with use_fully_qualified_names set to False\&. One exception from this rule are domains with
+\(lqid_provider=files\(rq
+that always try to match the behaviour of nss_files and therefore their output is not qualified even when the default_domain_suffix option is used\&.
+.sp
+Predeterminado: no definido
+.RE
+.PP
+override_space (cadena)
+.RS 4
+Este parámetro reemplazará los espacios (barra espaciadora) con los caracteres dados para los nombres de usuario y grupos\&. e\&.g\&. (_)\&. Nombre de usuario "john doe" será "john_doe" Esta característica se ha añadido para ayudar a la compatibilidad los scripts de shell que tienen dificultades con el manejo de espacios, debido al campo separador predeterminado en el shell\&.
+.sp
+Por favor advierta que es un error de configuración usar un carácter de reemplazo que pueda ser usado en los nombres de grupo o usuario\&. Si un nombre contiene el carácter de reemplazo SSSD intentará devolver un nombre no modificado pero en general el resultado de la búsqueda es indefinido\&.
+.sp
+Por defecto: no ajustado (los espacios no serán reemplazados)
+.RE
+.PP
+certificate_verification (cadena)
+.RS 4
+Con este parámetros la verificación del certificado se puede sintonizar con una lista de opciones separadas por comas\&. Las opciones soportadas son:
+.PP
+no_ocsp
+.RS 4
+Deshabilita la comprobación de Protocolo de Estado de Certificado en Línea (OCSP)\&. Esto puede ser necesario si los servidores OCSP definidos en el certificado no son alcanzables por el cliente\&.
+.RE
+.PP
+soft_ocsp
+.RS 4
+(NSS Version) This option is ignored\&.
+.sp
+(OpenSSL Version) If a connection cannot be established to an OCSP responder the OCSP check is skipped\&. This option should be used to allow authentication when the system is offline and the OCSP responder cannot be reached\&.
+.RE
+.PP
+ocsp_dgst
+.RS 4
+Digest (hash) function used to create the certificate ID for the OCSP request\&. Allowed values are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sha1
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sha256
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sha384
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sha512
+.RE
+.sp
+Default: sha256
+.sp
+(NSS Version) This option is ignored, because NSS uses sha1 unconditionally\&.
+.RE
+.PP
+no_verification
+.RS 4
+Deshabilita la verificación completamente\&. Esto opción solo se debería usar para pruebas\&.
+.RE
+.PP
+ocsp_default_responder=URL
+.RS 4
+Fija el contestador OCSP por defecto que será usando en lugar del mencionado en el certificado\&. La URL debe ser reemplazada con la URL del contestador OCSP por defecto e\&.g\&. http://example\&.com:80/ocsp\&.
+.sp
+(Versión NSS) Esta opción debe ser usada junto con ocsp_default_responder_signing_cert\&.
+.RE
+.PP
+ocsp_default_responder_signing_cert=NAME
+.RS 4
+(NSS Version) El apodo del certificado en el que confiar (esperado) para firmar las respuestas OCSP\&. El certificado con el apodo dado debe estar disponible en la base de datos NSS del sistema\&.
+.sp
+Esta opción debe ser usada junto con ocsp_default_responder\&.
+.sp
+(Versión OpenSSL) Esta opción se ignora actualmente\&. Todos los certificados necesarios deben estar disponibles en el fichero PEM indicado por pam_cert_db_path\&.
+.RE
+.PP
+crl_file=/PATH/TO/CRL/FILE
+.RS 4
+(Versión NSS) Esta opción se ignora, por favor vea en
+\fBcrlutil\fR(1)
+como importar una Lista de Revocación de Certificado (CRL) en una base de datos NSS\&.
+.sp
+(Versión OpenSSL) Usa la Lista de Revocación de Certificado (CRL) del fichero dado durante la verificación del certificado\&. La CRL se debe dar en formato PEM, vea detalles en
+\fBcrl\fR(1ssl)\&.
+.RE
+.PP
+soft_crl
+.RS 4
+(NSS Version) This option is ignored\&.
+.sp
+(OpenSSL Version) If a Certificate Revocation List (CRL) is expired ignore the CRL checks for the related certificates\&. This option should be used to allow authentication when the system is offline and the CRL cannot be renewed\&.
+.RE
+.sp
+Esta página de manual fue generada para la versión NSS\&.
+.sp
+Se informa de las opciones desconocidas pero son ignoradas\&.
+.sp
+Por defecto: no fijado, i\&.e\&. no restringe la verificación de certificado
+.RE
+.PP
+disable_netlink (boolean)
+.RS 4
+SSSD se engancha en el interfaz netlink para monitorizar los cambios a rutas, direcciones, enlaces y disparar ciertas acciones\&.
+.sp
+Los cambios en el estado de SSSD causados por eventos en enlace de red pueden ser no deseados y pueden ser deshabilitados ajustando esta opción a \*(Aqtrue\*(Aq
+.sp
+Predeterminado: false (se detectan los cambio de enlace de red)
+.RE
+.PP
+enable_files_domain (boolean)
+.RS 4
+Cuando se habilita esta opción, SSSD antepone in dominio implícito con
+\(lqid_provider=files\(rq
+antes de cualquier dominio explícito configurado\&.
+.sp
+Predeterminado: false
+.RE
+.PP
+domain_resolution_order
+.RS 4
+Lista separada por comas de dominios y subdominios que representa el orden de búsqueda que se seguirá\&. La lista no tiene que incluir todos los dominios posibles ya que los dominios que falten se buscarán en el orden que se presentan en la opción de configuración
+\(lqdomains\(rq\&. Los subdominios que no están listados como parte de
+\(lqlookup_order\(rq
+serán buscados en un orden aleatorio por cada dominio padre\&.
+.sp
+Por favor, advierta que cuando se fija esta opción el formato de salida de todos los comandos es siempre plenamente cualificado aunque se usen los nombre cortos para la entrada, para todos los usuarios excepto los gestionados por el proveedro de ficheros\&. En caso de que el administrador desee la salida no plenamente cualificada se debe usar los opción full_name_format como se muestra abajo:
+\(lqfull_name_format=%1$s\(rq
+Sin embargo, tenga en cuenta que durante el acceso, las aplicaciones de acceso con frecuencia canonicalizan el nombre de usuario llamando a
+\fBgetpwnam\fR(3)
+que, si se devuelve un nombre corto para una entrada cualificada (mientras que intenta alcanzar un usuario que existe en múltiples dominios) debe re\-enturar el intento de acceso hacia el dominio que usa nombres cortos, haciendo este rodeo totalmente no recomendado en los casos donde los nombres de usuarios se deben compartir entre dominios\&.
+.sp
+Por defecto: No definido
+.RE
+.SH "SECCIONES DE SERVICIOS"
+.PP
+Los ajustes que pueden ser utilizados para configurar diferentes servicios se describe en esta sección\&. Ellos deben residir en la sección [\fI$NAME\fR], por ejemplo, para el servicio NSS, la sección sería
+\(lq[nss]\(rq
+.SS "Opciones de configuración de servicios generales"
+.PP
+Estas opciones pueden usarse para configurar cualquier servicio\&.
+.PP
+reconnection_retries (entero)
+.RS 4
+Cantidad de intentos de reconexión de los servicios ante una eventual caída de datos del proveedor, o de reiniciarse antes de abandonar
+.sp
+Predeterminado: 3
+.RE
+.PP
+fd_limit
+.RS 4
+Esta opción especifica el número máximo de descriptores de ficheros que pueden ser abiertos a la vez por este proceso SSSD\&. Sobre sistemas donde SSSD ha alcanzado la capacidad CAP_SYS_RESOURCE, este será un ajuste absoluto\&. Sobre sistemas sin esta capacidad, el valor resultante será el valor más bajo de este o de limite \(lqhard\(rq en limits\&.conf\&.
+.sp
+Por defecto: 8192 (o limite \(lqhard\(rq en limits\&.conf)
+.RE
+.PP
+client_idle_timeout
+.RS 4
+Esta opción especifica el número de segundos que un cliente de un proceso SSSD puede conservar un descriptor de archivo sin comunicarse con él\&. Este valor está limitado con el objetivo de evitar el agotamiento de recursos del sistema\&. El tiempo de salida no puede ser más corto de 10 segundos\&. Si se configura un valor más bajo será ajustado a 10 segundos\&.
+.sp
+Predeterminado: 60
+.RE
+.PP
+offline_timeout (entero)
+.RS 4
+Cuando SSSD conmuta al modo fuera de línea la cantidad tiempo antes de que intente volver a estar en línea se incrementará en base al tiempo que ha estado desconectado\&. Este valor es en segundos y se calcula mediante lo siguiente:
+.sp
+offline_timeout + random_offset
+.sp
+El desplazamiento aleatorio puede ser incrementado a 30 segundos\&. Después de cada intento fracasado de ir a línea, el nuevo intervalo se re\-calcula de la siguiente forma:
+.sp
+new_interval = old_interval*2 + random_offset
+.sp
+Advierta que la longitud máxima de cada intervalo está limitada actualmente a una hora\&. Si la longitud calculada de new_interval es mayor de una hora se forzará a una hora\&.
+.sp
+Predeterminado: 60
+.RE
+.PP
+responder_idle_timeout
+.RS 4
+Esta opción especifica el número de segundos que un proceso contestador SSSD puede estar levantado sin ser usado\&. Este valor está limitado con el objetivo de evitar el agotamiento de recursos del sistema\&. El valor mínimo aceptable para esta opción es 60 segundos\&. Fijar esta opción a 0 (cero) significa que se le ajustarña tiempo de espera al contestador\&. Esta opción solo tiene efecto cuando SSSD está construido con soporte systemd y cuando los servicios activados son socket o D\-Bus\&.
+.sp
+Predeterminado: 300
+.RE
+.PP
+cache_first
+.RS 4
+Esta opción especifica si el contestador consultará todos los caches antes de consultar a los Proveedores de Datos\&.
+.sp
+Predeterminado: false
+.RE
+.SS "Opciones de configuración de NSS"
+.PP
+Estas opciones pueden ser usadas para configurar el servicio Name Service Switch (NSS)\&.
+.PP
+enum_cache_timeout (entero)
+.RS 4
+Cuantos segundos ocultaría enumeraciones nss_sss (peticiones de información sobre todos los usuarios)
+.sp
+Predeterminado: 120
+.RE
+.PP
+entry_cache_nowait_percentage (entero)
+.RS 4
+La entrada a la cache puede ser fijada automáticamente para actualizar entradas en segundo plano si hay peticiones más allá de un porcentanje del valor de entry_cache_timeout para el dominio\&.
+.sp
+Por ejemplo, si entry_cache_timeout del dominio está fijado a 30 y entry_cache_nowait_percentage está fijado a 50 (por ciento), las entradas que vengan después de 15 segundos pasado el último cache serán devueltas inmediatamente, pero SSSD irá y actualizará el cache por el mismo, de modo que las futuras peticiones no necesitarán bloquearse a la espera de una actualización del cache\&.
+.sp
+Los valores válidos para esta opción son 0\-99 y representan un porcentaje de entry_cache_timeout para cada dominio\&. Por razones de rendimiento, este porcentaje nunca reducirá el tiempo de salida de no espera a menos de 10 segundos\&. (0 deshabilita esta función)\&.
+.sp
+Predeterminado: 50
+.RE
+.PP
+entry_negative_timeout (entero)
+.RS 4
+Especifica por cuantos segundos nss_sss escondería golpes negativos al cache (esto es, consultas para entradas no válidas a la base de datos, como entradas no existentes) antes de preguntar al punto final otra vez\&.
+.sp
+Predeterminado: 15
+.RE
+.PP
+local_negative_timeout (integer)
+.RS 4
+Especifica por cuantos segundos nss_sss mantendría a los usuarios y grupos locales en cache negativo antes de intentar buscarlo en el extremo final otra vez\&. Fijando la opción a 0 deshabilita esta característica\&.
+.sp
+Por defecto: 14400 (4 horas)
+.RE
+.PP
+filter_users, filter_groups (cadena)
+.RS 4
+Excluye a ciertos usuarios o grupos de ser recuperados de la base de datos sss NSS\&. Esto es particularmente útil para cuentas del sistema\&. Esta opción puede ser también establecida por dominio o incluir nombres completos para filtrar solo usuarios de un dominio concreto o por el nombre principal de usuario (UPN)\&.
+.sp
+AVISO: La opción filter_groups no afecta a la herencia de miembros de grupos anidados, puesto que el filtrado sucede después de que hayan sido propagados para volver por medio de NSS\&. E\&.g\&. un grupo que tenga un miembro del grupo filtrado mantendrá los usuarios miembros del listado posterior\&.
+.sp
+Predeterminado: root
+.RE
+.PP
+filter_users_in_groups (bool)
+.RS 4
+Si usted desea filtrar usuarios aunque sean miembros del grupo, fije esta opción a false\&.
+.sp
+Predeterminado: true
+.RE
+.PP
+override_homedir (cadena)
+.RS 4
+Anula el directorio home del usuario\&. Usted puede suministras bien un valor absoluto o una plantilla\&. En la plantilla, serán sustituidas las siguientes secuencias:
+.PP
+%u
+.RS 4
+nombre de acceso
+.RE
+.PP
+%U
+.RS 4
+número UID
+.RE
+.PP
+%d
+.RS 4
+nombre de dominio
+.RE
+.PP
+%f
+.RS 4
+nombre totalmente cualificado del usuario (user@domain)
+.RE
+.PP
+%l
+.RS 4
+The first letter of the login name\&.
+.RE
+.PP
+%P
+.RS 4
+UPN \- User Principal Name (name@REALM)
+.RE
+.PP
+%o
+.RS 4
+El directorio home original recuperado del proveedor de identidad\&.
+.RE
+.PP
+%H
+.RS 4
+The value of configure option
+\fIhomedir_substring\fR\&.
+.RE
+.PP
+%%
+.RS 4
+un literal \(oq%\(cq
+.RE
+.sp
+Esta opción puede ser también fijada por dominio\&.
+.sp
+ejemplo:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+override_homedir = /home/%u
+        
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Por defecto: No fijado (SSSD usará el valor recuperado desde LDAP)
+.RE
+.PP
+homedir_substring (string)
+.RS 4
+The value of this option will be used in the expansion of the
+\fIoverride_homedir\fR
+option if the template contains the format string
+\fI%H\fR\&. An LDAP directory entry can directly contain this template so that this option can be used to expand the home directory path for each client machine (or operating system)\&. It can be set per\-domain or globally in the [nss] section\&. A value specified in a domain section will override one set in the [nss] section\&.
+.sp
+Default: /home
+.RE
+.PP
+fallback_homedir (cadena)
+.RS 4
+Fija la plantilla por defecto para el direcorio home del usuario si no se ha especificado una explícitamente por el proveedor de datos del dominio\&.
+.sp
+Los valores disponibles para esta opción son los mismos que para override_homedir\&.
+.sp
+ejemplo:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+fallback_homedir = /home/%u
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Por defecto: no fijado (sin sustitución para los directorios home no fijados)
+.RE
+.PP
+override_shell (cadena)
+.RS 4
+Anula el shell de acceso para todos los usuarios\&. Esta opción reemplaza cualquier otra opción de shell si tinene efecto y puede ser fijada bien en la sección [nss] o por dominio\&.
+.sp
+Por defecto: no fijado (SSSD usará el valor recuperado desde LDAP)
+.RE
+.PP
+allowed_shells (cadena)
+.RS 4
+Restringe la shell de usuario a uno de los valores listados\&. El orden de evaluación es:
+.sp
+1\&. Si el shell está presente en
+\(lq/etc/shells\(rq, se usa\&.
+.sp
+2\&. Si el shell está en la lista allowed_shells pero no en
+\(lq/etc/shells\(rq, usa el valor del parámetro shell_fallback\&.
+.sp
+3\&. Si el shell no está en la lista allowed_shells y tampoco en
+\(lq/etc/shells\(rq, se usará un shell de no acceso\&.
+.sp
+Se puede usar el comodín (*) para permitir cualquier shell\&.
+.sp
+(*) es útil si usted desea usar shell_fallback en caso de que el shell del usuario no esté en
+\(lq/etc/shells\(rq
+y las lista que mantiene todos los shells permitidos en allowed_shells estuviera llena\&.
+.sp
+Una cadena vacía para el shell se pasa como\-es a libc\&.
+.sp
+\(lq/etc/shells\(rq
+es de sólo lectura en el inicio SSSD, lo que significa que se requiere el reinicio del SSSD en el caso de que se instale una nueva shell\&.
+.sp
+Por defecto: No fijado\&. La shell del usuario se usa automáticamente\&.
+.RE
+.PP
+vetoed_shells (cadena)
+.RS 4
+Reemplaza cualquier instancia de estos shells con shell_fallback
+.RE
+.PP
+shell_fallback (cadena)
+.RS 4
+La shell por defecto a usar si una shell permitida no está instalada en la máquina\&.
+.sp
+Predeterminado: /bin/sh
+.RE
+.PP
+default_shell
+.RS 4
+El shell por defecto a usar si el proveedor no devuelve uno durante la búsqueda\&. Esta opción puede ser especificada globalmente en la sección [nss] o por dominio\&.
+.sp
+Por defecto: no fijado (Devuelve NULL si no se ha especificado una shell y confía en libc para sustituir algo sensible cuando sea necesario, normalmente /bin/sh)
+.RE
+.PP
+get_domains_timeout (entero)
+.RS 4
+Especifica el tiempo en segundos por los cuales la lista de subdominios será considerada válida\&.
+.sp
+Predeterminado: 60
+.RE
+.PP
+memcache_timeout (entero)
+.RS 4
+Especifica el tiempo en segundos por el cual os registros en la memoria cache serán validos\&. Fijando esta opción o cero deshabilita la memoria cache\&.
+.sp
+Predeterminado: 300
+.sp
+PRECAUCIÓN: Deshabilitar la memoria cache puede llevar a un impacto negativo significativo sobre el rendimiento de SSSD y debería ser usado solo para pruebas\&.
+.sp
+AVISO: Si la variable de entorno SSS_NSS_USE_MEMCACHE estça fijada a "NO", las aplicaciones clientes no usaran la memoria cache rápida\&.
+.RE
+.PP
+user_attributes (string)
+.RS 4
+Algunas de las solicitudes de respuestas adicionales NSS pueden devolver mas atributos que solos los de POXIS definido por el interfaz NSS\&. La lista de atributos se controla con esta opción\&. Se maneja de la misma forma que la opción
+\(lquser_attributes\(rq
+del contestador InfoPipe (see
+\fBsssd-ifp\fR(5)
+para mas detalles) pero sin valores predeterminados\&.
+.sp
+Para hacer mas fácil la configuración el contestador NSS comprobará la opción InfoPipe si no está fijada para el contestador NSS\&.
+.sp
+Por defecto: no ajustada, retroceder a opción InfoPipe
+.RE
+.PP
+pwfield (cadena)
+.RS 4
+El valor que las operaciones NSS que devuelven usuarios o grupos devolverán para el campo
+\(lqpassword\(rq\&.
+.sp
+Esta opción puede ser también fijada por dominio\&.
+.sp
+Por defecto:
+\(lq*\(rq
+(dominios remotos) o
+\(lqx\(rq
+(los ficheros de dominio)
+.RE
+.SS "Opciones de configuración PAM"
+.PP
+Estas opciones pueden ser usadas para configurar el servicio Pluggable Authentication Module (PAM)
+.PP
+offline_credentials_expiration (entero)
+.RS 4
+Si la autenticación del proveedor es fuera de línea, cuanto permitiríamos los accesos escondidos (en días desde el último login en línea con éxito)\&.
+.sp
+Predeterminado: 0 (Sin límite)
+.RE
+.PP
+offline_failed_login_attempts (entero)
+.RS 4
+Si la autenticación del proveedor es fuera de línea, cuantos intentos de login fallados están permitidos\&.
+.sp
+Predeterminado: 0 (Sin límite)
+.RE
+.PP
+offline_failed_login_delay (entero)
+.RS 4
+El tiempo en minutos que ha de pasar después de que offline_failed_login_attempts ha sido alcanzado antes de que un nuevo intento de login sea posible\&.
+.sp
+Si se fija en 0 el usuario no puede autenticarse fuerta de línea si se ha alcanzado offline_failed_login_attempts\&. Sólo una autenticación en línea con éxito puede habilitar otra vez la autenticación fuera de línea\&.
+.sp
+Predeterminado: 5
+.RE
+.PP
+pam_verbosity (entero)
+.RS 4
+Controla qué tipo de mensajes se muestra al usuario durante la autenticación\&. Cuanto mayor sea el número de mensajes más aparecen\&.
+.sp
+Actualmente sssd soporta los siguientes valores:
+.sp
+\fI0\fR: no mostrar ningún mensaje
+.sp
+\fI1\fR: mostrar sólo mensajes importantes
+.sp
+\fI2\fR: mostrar mensajes informativos
+.sp
+\fI3\fR: mostrar todos los mensajes e información de depuración
+.sp
+Predeterminado: 1
+.RE
+.PP
+pam_response_filter (entero)
+.RS 4
+Una lista separada por comas de cadenas que permiten borrar (filtrar) datos enviados por el contestador PAM al modulo PAM pam_sss PAM\&. Hay diferentes clases de respuestas enviadas a pam_sss e\&.g\&. mensajes mostrados al usuario o variables de entorno que deberían ser fijadas por pam_sss\&.
+.sp
+Como los mensajes ya pueden ser controlados con la ayuda de la opción pam_verbosity esta opción permite filtrar otra clase de respuestas también\&.
+.sp
+Actualmente se soportan los siguientes filtros:
+.PP
+ENV
+.RS 4
+No envía ninguna variable de entorno a ningún servicio\&.
+.RE
+.PP
+ENV:var_name
+.RS 4
+No envía la variable de entorno var_name a ningún servicio\&.
+.RE
+.PP
+ENV:var_name:service
+.RS 4
+No envía la variable de entorno var_name al servicio\&.
+.RE
+.sp
+Predeterminado: no definido
+.sp
+Ejemplo: ENV:KRB5CCNAME:sudo\-i
+.RE
+.PP
+pam_id_timeout (entero)
+.RS 4
+Para cualquier petición PAM mientras SSSD está en línea, SSSD intentará inmediatamente actualizar la información de identidad escondida por el usuario con el objetivo de asegurar que la autenticación tiene lugar con la información más actual\&.
+.sp
+Una conversación PAM completa puede llevar a cabo múltiples peticiones PAM, como gestión de cuenta y apertura de sesión\&. Esta opción controla (sobre una base de por cliente\-aplicación) cuanto (en segundos) podemos esconder la información de identidad para evitar excesivos viajes de ida y vuelata al proveedor de identidad\&.
+.sp
+Predeterminado: 5
+.RE
+.PP
+pam_pwd_expiration_warning (entero)
+.RS 4
+Mostrar una advertencia N días antes que la contraseña caduque\&.
+.sp
+Por favor advierta que el servidor de punto final tiene que suministrar información sobre el tiempo de expiración de la contraseña\&. Si esta información desaparece, sssd no podrá mostrar un aviso\&.
+.sp
+Si está fijado cero, no se aplicará el filtro, esto es si se recibe una advertencia de expiración desde el servidor final, se mostrará automáticamente\&.
+.sp
+Este ajuste puede ser anulado por el ajuste
+\fIpwd_expiration_warning\fR
+para un dominio concreto\&.
+.sp
+Predeterminado: 0
+.RE
+.PP
+get_domains_timeout (entero)
+.RS 4
+Especifica el tiempo en segundos por los cuales la lista de subdominios será considerada válida\&.
+.sp
+Predeterminado: 60
+.RE
+.PP
+pam_trusted_users (cadena)
+.RS 4
+Especifica la lista separada por comas de valores de UID o nombres de usuarios que tienen permitidas conversaciones PAM contra dominios de confianza\&. Los usuarios no incluidos en esta lista pueden solo acceder a dominios marcadoscomo públicos con
+\(lqpam_public_domains\(rq\&. Los nombres de usuarios se resuelven a UIDs en el arranque\&.
+.sp
+Por defecto: Todos los usuarios se consideran de confianza por defecto
+.sp
+Por favor advierta que la UID 0 siempre permite el acceso al contestador PAM aunque no está en la la lista pam_trusted_users\&.
+.RE
+.PP
+pam_public_domains (cadena)
+.RS 4
+Especifica la lista separada por comas de nombres de dominios que son accesibles hasta para los usuarios en los que no se confíe\&.
+.sp
+Hay definidos dos valores especiales para la opción pam_public_domains:
+.sp
+all (Los usuarios de no confianza están permitidos para acceder a todos los dominios en el contestador PAM\&.)
+.sp
+none (Los usuarios de no confianza no tienen permitido acceder a los dominios PAM en el contestador\&.)
+.sp
+Predeterminado: none
+.RE
+.PP
+pam_account_expired_message (cadena)
+.RS 4
+Permite configurar un mensaje de expiración personalizado, reemplazando el mensaje predeterminado \*(AqPermiso denegado\*(Aq\&.
+.sp
+Nota: Por favor tenga cuidado que este mensaje solo se imprime por el servicio SSH a no ser que pam_verbosity esté fijado a 3 (mostrar todos los mensajes e información de depuración)\&.
+.sp
+ejemplo:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+pam_account_expired_message = Cuenta expirada, por favor contacte con la mesa de ayuda\&.
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Predeterminado: none
+.RE
+.PP
+pam_account_locked_message (cadena)
+.RS 4
+Permite fijar un mensaje de bloqueo personalizado, reemplazando el mensaje por defecto \*(AqPermiso denegado\*(Aq\&.
+.sp
+ejemplo:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+pam_account_locked_message = Cuenta bloqueada, por favor contacte con la mesa de ayuda\&.
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Predeterminado: none
+.RE
+.PP
+pam_cert_auth (booleano)
+.RS 4
+Habilita un certificado en base a la autenticación Smartcard\&. Como esto requiere comunicación adicional con la Smartcard lo que dilatará el proceso de autenticación esta opción está deshabilitada por defecto\&.
+.sp
+Por defecto: False
+.RE
+.PP
+pam_cert_db_path (cadena)
+.RS 4
+La ruta a la base de datos de certificado que contiene los módulos PKCS#11 para acceder a la Smartcard\&.
+.sp
+Predeterminado:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+/etc/pki/nssdb (versión NSS, ruta a la base de datos NSS)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+/etc/sssd/pki/sssd_auth_ca_db\&.pem (Versión de OpenSSL, ruta a un fichero con certificados CA de confianza en formato PEM)
+.RE
+.sp
+Esta página de manual fue generada para la versión NSS\&.
+.RE
+.PP
+p11_child_timeout (entero)
+.RS 4
+Cuantos segundos esperará pam_sss wait para que p11_child finalice\&.
+.sp
+Predeterminado: 10
+.RE
+.PP
+pam_app_services (cadena)
+.RS 4
+Cuales son los servicios PAM que tiene permitido contactar con dominios del tipo
+\(lqapplication\(rq
+.sp
+Por defecto: No definido
+.RE
+.PP
+pam_p11_allowed_services (entero)
+.RS 4
+Una lista separada por comas de nombres de servicios PAM a los que les será permitidos usar Smartcards\&.
+.sp
+Es posible añadir otro nombre de servicio PAM al conjunto predeterminado usando
+\(lq+service_name\(rq
+o quitar explícitamente nombre de servicio PAM de los predeterminados usando
+\(lq\-service_name\(rq\&. Por ejemplo, con el objetivo de reemplazar un nombre de servicio PAM por autenticación con Smartcards (e\&.g\&.
+\(lqlogin\(rq) con un nombre de servicio PAM personalizado (e\&.g\&.
+\(lqmy_pam_service\(rq), debería usar la siguiente configuración:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+pam_p11_allowed_services = +my_pam_service, \-login
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Predeterminado: el conjunto predeterminado de nombres de servicio PAM incluye:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+login
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+su
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+su\-l
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+gdm\-smartcard
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+gdm\-password
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+kdm
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sudo
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sudo\-i
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+gnome\-screensaver
+.RE
+.sp
+.RE
+.PP
+p11_wait_for_card_timeout (entero)
+.RS 4
+Si se requiere la autenticación con Smartcard cuantos segundos extras se añaden a p11_child_timeout para que el contestador PAM espera hasta que se inserte la Smartcard\&.
+.sp
+Predeterminado: 60
+.RE
+.PP
+p11_uri (cadena)
+.RS 4
+PKCS#11 URI (ver detalles en RFC\-7512) que puede ser usada para restringir la selección de dspositivos usados por la autenticación Smartcard\&. Por defecto p11_child de SSSD buscará una ranura (lector) PKCS#11 donde este establecida la bandera \*(Aqremovable\*(Aq y lee los certificados de la ficha insertada en la primera ranura encontrada\&. Si están conectados múltiples lectores p11_uri puede ser usado para decir a p11_child que use un lector específico\&.
+.sp
+Ejemplo:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+p11_uri = slot\-description=My%20Smartcar%20Reader
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+o
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+p11_uri = library\-description=OpenSC%20smartcard%20framework;slot\-id=2
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Para encontrar la URI adecuada compruebe por favor la salida de depuración de p11_child\&. Como alternativa la utilidad GnuTLS \*(Aqp11tool\*(Aq con e\&.g\&. \*(Aq\-\-list\-all\*(Aq mostrará PKCS#11 URIs también\&.
+.sp
+Predeterminado: none
+.RE
+.SS "SUDO opciones de configuración"
+.PP
+Se pueden usar estas opciones para configurar el servicio sudo\&. Las instrucciones detalladas para la configuración de
+\fBsudo\fR(8)
+para trabajar con
+\fBsssd\fR(8)
+están en la página de manual
+\fBsssd-sudo\fR(5)\&.
+.PP
+sudo_timed (booleano)
+.RS 4
+Si se evalúan o no los atributos sudoNotBefore y sudoNotAfter que implementa entradas de sudoers dependientes del tiempo\&.
+.sp
+Predeterminado: false
+.RE
+.PP
+sudo_threshold (entero)
+.RS 4
+Número máxio de reflas expiradas que pueden ser refrescadas a la vez\&. Si el número de reglas expiradas está por debajo del umbral son refrescadas con el mecanismo
+\(lqrefrescar reglas\(rq
+mechanism\&. SI se supera el umbral un
+\(lqrefresco total\(rq
+de reglas sudo se dispara en su lugar\&. Este umbral también se aplica al comando IPA sudo y a las búsquedas de grupo de comando\&.
+.sp
+Predeterminado: 50
+.RE
+.SS "Opciones de configuración AUTOFS"
+.PP
+Estas opciones pueden ser usadas para configurar el servicio autofs\&.
+.PP
+autofs_negative_timeout (entero)
+.RS 4
+Especifica cuantos segundos debería el respondedor negativo autofs esconder golpes (esto es, consultas a entradas de mapa no válidad, como las no existentes) antes de preguntar al punto final otra vez\&.
+.sp
+Predeterminado: 15
+.RE
+.PP
+Por favor advierta que el automontador sólo lee el mapa maestro en el arranque, se modo que si se hace cualquier cambio relacionado con autofs al sssd\&.conf, usted normalmente también necesitará reiniciar el demonio automontador después de reiniciar el SSSD\&.
+.SS "Opciones de configuración SSH"
+.PP
+Estas opciones se pueden usar para configurar el servicio SSH\&.
+.PP
+ssh_hash_known_hosts (booleano)
+.RS 4
+Si se pican o no los nombres y las direcciones de host en fichero gestionado known_host\&.
+.sp
+Predeterminado: true
+.RE
+.PP
+ssh_known_hosts_timeout (entero)
+.RS 4
+Cuantos segundos se mantiene un host en el fichero known_hosts gestionados después de que se hayan pedido sus claves de host\&.
+.sp
+Por defecto: 180
+.RE
+.PP
+ssh_use_certificate_keys (booleano)
+.RS 4
+Si se ajusta a true
+\fBsss_ssh_authorizedkeys\fR
+devolverá claves ssh derivadas de la clave pública de los certificados X\&.509 almacenados en la entrada de usuario también\&. Vea detalles en
+\fBsss_ssh_authorizedkeys\fR(1)
+for details\&.
+.sp
+Predeterminado: true
+.RE
+.PP
+ssh_use_certificate_matching_rules (string)
+.RS 4
+By default the ssh responder will use all available certificate matching rules to filter the certificates so that ssh keys are only derived from the matching ones\&. With this option the used rules can be restricted with a comma separated list of mapping and matching rule names\&. All other rules will be ignored\&.
+.sp
+If a non\-existing rule name is given all rules will be ignored and all available certificates will be used to derive ssh keys\&.
+.sp
+Default: not set, all found rules are used
+.RE
+.PP
+ca_db (cadena)
+.RS 4
+Ruta al almacenamiento de certificados CA de confianza\&. Esta opción se usa para validar los certificados de usuario antes de derivar las claves públicas ssh de ellos\&.
+.sp
+Predeterminado:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+/etc/pki/nssdb (versión NSS, ruta a la base de datos NSS)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+/etc/sssd/pki/sssd_auth_ca_db\&.pem (Versión de OpenSSL, ruta a un fichero con certificados CA de confianza en formato PEM)
+.RE
+.sp
+Esta página de manual fue generada para la versión NSS\&.
+.RE
+.SS "Opciones de configuración del respondedor PAC"
+.PP
+El contestador PAC trabaja junto con el plugin de autorización de datos para MIT Kerberos sssd_pac_plugin\&.so y un proveedor de sub dominios\&. El plugin envía los datos PAC durante la autenticación GSSAPI al contestador PAC\&. El proveedor de sub dominio recoge el SID de dominio y los rangos de ID del dominio al que el cliente se ha unido y de los dominios remotos de confianza desde el controlador local de dominio\&. Si el PAC es decodificado y evaluado se hacen algunas de las siguientes operaciones:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Si el usuario remoto no existe en la cache, se crea\&. Se determina la UID con la ayuda del SID, los dominios de confianza tendrán UPGs y el GID tendrá el mismo valor que la UID\&. El directorio home se ajusta en base al parámetro subdomain_homedir\&. La shell estará vacía por defecto, i\&.e\&. se usa el sistema predeterminado, pero se puede sustituir con el parámetro default_shell\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Si se conocen los SIDs de los grupos de los dominios, se añadirá el usuario a esos grupos\&.
+.RE
+.PP
+Estas opciones pueden ser usadas para configurar el respondedor PAC\&.
+.PP
+allowed_uids (cadena)
+.RS 4
+Especifica la lista separada por comas de los valores UID o nombres de usuario que tiene el acceso permitido al respondedor PAC\&.
+.sp
+Por defecto: 0 (sólo el usuario root tiene permitido el acceso al respondedor PAC)
+.sp
+Por favor advierta que aunque la UID 0 se usa por defecto será anulada con esta opción\&. Si usted deses todavía permitir al usuario root acceder al respondedor PAC, que sería el caso típico, usted tiene que añadir 0 a la lista de UIDs permitidas también\&.
+.RE
+.PP
+pac_lifetime (entero)
+.RS 4
+Tiempo de vida de la entrada PAC en segundos\&. Tanto como la PAC es válida los datos PAC pueden ser usados para determinar la membresia de grupo de un usuario\&.
+.sp
+Predeterminado: 300
+.RE
+.SS "Opciones de configuración de la grabación de sesión"
+.PP
+Trabajos de grabación de sesión en conjunto con
+\fBtlog-rec-session\fR(8), una parte del paquete tlog, para registrar lo que los usuarios ven y el tipo cuando ellos lo registran en un terminal de texto\&. Vea también
+\fBsssd-session-recording\fR(5)\&.
+.PP
+Se pueden usar estas opciones para configurar la grabación de sesión\&.
+.PP
+scope (cadena)
+.RS 4
+Una de las siguientes cadena especifica el alcande de la sesión de grabación:
+.PP
+"none"
+.RS 4
+NO se grabaron usuarios\&.
+.RE
+.PP
+"some"
+.RS 4
+Usuarios/grupos especificados por las opciones
+\fIusers\fR
+y\fIgroups\fR
+son grabados\&.
+.RE
+.PP
+"all"
+.RS 4
+Se graban todos los usuarios\&.
+.RE
+.sp
+Predeterminado: "none"
+.RE
+.PP
+users (cadena)
+.RS 4
+Una lista separada por comas de usuarios que deberían tener la grabación de sesión habilitada\&. Coincide con los nombres de usuario que son devueltos por NSS\&. I\&.e\&. después de las posibles sustituciones de espacios, cambios de mayúsculas/minúsculas, etc\&.
+.sp
+Predeterminado: Vacío\&. No hay usuarios coincidentes\&.
+.RE
+.PP
+groups (cadena)
+.RS 4
+Una lista separada por comas de grupos, cuyos miembros tendrían habilitado la grabación de sesión\&. Coincide con los nombres de grupo devueltos por NSS\&. I\&.e\&. después de los posibles cambios de espacio, cambios de mayúsculas/minúsculas, etc\&.
+.sp
+AVISO: el uso de esta opción (teniéndolo ajustado a cualquiera) tiene un costo considerable de rendimiento, puesto que cada petición sin caché para un usuario requiere a recuperación y el emparejado de los grupos a los que pertenece el usuario\&.
+.sp
+Predeterminado: Vacío\&. No empareja grupos\&.
+.RE
+.SH "SECCIONES DE DOMINIO"
+.PP
+Estas opciones de configuración pueden estar presentes en la sección configuración de dominio, esto es, en una sección llamada
+\(lq[domain/\fINAME\fR]\(rq
+.PP
+domain_type (cadena)
+.RS 4
+Especifica si el dominio está destinado a ser usado por clientes atentos a POSIX como Name Service Switch o por aplicaciones que no necesitan datos POSIX presentes o generados\&. Solo los objetos de dominios POSIX están disponibles para las interfaces y utilidades de sistema operativo\&.
+.sp
+Los valores permitidos para esta opción son
+\(lqposix\(rq
+y
+\(lqapplication\(rq\&.
+.sp
+Los dominios POSIX son alcanzables por todos los servicios\&. Los dominios aplicación son solo alcanzables desde el contestador InfoPipe (vea
+\fBsssd-ifp\fR(5)) y el contestador PAM\&.
+.sp
+AVISO: LOs dominios aplicación actualmente están bien probados solamente con
+\(lqid_provider=ldap\(rq\&.
+.sp
+Para una manera fácil de configurar dominios no POSIX, vea la sección
+\(lqDominios aplicación\(rq\&.
+.sp
+Predeterminado: posix
+.RE
+.PP
+min_id, max_id (entero)
+.RS 4
+Límites de UID y GID para el dominio\&. Si un dominio contiene una entrada que está fuera de estos límites, ésta es ignorada\&.
+.sp
+Para usuarios, esto afecta al límite primario GID\&. El usuario no será devuelto a NSS si bien la UID o el GID primario está fuera de rango\&. Para los miembros de grupos no primarios, aquellos que estén en rango serán reportados como en espera\&.
+.sp
+Estos límites de ID afectan aunque se guarden entrada en la caché, no solo devolviéndolas por nombre o ID\&.
+.sp
+Predeterminado: 1 para min_id, 0 (sin límite) para max_id
+.RE
+.PP
+enumerar (bool)
+.RS 4
+Determina si un dominio puede ser enumerado, esto es, si el dominio puede listar tods los usuarios y grupos que contiene\&. Advierta que no requiere habilitar la enumeración con el objetivo de visualizar grupos secundarios\&. Este parámetros puede tener uno de los siguientes valores:
+.sp
+TRUE = Usuarios y grupos son enumerados
+.sp
+FALSE = Sin enumeraciones para este dominio
+.sp
+Predeterminado: FALSE
+.sp
+Enumerar un dominio requiere que SSSD descargue y almacene TODAS las entradas de usuario y grupo del servidor remoto\&.
+.sp
+Aviso: Habilitar la enumeración tiene un impacto moderado en el rendimiento sobre SSSD mientras está corriendo la enumeración\&. Puede llevar varios minutos después de que SSSD inicie una enumeración completa total\&. Durante este tiempo, las peticiones individuales de información irán directamente a LDAP, piense que puede ser lento, debido al pesado procesamiento de la enumeración\&. El guardar gran número de entradas en la caché después de una enumeración completa puede ser también intensiva para la CPU puesto que la membresía debe ser vuelta a computar\&. Esto puede llevar a que el proceso
+\(lqsssd_be\(rq
+no responda o que sea reiniciado por el perro guardián interno\&.
+.sp
+Mientras está corriendo la primera enumeración, peticiones para el usuario completo o listas de grupo pueden no devolver resultados hasta que se completen\&.
+.sp
+Adicionalmente, la habilitación de la enumeración puede incrementar el tiempo necesario para detectar la desconexión de red, tanto como los tiempos de espera necesarios para asegurar que las búsquedas de enumeración se han completado\&. Para más información vea las páginas de manual para el específico id_provider en uso\&.
+.sp
+Por las razones citadas arriba, no se recomienda habilitar la enumeración, especialmente en entornos grandes\&.
+.RE
+.PP
+subdomain_enumerate (cadena)
+.RS 4
+Si se debe enumerar alguno de los dominios de confianza autodetectados\&. Los valores soportados son:
+.PP
+all
+.RS 4
+Se enumerarán todos los dominios de confianza descubiertos
+.RE
+.PP
+none
+.RS 4
+No serán enumerados dominios de confianza descubiertos
+.RE
+.sp
+Opcionalmente, una lista de uno o más nombres de dominio puede habilitar la enumeración solo para estos dominios de confianza\&.
+.sp
+Predeterminado: none
+.RE
+.PP
+entry_cache_timeout (entero)
+.RS 4
+Cuántos segundos debe considerar nss_sss como válidas las entradas antes de volver a consultar al backend
+.sp
+Los sellos de tiempo de expiración de caché son almacenados somo atributos de los objetos individuales en caché\&. Por lo tanto, el cambio del tiempo de expiración de la caché solo tendrá efecto para las entradas más nuevas o expiradas\&. Debería ejecutar la herramienta
+\fBsss_cache\fR(8)
+con el objetivo de forzar el refresco de las entradas que ya están en la caché\&.
+.sp
+Predeterminado: 5400
+.RE
+.PP
+entry_cache_user_timeout (entero)
+.RS 4
+Cuantos segundos debería nss_sss considerar las entradas de usuario válidas antes de preguntar al punto final otra vez\&.
+.sp
+Por defecto: entry_cache_timeout
+.RE
+.PP
+entry_cache_group_timeout (entero)
+.RS 4
+Cuantos segundos debería nss_sss considerar las entradas de grupo válidas antes de preguntar al punto final otra vez\&.
+.sp
+Por defecto: entry_cache_timeout
+.RE
+.PP
+entry_cache_netgroup_timeout (entero)
+.RS 4
+Cuantos segundos debería nss_sss considerar las entradas de grupo de red válidas antes de preguntar al punto final otra vez\&.
+.sp
+Por defecto: entry_cache_timeout
+.RE
+.PP
+entry_cache_service_timeout (entero)
+.RS 4
+Cuantos segundos debería nss_sss considerar las entradas de servicio válidas antes de preguntar al punto final otra vez\&.
+.sp
+Por defecto: entry_cache_timeout
+.RE
+.PP
+entry_cache_sudo_timeout (entero)
+.RS 4
+Cuantos segundos debería considerar las regulas sudo válidas antes de preguntar al backend otra vez\&.
+.sp
+Por defecto: entry_cache_timeout
+.RE
+.PP
+entry_cache_autofs_timeout (entero)
+.RS 4
+Cuantos segundos deberá considerar el servicio autofs los mapas de automontaje válidos antes de preguntar al punto final otra vez\&.
+.sp
+Por defecto: entry_cache_timeout
+.RE
+.PP
+entry_cache_ssh_host_timeout (entero)
+.RS 4
+Cuantos segundos mantener una clave ssh de host después de refrescar\&. IE cuanto guardar en caché la clave de host\&.
+.sp
+Por defecto: entry_cache_timeout
+.RE
+.PP
+refresh_expired_interval (entero)
+.RS 4
+Especifica cuantos segundos tiene que esperar SSSD antes de disparar una tarea de refresco en segundo plano que refrescará todos los registros expirados o a punto de hacerlo\&.
+.sp
+The background refresh will process users, groups and netgroups in the cache\&. For users who have performed the initgroups (get group membership for user, typically ran at login) operation in the past, both the user entry and the group membership are updated\&.
+.sp
+This option is automatically inherited for all trusted domains\&.
+.sp
+Usted puede considerar ajustar este valor a 3/4 * entry_cache_timeout\&.
+.sp
+Predeterminado: 0 (deshabilitado)
+.RE
+.PP
+cache_credentials (bool)
+.RS 4
+Determina si las credenciales del usuario están también escondidas en el cache LDB local
+.sp
+Las credenciales de usuario son almacenadas en un hash SHA512, no en texto plano
+.sp
+Predeterminado: FALSE
+.RE
+.PP
+cache_credentials_minimal_first_factor_length (entero)
+.RS 4
+Si se usa 2\-Factor\-Authentication (2FA) y las credenciales deberían ser guardadas este valor determina la longitud mínima del primer factor de autenticación (contraseña de largo plazo) que debe ser guardado como hash SHA512 en el caché\&.
+.sp
+Esto evitaría que los PINs cortos de un esquema de PIN basado en 2FA se guarden en caché lo que les haría objetivos fáciles de ataques de fuerza bruta\&.
+.sp
+Predeterminado: 8
+.RE
+.PP
+account_cache_expiration (entero)
+.RS 4
+Entradas de números de días que son dejadas en el cache después del último login con éxito antes de ser borrado durante la limpieza de la cache\&. 0 significa mantener para siempre\&. El valor de este parámetro debe ser más grande o igual que offline_credentials_expiration\&.
+.sp
+Predeterminado: 0 (ilimitado)
+.RE
+.PP
+pwd_expiration_warning (entero)
+.RS 4
+Mostrar una advertencia N días antes que la contraseña caduque\&.
+.sp
+Si está fijado cero, no se aplicará el filtro, esto es si se recibe una advertencia de expiración desde el servidor final, se mostrará automáticamente\&.
+.sp
+Por favor advierta que el servidor de backend tiene que suministrar información sobre la hora expiración de la contraseña\&. Si esta información está desaparecida, sssd no puede mostrar un aviso\&. También se tiene que configurar un proveedor de autorización para el backend\&.
+.sp
+Por defecto: 7 (Kerberos), 0 (LDAP)
+.RE
+.PP
+id_provider (cadena)
+.RS 4
+El proveedor de identificación usado por el dominio\&. Los proveedores de ID soportados son:
+.sp
+\(lqproxy\(rq: Soporta un proveedor NSS heredado\&.
+.sp
+\(lqfiles\(rq: Proveedor de FICHEROS\&. Vea
+\fBsssd-files\fR(5)
+para más información sobre como hacer espejo de usuarios y grupos locales en SSSD\&.
+.sp
+\(lqldap\(rq: Proveedor LDAP\&. Vea
+\fBsssd-ldap\fR(5)
+para más información sobre la configuración de LDAP\&.
+.sp
+\(lqipa\(rq: Proveedor FreeIPA y Red Hat Enterprise Identity Management\&. Vea
+\fBsssd-ipa\fR(5)
+para más información sobre la configuración de FreeIPA\&.
+.sp
+\(lqad\(rq: Proveedor Active Directory\&. Vea
+\fBsssd-ad\fR(5)
+para más información sobre la configuración de Active Directory\&.
+.RE
+.PP
+use_fully_qualified_names (bool)
+.RS 4
+Utiliza el nombre completo y el dominio (formateado en el formato nombre_completo de dominio) como el nombre de acceso del usuario reportado a NSS\&.
+.sp
+Si es TRUE, todas las peticiones a este dominio deben usar nombres totalmente cualificados\&. Por ejemplo, si se usa en el dominio LOCAL que contiene un usuario \(lqtest\(rq,
+\fBgetent passwd test\fR
+no encontraría al usuario mientras que
+\fBgetent passwd test@LOCAL\fR
+lo haría\&.
+.sp
+AVISO: Esta opción no tiene efecto sobre búsquedas de grupo de red debido a su tendencia a incluir grupos de red anidados sin nombres cualificados\&. Para grupos de red, se buscará en todos los dominios cuando se pida un no no cualificado\&.
+.sp
+Predeterminado: FALSE (TRUE si se usa default_domain_suffix)
+.RE
+.PP
+ignore_group_members (bool)
+.RS 4
+No devuelve miembros de grupo para búsquedas de grupo\&.
+.sp
+Si se fija a TRUE, no se pide el atributo de membresía de grupo al servidor ldap y los miembros no son devueltos cuando se procesan llamadas de búsqueda, como
+\fBgetgrnam\fR(3)
+o
+\fBgetgrgid\fR(3)\&. Como efecto,
+\(lqgetent group $groupname\(rq
+debería devolver el grupo pedido como si estuviera vacío\&.
+.sp
+Habilitar esta opción puede también hacer acceso a las comprobaciones de proveedor ara membresía de grupo significativamente más rápidas, especialmente para grupos que contienen muchos miembros\&.
+.sp
+Predeterminado: FALSE
+.RE
+.PP
+auth_provider (cadena)
+.RS 4
+El proveedor de autenticación usado por el dominio\&. Los proveedores de autenticación soportados son:
+.sp
+\(lqldap\(rq
+para autenticación nativa LDAP\&. Vea
+\fBsssd-ldap\fR(5)
+para más información sobre la configuración LDAP\&.
+.sp
+\(lqkrb5\(rq
+para autenticación Kerberos\&. Vea
+\fBsssd-krb5\fR(5)
+para más información sobre la configuración de Kerberos\&.
+.sp
+\(lqipa\(rq: Proveedor FreeIPA y Red Hat Enterprise Identity Management\&. Vea
+\fBsssd-ipa\fR(5)
+para más información sobre la configuración de FreeIPA\&.
+.sp
+\(lqad\(rq: Proveedor Active Directory\&. Vea
+\fBsssd-ad\fR(5)
+para más información sobre la configuración de Active Directory\&.
+.sp
+\(lqproxy\(rq
+para la reinstalación de la autenticación a algún otro objetivo PAM\&.
+.sp
+\(lqnone\(rq
+deshabilita la autenticación explícitamente\&.
+.sp
+Por defecto:
+\(lqid_provider\(rq
+se usa si se ha fijado y puede manejar las peticiones de autenticación\&.
+.RE
+.PP
+access_provider (cadena)
+.RS 4
+El proveedor de control de acceso usado por el dominio\&. Hay dos provedores de acceso integrados (además de cualquiera instalado en los finales)\&. Los proveedores especiales internos son:
+.sp
+\(lqpermit\(rq
+siempre permite el acceso\&. Es el proveedor de acceso sólo permitido para un dominio local\&.
+.sp
+\(lqdeny\(rq
+siempre niega el acceso\&.
+.sp
+\(lqldap\(rq
+para autenticación nativa LDAP\&. Vea
+\fBsssd-ldap\fR(5)
+para más información sobre la configuración LDAP\&.
+.sp
+\(lqipa\(rq: Proveedor FreeIPA y Red Hat Enterprise Identity Management\&. Vea
+\fBsssd-ipa\fR(5)
+para más información sobre la configuración de FreeIPA\&.
+.sp
+\(lqad\(rq: Proveedor Active Directory\&. Vea
+\fBsssd-ad\fR(5)
+para más información sobre la configuración de Active Directory\&.
+.sp
+\(lqsimple\(rq
+control de acceso basado en listas de acceso o denegación\&. Vea
+\fBsssd-simple\fR(5)
+para más información sobre la configuración del módulo de acceso sencillo\&.
+.sp
+\(lqkrb5\(rq: \&.k5login basado en control de acceso\&. Vea
+\fBsssd-krb5\fR(5)
+para más información sobre la configuración de Kerberos\&.
+.sp
+\(lqproxy\(rq
+para transmitir control de acceso a otro módulo PAM\&.
+.sp
+Predeterminado:
+\(lqpermit\(rq
+.RE
+.PP
+chpass_provider (cadena)
+.RS 4
+El proveedor que debería manejar las operaciones de cambio de password para el dominio\&. Los proveedores de cambio de passweord soportados son:
+.sp
+\(lqldap\(rq
+para cambiar una contraseña almacenada en un servidor LDAP\&. Vea
+\fBsssd-ldap\fR(5)
+para más información sobre la configuración de LDAP\&.
+.sp
+\(lqkrb5\(rq
+para cambiar una contraseña Kerberos\&. Vea
+\fBsssd-krb5\fR(5)
+para más información sobre configurar Kerberos\&.
+.sp
+\(lqipa\(rq: Proveedor FreeIPA y Red Hat Enterprise Identity Management\&. Vea
+\fBsssd-ipa\fR(5)
+para más información sobre la configuración de FreeIPA\&.
+.sp
+\(lqad\(rq: Proveedor Active Directory\&. Vea
+\fBsssd-ad\fR(5)
+para más información sobre la configuración de Active Directory\&.
+.sp
+\(lqproxy\(rq
+para la reinstalación de cambios de password en algunos otros objetivos PAM\&.
+.sp
+\(lqnone\(rq
+deniega explícitamente los cambios en la contraseña\&.
+.sp
+Por defecto:
+\(lqauth_provider\(rq
+se utiliza si se ha fijado y se puede manejar las peticiones de cambio de password\&.
+.RE
+.PP
+sudo_provider (cadena)
+.RS 4
+El proveedor SUDO usado por el dominio\&. Los proveedores SUDO soportados son:
+.sp
+\(lqldap\(rq
+para reglas almacenadas en LDAP\&. Vea
+\fBsssd-ldap\fR(5)
+para más información sobre la configuración LDAP\&.
+.sp
+\(lqipa\(rq
+lo mismo que
+\(lqldap\(rq
+pero con ajustes predeterminados IPA\&.
+.sp
+\(lqad\(rq
+lo mismo que
+\(lqldap\(rq
+pero con ajustes predeterminados AD\&.
+.sp
+\(lqnone\(rqdeshabilita SUDO explícitamente\&.
+.sp
+Por defecto: el valor de
+\(lqid_provider\(rq
+se usa si está fijado\&.
+.sp
+Las instrucciones detalladas para la configuración de sudo_provider están el la página de manual
+\fBsssd-sudo\fR(5)\&. Hay muchas opciones de configuración que se puden usar para ajustar el comportamiento\&. Vea por favor "ldap_sudo_*" en
+\fBsssd-ldap\fR(5)\&.
+.sp
+\fIAVISO:\fR
+Las reglas sudo son periódicamente descargadas en segundo plano a no ser que proveedor sudo esté explícitamente deshabilitado\&. Ajuste
+\fIsudo_provider = None\fR
+para deshabilitatr toda la actividad relacionada con sudo en SSSD si usted no desea usar sudo cn SSSD mas\&.
+.RE
+.PP
+selinux_provider (cadena)
+.RS 4
+El proveedor que manejaría la carga de los ajustes selinux\&. Advierta que este proveedor será llamado justo después de que el proveedor de acceso finalice\&. Los proveedores selinux soportados son:
+.sp
+\(lqipa\(rq
+para cargar ajustes selinux desde un servidor IPA\&. Vea
+\fBsssd-ipa\fR(5)
+para más información sobre la configuración de IPA\&.
+.sp
+\(lqnone\(rq
+deshabilita ir a buscar los ajustes selinux explícitamente\&.
+.sp
+Por defecto:
+\(lqid_provider\(rq
+se usa si está fijado y puede manejar las peticiones de carga selinux\&.
+.RE
+.PP
+subdomains_provider (cadena)
+.RS 4
+El proveedor que debería manejar el atractivo de subdominios\&. Este valor debería ser siempre el mismo que id_provider\&. Los proveedores de subdominio soportados son:
+.sp
+\(lqipa\(rq
+para cargar una lista de subdominios desde un servidor IPA\&. Vea
+\fBsssd-ipa\fR(5)
+para más información sobre la configuración de IPA\&.
+.sp
+\(lqad\(rq
+para descargar una lista de subdominios desde un servidor Active Directory\&. Vea
+\fBsssd-ad\fR(5)
+para más información sobre la configuración del proveedor AD\&.
+.sp
+\(lqnone\(rq
+deshabilita el buscador de subdominios explícitamente\&.
+.sp
+Por defecto: el valor de
+\(lqid_provider\(rq
+se usa si está fijado\&.
+.RE
+.PP
+session_provider (cadena)
+.RS 4
+El proveedor que configura y gestiona las tareas relacionadas con la sesión de usuario\&. La única tarea de usuario que actualmente se provee es la integración con Fleet Commander, que trabaja solo con IPA\&. Los proveedores de sesiones soportados son:
+.sp
+\(lqipa\(rq
+para permitir llevar a cabo tareas relacionadas con la sesión de usuario\&.
+.sp
+\(lqnone\(rq
+no lleva a cabo ninguna tarea relacionada con la sesión de usuario\&.
+.sp
+Predeterminado:
+\(lqid_provider\(rq
+se usa si está ajustado y puede llevar a cabo tareas relacionadas con la sesión de usuario\&.
+.sp
+\fIAVISO:\fR
+Con el objetivo de tener esta característica trabajando como se espera SSSD se debe correr como "root" y o como usuario sin privilegios\&.
+.RE
+.PP
+autofs_provider (cadena)
+.RS 4
+El proveedor autofs usado por el dominio\&. Los proveedores autofs soportados son:
+.sp
+\(lqldap\(rq
+para cargar mapas almacenados en LDAP\&. Vea
+\fBsssd-ldap\fR(5)
+para más información sobre la configuración de LDAP\&.
+.sp
+\(lqipa\(rq
+para cargar mapas almacenados en un servidor IPA\&. Vea
+\fBsssd-ipa\fR(5)
+para más información sobre la configuración de IPA\&.
+.sp
+\(lqad\(rq
+para cargar mapas almacenados en un servidor AD\&. Vea
+\fBsssd-ad\fR(5)
+para más información sobre como configurar un proveedor AD\&.
+.sp
+\(lqnone\(rq
+deshabilita autofs explícitamente\&.
+.sp
+Por defecto: el valor de
+\(lqid_provider\(rq
+se usa si está fijado\&.
+.RE
+.PP
+hostid_provider (cadena)
+.RS 4
+El proveedor usado para recuperar información de identidad de host\&. Los proveedores de hostid soportados son:
+.sp
+\(lqipa\(rq
+para cargar la identidad del equipo almacenada en un servidor IPA\&. Vea
+\fBsssd-ipa\fR(5)
+para más información sobre la configuración de IPA\&.
+.sp
+\(lqnone\(rq
+deshabilita hostid explícitamente\&.
+.sp
+Por defecto: el valor de
+\(lqid_provider\(rq
+se usa si está fijado\&.
+.RE
+.PP
+re_expression (cadena)
+.RS 4
+Expresión regular para este dominio que describe como analizar gramaticalmente la cadena que contiene el nombre de usuario y el dominio en estos componentes\&. El "dominio" puede coincidir bien con el nombre de dominio de configuración SSSD o en el caso de subdominios de confianza IPA y dominios Active Directory, el nombre plano (NetBIOS) del dominio\&.
+.sp
+Por defecto para el proveedor AD e IPA:
+\(lq(((?P<domain>[^\e\e]+)\e\e(?P<name>\&.+$))|((?P<name>[^@]+)@(?P<domain>\&.+$))|(^(?P<name>[^@\e\e]+)$))\(rq
+que permite tres estilos diferentes de nombres de usuario:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+nombre de usuario
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+username@domain\&.name
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+dominio/nombre_de_usuario
+.RE
+.sp
+Mientras los primeros dos corresponden al valor por defecto general el tercero se introduce para permitir una fácil integración de usuarios desde dominios Windows\&.
+.sp
+Predeterminado:
+\(lq(?P<name>[^@]+)@?(?P<domain>[^@]*$)\(rq
+que traduce al "todo lo que hay hasta el signo
+\(lq@\(rq
+es el nombre, el dominio es el resto detrás de este signo"
+.sp
+AVISO: Algunos grupos Active Directory, normalmente aquellos que se usan por MS Exchange contienen un signo
+\(lq@\(rq
+en el nombre, lo que choca con el valor predeterminado de re_expressionpara los proveedores AD e IPA\&. Para soportar estos grupos, considere cambiar el valor de re_expression a:
+\(lq((?P<name>\&.+)@(?P<domain>[^@]+$))\(rq\&.
+.RE
+.PP
+full_name_format (cadena)
+.RS 4
+\fBprintf\fR(3)\-formato compatible que describe como componer un nombre de dominio totalmente cualificado y los componentes del nombre de dominio\&.
+.sp
+Son soportadas las siguientes expresiones:
+.PP
+%1$s
+.RS 4
+nombre de usuario
+.RE
+.PP
+%2$s
+.RS 4
+nombre de dominio como se especifica en el fichero de configuración SSSD
+.RE
+.PP
+%3$s
+.RS 4
+nombre plano de dominio\&. Principalmente usado por los dominios Active Directory tanto los configurados directamente como los descubiertos por medio de IPA de confianza\&.
+.RE
+.sp
+Predeterminado:
+\(lq%1$s@%2$s\(rq\&.
+.RE
+.PP
+lookup_family_order (cadena)
+.RS 4
+Suministra la capacidad para seleccionar la familia de dirección preferente a usar cuando se lleven a cabo búsquedas DNS\&.
+.sp
+Valores soportados:
+.sp
+ipv4_first: Intenta buscar dirección IPv4, si falla, intenta IPv6
+.sp
+ipv4_only: Sólo intenta resolver nombres de host a direccones IPv4\&.
+.sp
+ipv6_first: Intenta buscar dirección IPv6, si falla, intenta IPv4
+.sp
+ipv6_only: Sólo intenta resolver nombres de host a direccones IPv6\&.
+.sp
+Predeterminado: ipv4_first
+.RE
+.PP
+dns_resolver_timeout (entero)
+.RS 4
+Define la cantidad de tiempo (en segundos) a esperar una respuesta de un fallo interno sobre un servicio ntes de asumir que ese servicio es inalcanzable\&. ISi se alcanza este tiempo de salida, el dominio continuará trabajando en modo offline\&.
+.sp
+Por favor vea la sección
+\(lqRECUPERACIÓN DE FALLOS\(rq
+para más información sobre la resolución del servicio\&.
+.sp
+Predeterminado: 6
+.RE
+.PP
+dns_discovery_domain (cadena)
+.RS 4
+Si el descubridor de servicio se usa en el punto final, especifica la parte de dominio de la pregunta al descubridor de servicio DNS\&.
+.sp
+Predeterminado: Utilizar la parte del dominio del nombre de host del equipo
+.RE
+.PP
+override_gid (entero)
+.RS 4
+Anula el valor primario GID con el especificado\&.
+.RE
+.PP
+case_sensitive (cadena)
+.RS 4
+Trata nombres de usuario y de grupo como sensibles a mayúsculas/minúsculas\&. Los valores de opción posibles son:
+.PP
+True
+.RS 4
+Distingue mayúsculas y minúsculas\&. Este valor es invalido para el proveedor AD\&.
+.RE
+.PP
+False
+.RS 4
+No sensible a mayúsculas minúsculas\&.
+.RE
+.PP
+Preserving
+.RS 4
+Igual que False (no sensible a mayúsculas minúsculas\&.), pero sin minúsculas en los nombres en el resultado de las operaciones NSS\&. Advierta que los nombres de alias (y en el caso de servicios también los nombres de protocolo) están en minúsculas en la salida\&.
+.RE
+.sp
+Predeterminado: True (False para proveedor AD)
+.RE
+.PP
+subdomain_inherit (cadena)
+.RS 4
+Especifica una lista de parámetros de configuración que deberían ser heredados por un subdominio\&. Por favor advierta que solo pueden ser heredados parámetros seleccionados\&. Actualmente se pueden heredar las siguientes opciones:
+.sp
+ignore_group_members
+.sp
+ldap_purge_cache_timeout
+.sp
+ldap_use_tokengroups
+.sp
+ldap_user_principal
+.sp
+ldap_krb5_keytab (se deberá usar el valor de krb5_keytab si no se ha fijado explícitamente ldap_krb5_keytab)
+.sp
+Ejemplo:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+subdomain_inherit = ldap_purge_cache_timeout
+                            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Predeterminado: none
+.sp
+Aviso: Esta opción solo trabaja con el proveedor IPA y AD\&.
+.RE
+.PP
+subdomain_homedir (cadena)
+.RS 4
+Use este directorio home como valor predeterminado para todos los subdominios dentro de este dominio en IPA AD de confianza\&. Vea
+\fIoverride_homedir\fR
+para información sobre los posibles valores\&. Además de esto, la expansión de abajo sólo puede ser usada con
+\fIsubdomain_homedir\fR\&.
+.PP
+%F
+.RS 4
+flat (NetBIOS) nombre de un subdominio\&.
+.RE
+.sp
+Este valor puede ser anulado por la opción
+\fIoverride_homedir\fR\&.
+.sp
+Por defecto:
+/home/%d/%u
+.RE
+.PP
+realmd_tags (cadena)
+.RS 4
+Diversas banderas almacenadas por el servicio de configuración realmd para este dominio\&.
+.RE
+.PP
+cached_auth_timeout (entero)
+.RS 4
+Especifica el tiempo en segundos desde la última autenticación en línea con éxito por las cuales el usuario serán autenticado usando las credenciales en cache mientras SSSD está en modo en línea\&. Si las credenciales son incorrectas, SSSD cae de nuevo a la autenticación en linea\&.
+.sp
+Este valor de opción es heredado por todos los dominios de confianza\&. En este momento no es posible establecer un valor diferente por dominio de confianza\&.
+.sp
+El valor especial 0 implica que esta función está deshabilitada\&.
+.sp
+Por favor advierta que si
+\(lqcached_auth_timeout\(rq
+es mayor que
+\(lqpam_id_timeout\(rq
+el otro extremo podría ser llamado para gestionar
+\(lqinitgroups\&.\(rq
+.sp
+Predeterminado: 0
+.RE
+.PP
+auto_private_groups (cadena)
+.RS 4
+Esta opción toma cualquiera de los tres valores disponibles:
+.PP
+true
+.RS 4
+crear el grupo privado de usuario incondicionalmente desde el número UID del usuario\&. El número GID se ignora en este caso\&.
+.sp
+AVISO: Puesto que el número GID y el grupo privado de usuario se infieren de número UID, no está soportado tener múltiples entrada con los mismos UID o GID con esta opción\&. En otras palabras, habilitando esta opción se fuerza la unicidad den el espacio de ID\&.
+.RE
+.PP
+false
+.RS 4
+Use siempre el número GID primario del usuario\&. El número GID debe referirse a un objeto grupo en las base de datos LDAP\&.
+.RE
+.PP
+hybrid
+.RS 4
+A primary group is autogenerated for user entries whose UID and GID numbers have the same value and at the same time the GID number does not correspond to a real group object in LDAP\&. If the values are the same, but the primary GID in the user entry is also used by a group object, the primary GID of the user resolves to that group object\&.
+.sp
+Si el UID y el GID de un usuario son diferentes, el GID debe corresponder a una entrada de grupo, de otro modo el GID simplemente no se puede resolver\&.
+.sp
+Esta característica es útil para entornos que desean parar manteniendo un grupo separado de objetos grupos para el usuario de grupos privados, pero también desea retener los grupos privados existentes del usuario\&.
+.RE
+.sp
+Para subdominios el valor por defecto es False par subdominios que usan POSIX IDs asignados y True para subdominios que usan mapeo de ID automático\&.
+.sp
+El valor de auto_private_groups puede bien ser establecido por subdominios en una subsección, por ejemplo:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/forest\&.domain/sub\&.domain]
+auto_private_groups = false
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+o globalmente para todos los subdominios en la sección principal dominio usando la opción subdomain_inherit:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/forest\&.domain]
+subdomain_inherit = auto_private_groups
+auto_private_groups = false
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.RE
+.PP
+Opciones válidas para dominios proxy\&.
+.PP
+proxy_pam_target (cadena)
+.RS 4
+El proxy de destino PAM próximo a\&.
+.sp
+Por defecto: no se fija por defecto, usted tiene que coger una configuración pam existente o crear una nueva y añadir el nombre de servicio aquí\&.
+.RE
+.PP
+proxy_lib_name (cadena)
+.RS 4
+El nombre de la librería NSS para usar en los dominios proxy\&. Las funciones NSS buscadas dentro de la librería están el formato de _nss_$(libName)_$(function), por ejemplo _nss_files_getpwent\&.
+.RE
+.PP
+proxy_fast_alias (booleano)
+.RS 4
+Cuando un usuario o grupo es buscado por nombre en el proveedor proxy, una segunda búsqueda por ID es llevada a cabo para \(lqestandarizar\(rq el nombre en el caso de que el nombre pedido fuera un alias\&. Fijando esta opción a true se causaría que SSSD lleve a cabo una búsqueda de ID desde el escondrijo por razones de rendimiento\&.
+.sp
+Predeterminado: false
+.RE
+.PP
+proxy_max_children (entero)
+.RS 4
+Esta opción especifica el número de hijos proxy pre\-bifurcados\&. Es útil para entornor SSSD de alta carga donde sssd puede quedarse sin espacios para hijos disponibles, lo que podría causar errores debido a las peticiones que son encoladas\&.
+.sp
+Predeterminado: 10
+.RE
+.SS "Dominios de aplicaciones"
+.PP
+SSSD, con su interfaz D\-Bus (see
+\fBsssd-ifp\fR(5)) es atractivo para las aplicaciones como puerta de entrada a un directorio LDAP donde se almacenan usuarios y grupos\&. Sin embargo, de modo distinto al tradicional despliegue SSSD donde todos los usuarios y grupos bien tienen atributos POSIX o esos atributos se pueden inferir desde los Windows SIDs, en muchos casos los usuarios y grupos en el escenario de soporte de la aplicación no tienen atributos POSIX\&. En lugar de establecer una sección
+\(lq[domain/\fINAME\fR]\(rq, el administrador puede configurar una sección
+\(lq[application/\fINAME\fR]\(rq
+que internamente represente un dominio con un tipo
+\(lqapplication\(rq
+que opcionalmente herede ajustes de un dominio SSSD tradicional\&.
+.PP
+Por favor advierta que el dominio de aplicación debe aún ser habilitado explícitamente en el parámetros
+\(lqdomains\(rq
+de modo que la orden de búsqueda entre el dominio de aplicación y su dominio POSIX hermano está establecido correctamente\&.
+.PP
+\fBParámetros de dominio de aplicación\fR
+.PP
+inherit_from (cadena)
+.RS 4
+En el dominio tipo SSSD POSIX el dominio de aplicación hereda todos los ajustes\&. El dominio de aplicación puede además añadir sus propios ajustes a los ajustes de aplicación que aumentan o anulan los ajustes del dominio
+\(lqhermano\(rq\&.
+.sp
+Por defecto: No definido
+.RE
+.PP
+El siguiente ejemplo ilustra el uso de un dominio de aplicación\&. En este ajuste, el dominio POSIX está conectado a un servidor LDAP y se usa por el SO a través de un contestador NSS\&. Además, el dominio de aplicación también pide el atributo telephoneNumber, lo almacena como el atributo phone en la cache y hace al atributo phone alcanzable a través del interfaz D\-Bus\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[sssd]
+domains = appdom, posixdom
+
+[ifp]
+user_attributes = +phone
+
+[domain/posixdom]
+id_provider = ldap
+ldap_uri = ldap://ldap\&.example\&.com
+ldap_search_base = dc=example,dc=com
+
+[application/appdom]
+inherit_from = posixdom
+ldap_user_extra_attrs = phone:telephoneNumber
+.fi
+.if n \{\
+.RE
+.\}
+.SH "SECCIÓN DE DOMINIO DE CONFIANZA"
+.PP
+Algunas opciones usadas en la sección dominio puede ser usadas también en la sección dominio de confianza, esto es, en una sección llamada\(lq[domain/\fIDOMAIN_NAME\fR/\fITRUSTED_DOMAIN_NAME\fR]\(rq\&. Donde DOMAIN_NAME es el dominio base real\&. Por favor vea los ejemplos de abajo para una explicación\&. Actualmente las opciones soportadas en la sección de dominio de confianza son:
+.PP
+ldap_search_base,
+.PP
+ldap_user_search_base,
+.PP
+ldap_group_search_base,
+.PP
+ldap_netgroup_search_base,
+.PP
+ldap_service_search_base,
+.PP
+ldap_sasl_mech,
+.PP
+ad_server,
+.PP
+ad_backup_server,
+.PP
+ad_site,
+.PP
+use_fully_qualified_names
+.PP
+Para más detalles sobre estas opciones vea su descripción individual en la página de manual\&.
+.SH "SECCIÓN DE MAPEO DEL CERTIFICADO"
+.PP
+Para permitir la autenticación con Smartcards y certificados SSSD debe ser capaz de mapear los certificados con los usuarios\&. Esto puede ser hecho añadiendo el certificado completo al objeto LDAP del usuario o a una anulación local\&. Mientras requierir el uso del certificado completo para usar la característica autenticación Smartcard de SSH (ver
+\fBsss_ssh_authorizedkeys\fR(8)
+para más detalles) puede ser engorroso o no siempre posible de hacer esto en el caso general donde los servicios locales usan autenticación PAM\&.
+.PP
+Para hacer que la asignación sea más flexible, se agregaron reglas de asignación y coincidencia a SSSD (ver más detalles en
+\fBsss-certmap\fR(5))\&.
+.PP
+Un regla de mapeo y coincidencia puede ser añadida a la configuración SSSD en una sección en si misma con un nombre como
+\(lq[certmap/\fIDOMAIN_NAME\fR/\fIRULE_NAME\fR]\(rq\&. En esta sección están permitidas las siguientes opciones:
+.PP
+matchrule (cadena)
+.RS 4
+Solo los certificados de la Smartcard que coincidan con esta regla serán procesados, los demás son ignorados\&.
+.sp
+Predeterminado: KRB5:<EKU>clientAuth, i\&.e\&. solo los certificados que tengan Extended Key Usage
+\(lqclientAuth\(rq
+.RE
+.PP
+maprule (cadena)
+.RS 4
+Define como se encuentra un usuario desde un certificado dado\&.
+.sp
+Predeterminado:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+LDAP:(userCertificate;binary={cert!bin}) para proveedores basados en LDAP como
+\(lqldap\(rq,
+\(lqAD\(rq
+o
+\(lqipa\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+El RULE_NAME para el proveedor de
+\(lqficheros\(rq
+que intenta encontrar un usuario con el mismo nombre\&.
+.RE
+.sp
+.RE
+.PP
+domains (cadena)
+.RS 4
+Lista separada por comas de nombrs de dominios a los que la regla debería ser aplicada\&. Por defecto una regla solo es válida en el dominio configurado en sssd\&.conf\&. Si el proveedor soporta subdominios esta opción puede ser usada para añadir la regla a los subdominios también\&.
+.sp
+Predetermiado: el dominio configurado en sssd\&.conf
+.RE
+.PP
+priority (entero)
+.RS 4
+Valor entero sin signo que define la prioridad de la regla\&. El número más alto la prioridad más baja\&.
+\(lq0\(rq
+se mantiene para la prioridad más alte mientras que
+\(lq4294967295\(rq
+es la más baja\&.
+.sp
+Predeterminado: la prioridad más baja
+.RE
+.PP
+Para hacer la configuración sencilla y reducir la cantidad de opciones de configuración el proveedor de
+\(lqficheros\(rq
+tiene algunas propiedades especiales:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+si maprule no está establecido el nombre RULE_NAME se asume como en del usuario coincidente
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+si se usa una maprule tanto un único nombre de usuario como una plantilla como
+\(lq{subject_rfc822_name\&.short_name}\(rq
+debe ir entre llaves como e\&.g\&.
+\(lq(username)\(rq
+or
+\(lq({subject_rfc822_name\&.short_name})\(rq
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+la opción
+\(lqdomains\(rq
+es ignorada
+.RE
+.sp
+.SH "SECCIÓN DE CONFIGURACIÓN INICIAL"
+.PP
+Si existe un fichero especial(/var/lib/sss/pubconf/pam_preauth_available) el módulo PAM de SSSD pam_sss le pedirá a SSSD que descubra que métodos de autenticación están disponibles para el usuario que intenta iniciar sesión\&. En base a los resultados pam_sss pedirá al usuario las credenciales apropiadas\&.
+.PP
+With the growing number of authentication methods and the possibility that there are multiple ones for a single user the heuristic used by pam_sss to select the prompting might not be suitable for all use cases\&. The following options should provide a better flexibility here\&.
+.PP
+Each supported authentication method has its own configuration subsection under
+\(lq[prompting/\&.\&.\&.]\(rq\&. Currently there are:
+.PP
+[prompting/password]
+.RS 4
+para configurar la solicitud de contraseña, las opciones permitidas son:
+.PP
+password_prompt
+.RS 4
+cambiar la cadena de solicitud de contraseña
+.RE
+.sp
+.RE
+.PP
+[prompting/2fa]
+.RS 4
+para configurar la consulta de autenticación de dos factores, las opciones permitidas son:
+.PP
+first_prompt
+.RS 4
+para cambiar la cadena de la solicitud del primer factor
+.RE
+.PP
+second_prompt
+.RS 4
+para cambiar la cadena de la solicitud para el segundo factor
+.RE
+.PP
+single_prompt
+.RS 4
+boolean value, if True there will be only a single prompt using the value of first_prompt where it is expected that both factors are entered as a single string
+.RE
+.sp
+.RE
+.PP
+It is possible to add a subsection for specific PAM services, e\&.g\&.
+\(lq[prompting/password/sshd]\(rq
+to individual change the prompting for this service\&.
+.SH "EJEMPLOS"
+.PP
+1\&. El siguiente ejemplo muestra una configuración SSSD típica\&.No describe la configuración de los dominios en si mismos \- vea la documentación sobre configuración de dominios para mas detalles\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[sssd]
+domains = LDAP
+services = nss, pam
+config_file_version = 2
+
+[nss]
+filter_groups = root
+filter_users = root
+
+[pam]
+
+[domain/LDAP]
+id_provider = ldap
+ldap_uri = ldap://ldap\&.example\&.com
+ldap_search_base = dc=example,dc=com
+
+auth_provider = krb5
+krb5_server = kerberos\&.example\&.com
+krb5_realm = EXAMPLE\&.COM
+cache_credentials = true
+
+min_id = 10000
+max_id = 20000
+enumerate = False
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+2\&. El siguiente ejemplo muestra la configuración de confianza IPA AD el bosque AD consta de dos dominios en una estructura padre\-hijo\&. Supone que el dominio IPA (ipa\&.com) tiene confianza con el dominio AD (ad\&.com)\&. ad\&.com tiene dominio hijo (child\&.ad\&.com)\&. Para habilitar nombres cortos en el dominio hijo se debería usar la siguiente configuración\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/ipa\&.com/child\&.ad\&.com]
+use_fully_qualified_names = false
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+3\&. El siguiente ejemplo muestra la configuración para dos reglas de mapeo de certificado\&. La primera es válida para el dominio configurado
+\(lqmy\&.domain\(rq
+y adicionalmente para los subdominios
+\(lqyour\&.domain\(rq
+y usa el certificado completo en el filtro de búsqueda\&. El segundo ejemplo es válido para el dominio
+\(lqfiles\(rq
+donde se asume que el proveedor de ficheros se usa por este dominio y contiene la regla de coincidencia para el usuario local
+\(lqmyname\(rq\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[certmap/my\&.domain/rule_name]
+matchrule = <ISSUER>^CN=My\-CA,DC=MY,DC=DOMAIN$
+maprule = (userCertificate;binary={cert!bin})
+domains = my\&.domain, your\&.domain
+priority = 10
+
+[certmap/files/myname]
+matchrule = <ISSUER>^CN=My\-CA,DC=MY,DC=DOMAIN$<SUBJECT>^CN=User\&.Name,DC=MY,DC=DOMAIN$
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "VEA TAMBIEN"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

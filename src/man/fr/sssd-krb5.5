@@ -1,0 +1,490 @@
+'\" t
+.\"     Title: sssd-krb5
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Formats de fichier et conventions
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-KRB5" "5" "12/09/2020" "SSSD" "Formats de fichier et conventi"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-krb5 \- Fournisseur Kerberos SSSD
+.SH "DESCRIPTION"
+.PP
+Cette page de manuel décrit la configuration du moteur d\*(Aqauthentification de Kerberos 5 pour
+\fBsssd\fR(8)\&. Pour une référence détaillée sur la syntaex, veuillez vous référer à la section
+\(lqFORMAT DE FICHIER\(rq
+du manuel de
+\fBsssd.conf\fR(5)\&.
+.PP
+Le moteur d\*(Aqauthentification Kerberos 5 contient les fournisseurs d\*(Aqauthentification et de changement de mot de passe\&. Il doit être couplé avec un fournisseur d\*(Aqidentité de manière à fonctionner proprement (par exemple, id_provider = ldap)\&. Plusieurs informations requises par le moteur d\*(Aqauthentification Kerberos 5 doivent être fournies par le fournisseur d\*(Aqidentité, telles que le nom du principal de l\*(Aqutilisateur Kerberos (UPN)\&. La configuration du fournisseur d\*(Aqidentité doit avoir une entrée pour spécifier l\*(AqUPN\&. Veuillez vous référer aux pages du manuel du fournisseur d\*(Aqidentité ad\-hoc pour pouvoir le configurer\&.
+.PP
+Ce moteur fournit aussi un contrôle d\*(Aqaccès sur le fichier \&.k5login dans le répertoire personnel de l\*(Aqutilisateur\&. Voir
+\fB.k5login\fR(5)
+pour plus de détails\&. Veuillez noter qu\*(Aqun fichier \&.k5login vide interdira tout accès pour cet utilisateur\&. Pour activer cette option, utilisez \(Fo access_provider = krb5 \(Fc dans votre configuration de SSSD\&.
+.PP
+Dans le cas où l\*(AqUPN n\*(Aqest pas valide dans le moteur d\*(Aqidentité,
+\fBsssd\fR
+construira un UPN en utilisant le format
+\fIutilisateur\fR@\fIkrb5_realm\fR\&.
+.SH "OPTIONS DE CONFIGURATION"
+.PP
+Si le module auth krb5 est utilisé dans un domaine SSSD, les options suivantes doivent être utilisées\&. Cf\&. la page de manuel
+\fBsssd.conf\fR(5), section
+\(lqSECTIONS DOMAINE\(rq
+pour plus de détails sur la configuration d\*(Aqun domaine SSSD\&.
+.PP
+krb5_server, krb5_backup_server (string)
+.RS 4
+Spécifie la liste séparée par des virgules des adresses IP ou des noms de systèmes des serveurs Kerberos auquel SSSD doit se connecter, par ordre de préférence\&. Pour plus d\*(Aqinformations sur la redondance par bascule et le serveur, consultez la section de
+\(lqBASCULE\(rq\&. Un numéro de port facultatif (précédé de deux\-points) peut être ajouté aux adresses ou aux noms de systèmes\&. Si vide, le service de découverte est activé \- pour plus d\*(Aqinformations, se reporter à la section
+\(lqDÉCOUVERTE DE SERVICE\(rq\&.
+.sp
+Lors de l\*(Aqutilisation de découverte de services pour le KDC ou les serveurs kpasswd, SSSD recherche en premier les entrées DNS qui définissent _udp comme protocole, et passe sur _tcp si aucune entrée n\*(Aqest trouvée\&.
+.sp
+Cette option s\*(Aqappelait
+\(lqkrb5_kdcip\(rq
+dans les versions précédentes de SSSD\&. Bien que ce nom soit toujours reconnu à l\*(Aqheure actuelle, il est conseillé de migrer les fichiers de configuration vers l\*(Aqutilisation de
+\(lqkrb5_server\(rq\&.
+.RE
+.PP
+krb5_realm (chaîne)
+.RS 4
+Le nom du domaine Kerberos\&. Cette option est nécessaire et doit être renseignée\&.
+.RE
+.PP
+krb5_kpasswd, krb5_backup_kpasswd (string)
+.RS 4
+Si le service de changement de mot de passe ne fonctionne pas sur le KDC, des serveurs de secours peuvent être définis ici\&. Un numéro de port facultatif (précédé par un signe deux\-points) peut\-être être suffixé aux adresses ou aux noms de systèmes\&.
+.sp
+Pour plus d\*(Aqinformation sur la bascule et la redondance de serveurs, voir la section
+\(lqBASCULE\(rq\&. Noter que même si il n\*(Aqy a plus de serveurs kpasswd à essayer, le moteur ne passe pas en mode hors\-ligne si l\*(Aqauthentification KDC est toujours possible\&.
+.sp
+Par défaut : utiliser le KDC
+.RE
+.PP
+krb5_ccachedir (chaîne)
+.RS 4
+Directory to store credential caches\&. All the substitution sequences of krb5_ccname_template can be used here, too, except %d and %P\&. The directory is created as private and owned by the user, with permissions set to 0700\&.
+.sp
+Par défaut : /tmp
+.RE
+.PP
+krb5_ccname_template (chaîne)
+.RS 4
+Location of the user\*(Aqs credential cache\&. Three credential cache types are currently supported:
+\(lqFILE\(rq,
+\(lqDIR\(rq
+and
+\(lqKEYRING:persistent\(rq\&. The cache can be specified either as
+\fITYPE:RESIDUAL\fR, or as an absolute path, which implies the
+\(lqFILE\(rq
+type\&. In the template, the following sequences are substituted:
+.PP
+%u
+.RS 4
+identifiant de connexion
+.RE
+.PP
+%U
+.RS 4
+UID de l\*(Aqutilisateur
+.RE
+.PP
+%p
+.RS 4
+nom du principal
+.RE
+.PP
+%r
+.RS 4
+nom de domaine
+.RE
+.PP
+%h
+.RS 4
+répertoire personnel
+.RE
+.PP
+%d
+.RS 4
+valeur de krb5_ccachedir
+.RE
+.PP
+%P
+.RS 4
+l\*(AqID de processus du client SSSD
+.RE
+.PP
+%%
+.RS 4
+un \(Fo % \(Fc littéral
+.RE
+.sp
+If the template ends with \*(AqXXXXXX\*(Aq mkstemp(3) is used to create a unique filename in a safe way\&.
+.sp
+When using KEYRING types, the only supported mechanism is
+\(lqKEYRING:persistent:%U\(rq, which uses the Linux kernel keyring to store credentials on a per\-UID basis\&. This is also the recommended choice, as it is the most secure and predictable method\&.
+.sp
+The default value for the credential cache name is sourced from the profile stored in the system wide krb5\&.conf configuration file in the [libdefaults] section\&. The option name is default_ccache_name\&. See krb5\&.conf(5)\*(Aqs PARAMETER EXPANSION paragraph for additional information on the expansion format defined by krb5\&.conf\&.
+.sp
+NOTE: Please be aware that libkrb5 ccache expansion template from
+\fBkrb5.conf\fR(5)
+uses different expansion sequences than SSSD\&.
+.sp
+Par défaut\ \&: (valeur provenant de libkrb5)
+.RE
+.PP
+krb5_auth_timeout (entier)
+.RS 4
+Délai d\*(Aqattente, en secondes, après l\*(Aqannulation d\*(Aqune requête d\*(Aqauthentification en ligne ou de changement de mot de passe\&. La requête d\*(Aqauthentification sera effectuée hors\-ligne si cela est possible\&.
+.sp
+Par défaut : 6
+.RE
+.PP
+krb5_validate (booléen)
+.RS 4
+Vérifie à l\*(Aqaide de krb5_keytab que le TGT obtenu n\*(Aqa pas été usurpé\&. Les entrées d\*(Aqun fichier keytab sont vérifiées dans l\*(Aqordre, et la première entrée avec un domaine correspondant est utilisée pour la validation\&. Si aucune entrée ne correspond au domaine, la dernière entrée dans le fichier keytab est utilisée\&. Ce processus peut être utilisé pour valider des environnements utilisant l\*(Aqapprobation entre domaines en plaçant l\*(Aqentrée keytab appropriée comme dernière ou comme seule entrée dans le fichier keytab\&.
+.sp
+Par défaut : false
+.RE
+.PP
+krb5_keytab (chaîne)
+.RS 4
+L\*(Aqemplacement du fichier keytab à utiliser pour valider les données d\*(Aqidentification obtenues à partir de KDC\&.
+.sp
+Par défaut : /etc/krb5\&.keytab
+.RE
+.PP
+krb5_store_password_if_offline (booléen)
+.RS 4
+Stocke le mot de passe de l\*(Aqutilisateur si le fournisseur est hors\-ligne, puis l\*(Aqutilise pour obtenir un TGT lorsque le fournisseur redevient disponible en ligne\&.
+.sp
+NOTE\ \&: cette fonctionnalité n\*(Aqest actuellement disponible que sur les plates\-formes Linux\&. Les mots de passe stockés de cette manière sont conservés en texte brut dans le trousseau de clés du noyau et sont potentiellement accessibles à l\*(Aqutilisateur root (avec difficulté)\&.
+.sp
+Par défaut : false
+.RE
+.PP
+krb5_renewable_lifetime (chaîne)
+.RS 4
+Demande un ticket renouvelable avec une durée de vie totale, donnée par un entier immédiatement suivi par une unité de temps :
+.sp
+\fIs\fR
+pour secondes
+.sp
+\fIm\fR
+pour minutes
+.sp
+\fIh\fR
+pour heures
+.sp
+\fId\fR
+pour jours\&.
+.sp
+Si aucune unité n\*(Aqest spécifiée,
+\fIs\fR
+est utilisé\&.
+.sp
+NOTE\ \&: il n\*(Aqest pas possible de mélanger les unités\&. Pour indiquer une durée de vie renouvelable de une heure et trente minutes, utiliser \(Fo 90m \(Fc au lieu de \(Fo 1h30m \(Fc\&.
+.sp
+Par défaut : non défini, c\*(Aqest\-à\-dire que le TGT n\*(Aqest pas renouvelable
+.RE
+.PP
+krb5_lifetime (chaîne)
+.RS 4
+Demande un ticket avec une durée de vie, donnée par un entier immédiatement suivi par une unité de temps :
+.sp
+\fIs\fR
+pour secondes
+.sp
+\fIm\fR
+pour minutes
+.sp
+\fIh\fR
+pour heures
+.sp
+\fId\fR
+pour jours\&.
+.sp
+Si aucune unité n\*(Aqest spécifiée,
+\fIs\fR
+est utilisé\&.
+.sp
+NOTE : il n\*(Aqest pas possible de mélanger les unités\&. Pour indiquer une durée de vie de une heure et trente minutes, utiliser \(Fo 90m \(Fc au lieu de \(Fo 1h30m \(Fc\&.
+.sp
+Par défaut : non défini, c\*(Aqest\-à\-dire la durée de vie par défaut configurée dans le KDC\&.
+.RE
+.PP
+krb5_renew_interval (chaîne)
+.RS 4
+La durée, en secondes, entre deux vérifications pour savoir si le TGT doit être renouvelé\&. Les TGT sont renouvelés si environ la moitié de leur durée de vie est dépassée\&. Indiquée par un entier immédiatement suivi d\*(Aqune unité de temps\ \&:
+.sp
+\fIs\fR
+pour secondes
+.sp
+\fIm\fR
+pour minutes
+.sp
+\fIh\fR
+pour heures
+.sp
+\fId\fR
+pour jours\&.
+.sp
+Si aucune unité n\*(Aqest spécifiée,
+\fIs\fR
+est utilisé\&.
+.sp
+NOTE\ \&: il n\*(Aqest pas possible de mélanger les unités\&. Pour indiquer une durée de vie renouvelable de une heure et trente minutes, utiliser \(Fo 90m \(Fc au lieu de \(Fo 1h30m \(Fc\&.
+.sp
+Si cette option n\*(Aqest pas définie ou définie à 0, le renouvellement automatique est désactivé\&.
+.sp
+Par défaut : non défini
+.RE
+.PP
+krb5_use_fast (chaîne)
+.RS 4
+Active le flexible authentication secure tunneling (FAST) pour la pré\-authentification Kerberos\&. Les options suivantes sont supportées :
+.sp
+\fInever\fR\ \&: ne jamais utiliser FAST\&. Ceci équivaut à ne pas définir cette option\&.
+.sp
+\fItry\fR\ \&: eassyer d\*(Aqutiliser FAST\&. Si le serveur ne prend pas en charge FAST, continuer l\*(Aqauthentification sans\&.
+.sp
+\fIdemander\fR
+\ \&: imposer d\*(Aqutiliser FAST\&. L\*(Aqauthentification échoue si le serveur ne requiert pas FAST\&.
+.sp
+Par défaut : non défini, i\&.e\&. FAST n\*(Aqest pas utilisé\&.
+.sp
+NOTE\ \&: un fichier keytab est requis pour utiliser FAST\&.
+.sp
+NOTE\ \&: SSSD prend en charge le paramètre FAST uniquement avec MIT Kerberos version 1\&.8 et au\-delà\&. L\*(Aqutilisation de SSSD avec une version antérieure de MIT Kerberos avec cette option est une erreur de configuration\&.
+.RE
+.PP
+krb5_fast_principal (chaîne)
+.RS 4
+Spécifie le principal de serveur afin d\*(Aqutiliser FAST\&.
+.RE
+.PP
+krb5_canonicalize (booléen)
+.RS 4
+Spécifie si les principaux du système et de l\*(Aqutilisateur doivent être rendus canoniques\&. Cette fonctionnalité est disponible avec MIT Kerberos 1\&.7 et versions suivantes\&.
+.sp
+Par défaut : false
+.RE
+.PP
+krb5_use_kdcinfo (booléen)
+.RS 4
+Indique si SSSD doit préciser aux bibliothèques Kerberos quels domaine et KDC utiliser\&. Cette option est activée par défaut, si elle est désactivée, la bibliothèque Kerberos doit être configurée à l\*(Aqaide du fichier de configuration
+\fBkrb5.conf\fR(5)\&.
+.sp
+Consulter la page de manuel de
+\fBsssd_krb5_locator_plugin\fR(8)
+pour plus d\*(Aqinformations sur le greffon de localisation\&.
+.sp
+Par défaut : true
+.RE
+.PP
+krb5_kdcinfo_lookahead (string)
+.RS 4
+When krb5_use_kdcinfo is set to true, you can limit the amount of servers handed to
+\fBsssd_krb5_locator_plugin\fR(8)\&. This might be helpful when there are too many servers discovered using SRV record\&.
+.sp
+The krb5_kdcinfo_lookahead option contains two numbers separated by a colon\&. The first number represents number of primary servers used and the second number specifies the number of backup servers\&.
+.sp
+For example
+\fI10:0\fR
+means that up to 10 primary servers will be handed to
+\fBsssd_krb5_locator_plugin\fR(8)
+but no backup servers\&.
+.sp
+Default: 3:1
+.RE
+.PP
+krb5_use_enterprise_principal (booléen)
+.RS 4
+Indique si le principal de l\*(Aqutilisateur doit être traité comme un principal d\*(Aqentreprise\&. Cf\&. la section 5 de la RFC 6806 pour plus de détails sur les principals d\*(Aqentreprise\&.
+.sp
+Par défaut\ \&: false (AD provider\ \&: true)
+.sp
+The IPA provider will set to option to \*(Aqtrue\*(Aq if it detects that the server is capable of handling enterprise principals and the option is not set explicitly in the config file\&.
+.RE
+.PP
+krb5_map_user (chaîne)
+.RS 4
+The list of mappings is given as a comma\-separated list of pairs
+\(lqusername:primary\(rq
+where
+\(lqusername\(rq
+is a UNIX user name and
+\(lqprimary\(rq
+is a user part of a kerberos principal\&. This mapping is used when user is authenticating using
+\(lqauth_provider = krb5\(rq\&.
+.sp
+exemple :
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+krb5_realm = REALM
+krb5_map_user = joe:juser,dick:richard
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+\(lqjoe\(rq
+and
+\(lqdick\(rq
+are UNIX user names and
+\(lqjuser\(rq
+and
+\(lqrichard\(rq
+are primaries of kerberos principals\&. For user
+\(lqjoe\(rq
+resp\&.
+\(lqdick\(rq
+SSSD will try to kinit as
+\(lqjuser@REALM\(rq
+resp\&.
+\(lqrichard@REALM\(rq\&.
+.sp
+Par défaut : non défini
+.RE
+.SH "BASCULE"
+.PP
+La fonctionnalité de bascule autorise le moteur à basculer automatiquement sur un serveur différent si le serveur actuel est défaillant\&.
+.SS "Syntaxe de bascule"
+.PP
+La liste des serveurs est donnée sous forme de liste séparée par des virgules ; un nombre quelconque d\*(Aqespaces est autorisé autour de la virgule\&. Les serveurs sont répertoriés par ordre de préférence\&. La liste peut contenir un nombre quelconque de serveurs\&.
+.PP
+Pour chaque option de configuration alors que la bascule est activée, il existe deux variantes\ \&:
+\fIprimary\fR
+et
+\fIbackup\fR\&. L\*(Aqidée est que les serveurs dans la liste principale sont préférés et les serveurs de secours sont interrogés uniquement si aucun serveur primaire ne peut être atteint\&. Si un serveur de secours est sélectionné, un délai d\*(Aqattente de 31 secondes est défini\&. Après ce délai d\*(Aqattente, SSSD tentera périodiquement de se reconnecter à un des serveurs primaires\&. S\*(Aqil réussit, il remplacera l\*(Aqactuel serveur (de secours) actif\&.
+.SS "Mécanisme de bascule"
+.PP
+Le mécanisme de bascule fait la distinction entre une machine et d\*(Aqun service\&. Le moteur tente d\*(Aqabord de résoudre le nom d\*(Aqhôte d\*(Aqun ordinateur donné ; en cas d\*(Aqéchec de cette tentative de résolution, la machine est considérée comme hors ligne\&. Aucune autre tentative n\*(Aqest faite pour se connecter à cette machine pour tout autre service\&. Si la tentative de résolution réussit, le serveur principal tente de se connecter à un service sur cette machine\&. Si la tentative de connexion de service échoue, alors ce seul service est considéré comme hors ligne et le moteur passe automatiquement au service suivant\&. La machine est toujours considérée en ligne et peut toujours être considérée pour une tentative d\*(Aqaccès à un autre service\&.
+.PP
+Les tentatives de connexion ultérieures sont faites vers des machines ou des services marqués comme hors connexion après un délai spécifié\ \&; ce délai est actuellement spécifié en dur à 30 secondes\&.
+.PP
+S\*(Aqil n\*(Aqy a plus aucune machine à essayer, le moteur dans son ensemble bascule dans le mode hors connexion et tente ensuite de se reconnecter toutes les 30 secondes\&.
+.SS "Failover time outs and tuning"
+.PP
+Resolving a server to connect to can be as simple as running a single DNS query or can involve several steps, such as finding the correct site or trying out multiple host names in case some of the configured servers are not reachable\&. The more complex scenarios can take some time and SSSD needs to balance between providing enough time to finish the resolution process but on the other hand, not trying for too long before falling back to offline mode\&. If the SSSD debug logs show that the server resolution is timing out before a live server is contacted, you can consider changing the time outs\&.
+.PP
+This section lists the available tunables\&. Please refer to their description in the
+\fBsssd.conf\fR(5), manual page\&.
+.PP
+dns_resolver_server_timeout
+.RS 4
+Time in milliseconds that sets how long would SSSD talk to a single DNS server before trying next one\&.
+.sp
+Par défaut : 1000
+.RE
+.PP
+dns_resolver_op_timeout
+.RS 4
+Time in seconds to tell how long would SSSD try to resolve single DNS query (e\&.g\&. resolution of a hostname or an SRV record) before trying the next hostname or discovery domain\&.
+.sp
+Par défaut : 2
+.RE
+.PP
+dns_resolver_timeout
+.RS 4
+How long would SSSD try to resolve a failover service\&. This service resolution internally might include several steps, such as resolving DNS SRV queries or locating the site\&.
+.sp
+Default: 4
+.RE
+.PP
+For LDAP\-based providers, the resolve operation is performed as part of an LDAP connection operation\&. Therefore, also the
+\(lqldap_opt_timeout>\(rq
+timeout should be set to a larger value than
+\(lqdns_resolver_timeout\(rq
+which in turn should be set to a larger value than
+\(lqdns_resolver_op_timeout\(rq
+which should be larger than
+\(lqdns_resolver_server_timeout\(rq\&.
+.SH "DÉCOUVERTE DE SERVICE"
+.PP
+La fonctionnalité de découverte de services permet aux moteurs de trouver automatiquement les serveurs appropriés auxquels se connecter à l\*(Aqaide d\*(Aqune requête DNS spéciale\&. Cette fonctionnalité n\*(Aqest pas pris en charge pour sur les serveurs secondaires\&.
+.SS "Configuration"
+.PP
+Si aucun serveur n\*(Aqest spécifié, le moteur utilise automatiquement la découverte de services pour tenter de trouver un serveur\&. L\*(Aqutilisateur peut aussi choisir d\*(Aqutiliser des adresses de serveur et de découverte de services fixes en insérant un mot\-clé spécial,
+\(lq_srv_\(rq, dans la liste des serveurs\&. L\*(Aqordre de préférence est maintenu\&. Cette fonctionnalité est utile si, par exemple, l\*(Aqutilisateur préfère utiliser la découverte de services chaque fois que possible et se replier vers un serveur spécifique lorsqu\*(Aqaucun serveur ne peut être découvert à l\*(Aqaide du DNS\&.
+.SS "Le nom de domaine"
+.PP
+Se reporter au paramètre
+\(lqdns_discovery_domain\(rq
+dans la page de manuel
+\fBsssd.conf\fR(5)
+pour plus de détails\&.
+.SS "Le protocole"
+.PP
+Les requêtes spécifient généralement _tcp comme protocole\&. Les exceptions sont documentées dans les descriptions respectives des options\&.
+.SS "Voir aussi"
+.PP
+Pour plus d\*(Aqinformations sur le mécanisme de découverte de services, se reporter à la RFC 2782\&.
+.SH "EXEMPLE"
+.PP
+L\*(Aqexemple suivant suppose que SSSD est correctement configuré et que FOO est l\*(Aqun des domaines de la section
+\fI[sssd]\fR\&. Cet exemple montre uniquement la configuration de l\*(Aqauthentification Kerberos, et n\*(Aqinclut aucun fournisseur d\*(Aqidentité\&.
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+[domain/FOO]
+auth_provider = krb5
+krb5_server = 192\&.168\&.1\&.1
+krb5_realm = EXAMPLE\&.COM
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "VOIR AUSSI"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR

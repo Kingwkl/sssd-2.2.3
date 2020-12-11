@@ -1,0 +1,162 @@
+'\" t
+.\"     Title: sssd-simple
+.\"    Author: The SSSD upstream - https://pagure.io/SSSD/sssd/
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 12/09/2020
+.\"    Manual: Formats i convencions dels fitxers
+.\"    Source: SSSD
+.\"  Language: English
+.\"
+.TH "SSSD\-SIMPLE" "5" "12/09/2020" "SSSD" "Formats i convencions dels fit"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sssd-simple \- el fitxer de configuració per al proveïdor de control d\*(Aqaccés \*(Aqsimple\*(Aq de l\*(AqSSSD
+.SH "DESCRIPCIÓ"
+.PP
+En aquesta pàgina del manual es descriu la configuració del proveïdor de control d\*(Aqaccés simple per a
+\fBsssd\fR(8)\&. Per a una referència detallada de la sintaxi, aneu a la secció
+\(lqFORMAT DEL FITXER\(rq
+de la pàgina del manual
+\fBsssd.conf\fR(5)\&.
+.PP
+El proveïdor d\*(Aqaccés simple concedeix o denega l\*(Aqaccés basat en una llista d\*(Aqaccés o denegació dels noms dels usuaris o dels noms dels grups\&. S\*(Aqapliquen les regles següents:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Si totes les llistes estan buides, es concedeix l\*(Aqaccés
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Si es proporciona alguna llista, l\*(Aqordre d\*(Aqavaluació és permissió, denegació\&. Això vol dir que qualsevol coincidència amb la regla de denegació reemplaçarà qualsevol coincidència amb la regla de permissió\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Si es proporcionen una o ambdues llistes de "permissió", tots els usuaris són denegats excepte els que apareixen a la llista\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Si només es proporcionen llistes de "denegació", es concedeix l\*(Aqaccés a tots els usuaris excepte els que apareixen a la llista\&.
+.RE
+.sp
+.SH "OPCIONS DE CONFIGURACIÓ"
+.PP
+Per a més informació sobre la configuració d\*(Aqun domini SSSD, consulteu la secció
+\(lqSECCIONS DELS DOMINIS\(rq
+de la pàgina del manual
+\fBsssd.conf\fR(5)\&.
+.PP
+simple_allow_users (cadena)
+.RS 4
+Llista separada per comes dels usuaris a qui se\*(Aqls permet iniciar la sessió\&.
+.RE
+.PP
+simple_deny_users (cadena)
+.RS 4
+Llista separada per comes dels usuaris a qui se\*(Aqls denega explícitament l\*(Aqaccés\&.
+.RE
+.PP
+simple_allow_groups (cadena)
+.RS 4
+Llista separada per comes dels grups a qui se\*(Aqls permet iniciar la sessió\&. Això s\*(Aqaplica únicament als grups dins d\*(Aqaquest domini SSSD\&. No s\*(Aqavaluen els grups locals\&.
+.RE
+.PP
+simple_deny_groups (cadena)
+.RS 4
+Llista separada per comes dels grups a qui se\*(Aqls denega explícitament l\*(Aqaccés\&. Això s\*(Aqaplica únicament als grups dins d\*(Aqaquest domini SSSD\&. No s\*(Aqavaluen els grups locals\&.
+.RE
+.PP
+Specifying no values for any of the lists is equivalent to skipping it entirely\&. Beware of this while generating parameters for the simple provider using automated scripts\&.
+.PP
+Si us plau, tingueu en compte que és un error de configuració si es defineixen alhora simple_allow_users i simple_deny_users\&.
+.SH "EXEMPLE"
+.PP
+En el següent exemple s\*(Aqassumeix que l\*(AqSSD està configurat correctament i que exemple\&.com és un dels dominis de la secció
+\fI[sssd]\fR\&. En aquest exemple es mostren únicament les opcions específiques del proveïdor d\*(Aqaccés simple\&.
+.PP
+.if n \{\
+.RS 4
+.\}
+.nf
+[domini/exemple\&.com]
+access_provider = simple
+simple_allow_users = usuari1, usuari2
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SH "NOTES"
+.PP
+La jerarquia completa de la pertinença a un grup es resol abans de la comprovació de l\*(Aqaccés, de manera que fins i tot els grups imbricats es poden incloure a les llistes d\*(Aqaccés\&. Si us plau, tingueu cura que l\*(Aqopció
+\(lqldap_group_nesting_level\(rq
+pot influir amb els resultats i s\*(Aqha d\*(Aqestablir amb un valor suficient\&. L\*(Aqopció (\fBsssd-ldap\fR(5))\&.
+.SH "VEGEU TAMBÉ"
+.PP
+\fBsssd\fR(8),
+\fBsssd.conf\fR(5),
+\fBsssd-ldap\fR(5),
+\fBsssd-krb5\fR(5),
+\fBsssd-simple\fR(5),
+\fBsssd-ipa\fR(5),
+\fBsssd-ad\fR(5),
+\fBsssd-files\fR(5),
+\fBsssd-sudo\fR(5),
+\fBsssd-session-recording\fR(5),
+\fBsss_cache\fR(8),
+\fBsss_debuglevel\fR(8),
+\fBsss_obfuscate\fR(8),
+\fBsss_seed\fR(8),
+\fBsssd_krb5_locator_plugin\fR(8),
+\fBsss_ssh_authorizedkeys\fR(8), \fBsss_ssh_knownhostsproxy\fR(8),
+\fBsssd-ifp\fR(5),
+\fBpam_sss\fR(8)\&.
+\fBsss_rpcidmapd\fR(5)
+.SH "AUTHORS"
+.PP
+\fBThe SSSD upstream \-
+https://pagure\&.io/SSSD/sssd/\fR
