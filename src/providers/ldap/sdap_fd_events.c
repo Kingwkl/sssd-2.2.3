@@ -67,6 +67,7 @@ int remove_ldap_connection_callbacks(struct sdap_handle *sh)
 static int remove_connection_callback(TALLOC_CTX *mem_ctx)
 {
     int lret;
+    //从talloc指针中获取类型化的指针，由ptr给定的正确转换的指针，错误时为NULL。
     struct ldap_conncb *conncb = talloc_get_type(mem_ctx, struct ldap_conncb);
 
     struct ldap_cb_data *cb_data = talloc_get_type(conncb->lc_arg,
@@ -98,7 +99,8 @@ static int sdap_ldap_connect_callback_add(LDAP *ld, Sockbuf *sb,
                   "callback data.\n");
         return EINVAL;
     }
-
+//检索与Sockbuf相关的文件描述符； arg必须是ber_socket_t *。
+ // 如果存在有效的描述符，则返回值为1，否则为-1。
     ret = ber_sockbuf_ctrl(sb, LBER_SB_OPT_GET_FD, &ber_fd);
     if (ret == -1) {
         DEBUG(SSSDBG_CRIT_FAILURE, "ber_sockbuf_ctrl failed.\n");
@@ -243,12 +245,12 @@ errno_t setup_ldap_connection_callbacks(struct sdap_handle *sh,
     cb_data->sh = sh;
     cb_data->ev = ev;
 
-    sh->sdap_fd_events->conncb->lc_add = sdap_ldap_connect_callback_add;
-    sh->sdap_fd_events->conncb->lc_del = sdap_ldap_connect_callback_del;
+    sh->sdap_fd_events->conncb->lc_add = sdap_ldap_connect_callback_add; //建立连接后调用
+    sh->sdap_fd_events->conncb->lc_del = sdap_ldap_connect_callback_del; //在连接关闭之前调用
     sh->sdap_fd_events->conncb->lc_arg = cb_data;
 
     ret = ldap_set_option(sh->ldap, LDAP_OPT_CONNECT_CB,
-                          sh->sdap_fd_events->conncb);
+                          sh->sdap_fd_events->conncb);  //设置连接回调，此选项特定于OpenLDAP
     if (ret != LDAP_OPT_SUCCESS) {
         DEBUG(SSSDBG_CRIT_FAILURE, "Failed to set connection callback\n");
         ret = EFAULT;
@@ -289,18 +291,36 @@ errno_t sdap_call_conn_cb(const char *uri,int fd, struct sdap_handle *sh)
     Sockbuf *sb;
     LDAPURLDesc *lud;
 
+/*
+*这些例程用于管理底层I / O操作
+*        由轻型BER库执行。 它们被隐式调用
+*       由其他库调用，通常不需要直接调用
+*        从应用程序。 I / O框架是模块化的并且是新的
+*       可以通过适当定义
+*       Sockbuf_IO结构并将其安装到现有的Sockbuf上。
+*       Sockbuf结构由ber_sockbuf_alloc（）分配和释放
+*       ber_sockbuf_free（）。 ber_sockbuf_ctrl（）函数是
+*       用于获取和设置与Sockbuf或特定I / O相关的选项
+*        Sockbuf的一层。 ber_sockbuf_add_io（）和
+*        ber_sockbuf_remove_io（）函数用于添加和删除特定的
+*       Sockbuf上的I / O层。
+*
+*/
+
     sb = ber_sockbuf_alloc();
     if (sb == NULL) {
         DEBUG(SSSDBG_CRIT_FAILURE, "ber_sockbuf_alloc failed.\n");
         return ENOMEM;
     }
-
+//将Sockbuf的文件描述符设置为arg指向的描述符； arg必须是ber_socket_t *。
+//返回值将始终为1。
     ret = ber_sockbuf_ctrl(sb, LBER_SB_OPT_SET_FD, &fd);
     if (ret != 1) {
         DEBUG(SSSDBG_CRIT_FAILURE, "ber_sockbuf_ctrl failed.\n");
         return EFAULT;
     }
-
+//返回LDAP URL描述的地址。 应用程序应调用ldap_free_urldesc（）例程以在不再需要时释放URL描述。
+//由LDAP_LIBASCII编译器变量确定，将在本地EBCDIC代码页或UTF-8中返回文本数据。
     ret = ldap_url_parse(uri, &lud);
     if (ret != 0) {
         ber_sockbuf_free(sb);
@@ -315,7 +335,7 @@ errno_t sdap_call_conn_cb(const char *uri,int fd, struct sdap_handle *sh)
 
     ldap_free_urldesc(lud);
     ber_sockbuf_free(sb);
-    return ret;
+    return ret;   //成功返回0
 #else
     DEBUG(SSSDBG_TRACE_ALL, "LDAP connection callbacks are not supported.\n");
     return EOK;

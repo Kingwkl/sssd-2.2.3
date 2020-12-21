@@ -128,8 +128,11 @@ fail:
 
 static void sdap_sys_connect_done(struct tevent_req *subreq)
 {
+    //从tevent请求结构中获取用于回调的给定类型的私有数据。
     struct tevent_req *req = tevent_req_callback_data(subreq,
                                                       struct tevent_req);
+    //从tevent请求结构获取私有数据。当tevent_req_create已创建tevent_req时，
+    //tevent_req_data（）的结果是tevent_req_create（）作为req的子级创建的状态变量。
     struct sdap_connect_state *state = tevent_req_data(req,
                                                      struct sdap_connect_state);
     struct timeval tv;
@@ -149,7 +152,7 @@ static void sdap_sys_connect_done(struct tevent_req *subreq)
     int sasl_minssf;
     ber_len_t ber_sasl_minssf;
 
-    ret = sss_ldap_init_recv(subreq, &state->sh->ldap, &sd);
+    ret = sss_ldap_init_recv(subreq, &state->sh->ldap, &sd);  //获取ldap和sd
     talloc_zfree(subreq);
     if (ret != EOK) {
         DEBUG(SSSDBG_CRIT_FAILURE,
@@ -169,9 +172,12 @@ static void sdap_sys_connect_done(struct tevent_req *subreq)
 
     /* If sss_ldap_init_recv() does not return a valid file descriptor we have
      * to assume that the connection callback will be called by internally by
-     * the OpenLDAP client library. */
+     * the OpenLDAP client library. 
+     * 如果sss_ldap_init_recv（）没有返回有效的文件描述符，
+     * 我们必须假定连接回调将由OpenLDAP客户端库在内部进行调用。
+     * */
     if (sd != -1) {
-        ret = sdap_call_conn_cb(state->uri, sd, state->sh);
+        ret = sdap_call_conn_cb(state->uri, sd, state->sh); //成功返回0
         if (ret != EOK) {
             DEBUG(SSSDBG_CRIT_FAILURE, "sdap_call_conn_cb failed.\n");
             goto fail;
@@ -187,7 +193,10 @@ static void sdap_sys_connect_done(struct tevent_req *subreq)
     }
 
     /* TODO: maybe this can be remove when we go async, currently we need it
-     * to handle EINTR during poll(). */
+     * to handle EINTR during poll(). 
+     * TODO：也许可以在异步时删除它，当前我们需要它在poll（）期间处理EINTR。
+     * */
+    //动连接（FIXME）。无值必须是const int *;其值应为LDAP_OPT_OFF或LDAP_OPT_ON。超值必须为整数*。
     ret = ldap_set_option(state->sh->ldap, LDAP_OPT_RESTART, LDAP_OPT_ON);
     if (ret != LDAP_OPT_SUCCESS) {
         DEBUG(SSSDBG_CRIT_FAILURE, "Failed to set restart option.\n");
@@ -203,7 +212,7 @@ static void sdap_sys_connect_done(struct tevent_req *subreq)
         goto fail;
     }
 
-    /* Set Default Timeout */
+    /* Set Default Timeout 设置同步API调用的超时值*/
     tv.tv_sec = dp_opt_get_int(state->opts->basic, SDAP_OPT_TIMEOUT);
     tv.tv_usec = 0;
     lret = ldap_set_option(state->sh->ldap, LDAP_OPT_TIMEOUT, &tv);
@@ -213,8 +222,10 @@ static void sdap_sys_connect_done(struct tevent_req *subreq)
         goto fail;
     }
 
-    /* Set Referral chasing */
+    /* Set Referral chasing  设置追逐引用*/
     ldap_referrals = dp_opt_get_bool(state->opts->basic, SDAP_REFERRALS);
+//LDAP库是否自动追随LDAP服务器返回的引用 
+//无值必须是const int *; 其值应为LDAP_OPT_OFF或LDAP_OPT_ON。 超值必须为整数*。
     lret = ldap_set_option(state->sh->ldap, LDAP_OPT_REFERRALS,
                            (ldap_referrals ? LDAP_OPT_ON : LDAP_OPT_OFF));
     if (lret != LDAP_OPT_SUCCESS) {
@@ -223,7 +234,7 @@ static void sdap_sys_connect_done(struct tevent_req *subreq)
         goto fail;
     }
 
-    if (ldap_referrals) {
+    if (ldap_referrals) {  // 设置回调函数
         rebind_proc_params = talloc_zero(state->sh,
                                          struct sdap_rebind_proc_params);
         if (rebind_proc_params == NULL) {
@@ -232,9 +243,9 @@ static void sdap_sys_connect_done(struct tevent_req *subreq)
             goto fail;
         }
 
-        rebind_proc_params->opts = state->opts;
-        rebind_proc_params->sh = state->sh;
-        rebind_proc_params->use_start_tls = state->use_start_tls;
+        rebind_proc_params->opts = state->opts;   //sdap_options
+        rebind_proc_params->sh = state->sh;     //sdap_handel
+        rebind_proc_params->use_start_tls = state->use_start_tls;  //使用tls连接
 
         lret = ldap_set_rebind_proc(state->sh->ldap, sdap_rebind_proc,
                                     rebind_proc_params);
@@ -244,7 +255,7 @@ static void sdap_sys_connect_done(struct tevent_req *subreq)
         }
     }
 
-    /* Set alias dereferencing */
+    /* Set alias dereferencing 设置别名解引用*/
     ldap_deref = dp_opt_get_string(state->opts->basic, SDAP_DEREF);
     if (ldap_deref != NULL) {
         ret = deref_string_to_val(ldap_deref, &ldap_deref_val);
@@ -252,7 +263,8 @@ static void sdap_sys_connect_done(struct tevent_req *subreq)
             DEBUG(SSSDBG_CRIT_FAILURE, "deref_string_to_val failed.\n");
             goto fail;
         }
-
+//搜索的时候如何处理别名，取值范围如下：
+//LDAP_DEREF_NEVER(0,默认值), LDAP_DEREF_SEARCHING(1), LDAP_DEREF_FINDING(2), LDAP_DEREF_ALWAYS(3) 
         lret = ldap_set_option(state->sh->ldap, LDAP_OPT_DEREF, &ldap_deref_val);
         if (lret != LDAP_OPT_SUCCESS) {
             DEBUG(SSSDBG_CRIT_FAILURE,
@@ -262,7 +274,12 @@ static void sdap_sys_connect_done(struct tevent_req *subreq)
 
     }
 
-    /* Set host name canonicalization for LDAP SASL bind */
+    /* Set host name canonicalization for LDAP SASL bind 
+    *设置LDAP SASL绑定的主机名规范化
+    * */
+
+   //设置/获取NOCANON标志。 取消设置后，主机名将被规范化。
+   // 无值必须是const int *; 其值应为LDAP_OPT_OFF或LDAP_OPT_ON。
     sasl_nocanon = !dp_opt_get_bool(state->opts->basic, SDAP_SASL_CANONICALIZE);
     lret = ldap_set_option(state->sh->ldap, LDAP_OPT_X_SASL_NOCANON,
                            sasl_nocanon ? LDAP_OPT_ON : LDAP_OPT_OFF);
