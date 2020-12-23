@@ -84,7 +84,7 @@ static void sss_cli_close_socket(void)
  * byte 4-7: 32bit unsigned with command code
  * byte 8-11: 32bit unsigned (reserved)
  * byte 12-15: 32bit unsigned (reserved)
- * byte 16-X: (optional) request structure associated to the command code used
+ * byte 16-X: (optional) request structure associated to the command code used 与所使用的命令代码关联的请求结构
  */
 static enum sss_status sss_cli_send_req(enum sss_cli_command cmd,
                                         struct sss_cli_req_data *rd,
@@ -343,7 +343,9 @@ failed:
 }
 
 /* this function will check command codes match and returned length is ok */
-/* repbuf and replen report only the data section not the header */
+/* repbuf and replen report only the data section not the header 
+*此函数将检查命令代码是否匹配，并且返回的长度是正确的repbuf和replen仅报告数据部分而不报告标头
+*/
 static enum sss_status sss_cli_make_request_nochecks(
                                        enum sss_cli_command cmd,
                                        struct sss_cli_req_data *rd,
@@ -368,7 +370,7 @@ static enum sss_status sss_cli_make_request_nochecks(
     }
 
     /* we got through, now we have the custom data in buf if any,
-     * return it if requested */
+     * return it if requested 我们通过了，现在在buf中有自定义数据（如果有的话），如果需要返回*/
     if (repbuf && buf) {
         *repbuf = buf;
         if (replen) {
@@ -563,7 +565,7 @@ static int sss_cli_open_socket(int *errnop, const char *socket_name, int timeout
         return -1;
     }
 
-    /* this piece is adapted from winbind client code */
+    /* this piece is adapted from winbind client code 该部分改编自winbind客户代码*/
     wait_time = 0;
     sleep_time = 0;
     while (inprogress) {
@@ -910,7 +912,7 @@ int sss_pam_make_request(enum sss_cli_command cmd,
         goto out;
     }
 
-    /* only root shall use the privileged pipe */
+    /* only root shall use the privileged pipe 只有root才能使用特权管道*/
     if (getuid() == 0 && getgid() == 0) {
         socket_name = SSS_PAM_PRIV_SOCKET_NAME;
         errno = 0;
@@ -954,7 +956,7 @@ int sss_pam_make_request(enum sss_cli_command cmd,
             goto out;
         }
     }
-
+// errnop=0,timeout=300s
     status = sss_cli_check_socket(errnop, socket_name, timeout);
     if (status != SSS_STATUS_SUCCESS) {
         ret = PAM_SERVICE_ERR;

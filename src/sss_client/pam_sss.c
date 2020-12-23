@@ -1222,11 +1222,14 @@ static int get_pam_items(pam_handle_t *pamh, uint32_t flags,
     pi->pam_newauthtok_size = 0;
     pi->first_factor = NULL;
 
+//服务名称（标识PAM功能将用于验证程序的PAM堆栈）
     ret = pam_get_item(pamh, PAM_SERVICE, (const void **) &(pi->pam_service));
     if (ret != PAM_SUCCESS) return ret;
     if (pi->pam_service == NULL) pi->pam_service="";
     pi->pam_service_size=strlen(pi->pam_service)+1;
 
+//将提供身份服务的实体的用户名。也就是说，在身份验证之后，PAM_USER会识别要使用该服务的本地实体。
+//注意，该值可以由PAM堆栈中的任何模块从某些内容（例如“匿名”）映射因此，在每次调用PAM函数后，应用程序都应查询PAM_USER的值。
     ret = pam_get_item(pamh, PAM_USER, (const void **) &(pi->pam_user));
     if (ret == PAM_PERM_DENIED && (flags & PAM_CLI_FLAGS_ALLOW_MISSING_NAME)) {
         pi->pam_user = "";
@@ -1344,6 +1347,7 @@ static int send_and_receive(pam_handle_t *pamh, struct pam_items *pi,
     errnop = 0;
     ret = sss_pam_make_request(task, &rd, &repbuf, &replen, &errnop);
 
+//设置模块内部数据
     sret = pam_set_data(pamh, FD_DESTRUCTOR, NULL, close_fd);
     if (sret != PAM_SUCCESS) {
         D(("pam_set_data failed, client might leaks fds"));
@@ -1367,14 +1371,14 @@ static int send_and_receive(pam_handle_t *pamh, struct pam_items *pi,
         goto done;
     }
 
-/* FIXME: add an end signature */
+/* FIXME: add an end signature 添加结束签名*/
     if (replen < (2*sizeof(int32_t))) {
         D(("response not in expected format."));
         pam_status = PAM_SYSTEM_ERR;
         goto done;
     }
 
-    SAFEALIGN_COPY_UINT32(&pam_status, repbuf, NULL);
+    SAFEALIGN_COPY_UINT32(&pam_status, repbuf, NULL);  //安全对齐
     ret = eval_response(pamh, replen, repbuf, pi);
     if (ret != PAM_SUCCESS) {
         D(("eval_response failed."));
@@ -2509,8 +2513,10 @@ static int pam_sss(enum sss_cli_command task, pam_handle_t *pamh,
 
     eval_argv(pamh, argc, argv, &flags, &retries, &quiet_mode, &domains);
 
-    /* Fail all authentication on misconfigured domains= parameter. The admin
-     * probably wanted to restrict authentication, so it's safer to fail */
+    /* Fail all authentication on misconfigured domains= parameter. The admin 
+     * probably wanted to restrict authentication, so it's safer to fail 
+     * 对配置错误的domains= parameter的所有身份验证失败。 管理员可能想限制身份验证，因此失败更安全
+     * */
     if (domains && strcmp(domains, "") == 0) {
         return PAM_SYSTEM_ERR;
     }
@@ -2544,6 +2550,10 @@ static int pam_sss(enum sss_cli_command task, pam_handle_t *pamh,
                  * - PAM_CLI_FLAGS_USE_FIRST_PASS is not set
                  * - no password is on the stack or PAM_CLI_FLAGS_PROMPT_ALWAYS is set
                  * - preauth indicator file exists.
+                 * 仅在以下情况下进行预身份验证
+                 * -未设置PAM_CLI_FLAGS_USE_FIRST_PASS
+                 * -堆栈上没有密码或未设置PAM_CLI_FLAGS_PROMPT_ALWAYS
+                 * -预认证指示符文件存在。
                  */
                 if ( !(flags & PAM_CLI_FLAGS_USE_FIRST_PASS)
                         && (pi.pam_authtok == NULL
@@ -2603,7 +2613,8 @@ static int pam_sss(enum sss_cli_command task, pam_handle_t *pamh,
                  * there are cases where more than the password is needed to
                  * get the needed privileges in a backend to change the
                  * password.
-                 *
+                 *即使我们只想更改（长期）密码，
+                 *在某些情况下，要在后端获得所需的特权以更改密码，也需要超过密码的数量。
                  * E.g. with mandatory 2-factor authentication we have to ask
                  * not only for the current password but for the second
                  * factor, e.g. the one-time token value, as well.
@@ -2614,6 +2625,11 @@ static int pam_sss(enum sss_cli_command task, pam_handle_t *pamh,
                  * - PAM_CLI_FLAGS_USE_FIRST_PASS is not set
                  * - no password is on the stack or PAM_CLI_FLAGS_PROMPT_ALWAYS is set
                  * - preauth indicator file exists.
+                 * 这意味着预验证步骤也必须在这里完成，但前提是
+                 *-设置了PAM_PRELIM_CHECK
+                 *-未设置PAM_CLI_FLAGS_USE_FIRST_PASS
+                 *-堆栈上没有密码或未设置PAM_CLI_FLAGS_PROMPT_ALWAYS
+                 *-预认证指示符文件存在。
                  */
                 if ( (pam_flags & PAM_PRELIM_CHECK)
                         && !(flags & PAM_CLI_FLAGS_USE_FIRST_PASS)
@@ -2767,26 +2783,26 @@ static int pam_sss(enum sss_cli_command task, pam_handle_t *pamh,
 }
 
 PAM_EXTERN int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc,
-                                   const char **argv )
+                                   const char **argv )  //认证管理
 {
     return pam_sss(SSS_PAM_AUTHENTICATE, pamh, flags, argc, argv);
 }
 
 
 PAM_EXTERN int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc,
-                              const char **argv )
+                              const char **argv )  //证书管理
 {
     return pam_sss(SSS_PAM_SETCRED, pamh, flags, argc, argv);
 }
 
 PAM_EXTERN int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
-                                const char **argv )
+                                const char **argv )     //账户管理
 {
     return pam_sss(SSS_PAM_ACCT_MGMT, pamh, flags, argc, argv);
 }
 
 PAM_EXTERN int pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc,
-                                const char **argv )
+                                const char **argv )  //密码管理
 {
     return pam_sss(SSS_PAM_CHAUTHTOK, pamh, flags, argc, argv);
 }
